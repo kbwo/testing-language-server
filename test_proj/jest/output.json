@@ -1,0 +1,132 @@
+{
+  "numFailedTestSuites": 2,
+  "numFailedTests": 2,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 1,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 2,
+  "numTotalTests": 3,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1714484637658,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "index"
+          ],
+          "duration": 3,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 1,
+                "expected": 0,
+                "message": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at Object.toBe (/absolute_path/test_proj/jest/index.spec.js:4:15)\n    at Promise.then.completed (/absolute_path/test_proj/jest/node_modules/jest-circus/build/utils.js:298:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/absolute_path/test_proj/jest/node_modules/jest-circus/build/utils.js:231:10)\n    at _callCircusTest (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:316:40)\n    at _runTest (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:252:3)\n    at _runTestsForDescribeBlock (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:126:9)\n    at _runTestsForDescribeBlock (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:121:9)\n    at run (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:71:3)\n    at runAndTransformResultsToJestFormat (/absolute_path/test_proj/jest/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n    at jestAdapter (/absolute_path/test_proj/jest/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n    at runTestInternal (/absolute_path/test_proj/jest/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/absolute_path/test_proj/jest/node_modules/jest-runner/build/runTest.js:444:34)"
+          ],
+          "fullName": "index fail",
+          "invocations": 1,
+          "location": {
+            "column": 3,
+            "line": 3
+          },
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "fail"
+        }
+      ],
+      "endTime": 1714484637874,
+      "message": "\u001b[1m\u001b[31m  \u001b[1m● \u001b[22m\u001b[1mindex › fail\u001b[39m\u001b[22m\n\n    \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\n    Expected: \u001b[32m0\u001b[39m\n    Received: \u001b[31m1\u001b[39m\n\u001b[2m\u001b[22m\n\u001b[2m    \u001b[0m \u001b[90m 2 |\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 3 |\u001b[39m   it(\u001b[32m\"fail\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[22m\n\u001b[2m    \u001b[31m\u001b[1m>\u001b[22m\u001b[2m\u001b[39m\u001b[90m 4 |\u001b[39m     expect(\u001b[35m1\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[22m\n\u001b[2m     \u001b[90m   |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[2m\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 5 |\u001b[39m   })\u001b[22m\n\u001b[2m     \u001b[90m 6 |\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 7 |\u001b[39m })\u001b[0m\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat Object.toBe (\u001b[22m\u001b[2m\u001b[0m\u001b[36mindex.spec.js\u001b[39m\u001b[0m\u001b[2m:4:15)\u001b[22m\u001b[2m\u001b[22m\n",
+      "name": "/absolute_path/test_proj/jest/index.spec.js",
+      "startTime": 1714484637684,
+      "status": "failed",
+      "summary": ""
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "another"
+          ],
+          "duration": 2,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 1,
+                "expected": 0,
+                "message": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at Object.toBe (/absolute_path/test_proj/jest/another.spec.js:4:15)\n    at Promise.then.completed (/absolute_path/test_proj/jest/node_modules/jest-circus/build/utils.js:298:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/absolute_path/test_proj/jest/node_modules/jest-circus/build/utils.js:231:10)\n    at _callCircusTest (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:316:40)\n    at _runTest (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:252:3)\n    at _runTestsForDescribeBlock (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:126:9)\n    at _runTestsForDescribeBlock (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:121:9)\n    at run (/absolute_path/test_proj/jest/node_modules/jest-circus/build/run.js:71:3)\n    at runAndTransformResultsToJestFormat (/absolute_path/test_proj/jest/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n    at jestAdapter (/absolute_path/test_proj/jest/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n    at runTestInternal (/absolute_path/test_proj/jest/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/absolute_path/test_proj/jest/node_modules/jest-runner/build/runTest.js:444:34)"
+          ],
+          "fullName": "another fail",
+          "invocations": 1,
+          "location": {
+            "column": 3,
+            "line": 3
+          },
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "fail"
+        },
+        {
+          "ancestorTitles": [
+            "another"
+          ],
+          "duration": 1,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "another pass",
+          "invocations": 1,
+          "location": {
+            "column": 3,
+            "line": 7
+          },
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "pass"
+        }
+      ],
+      "endTime": 1714484637974,
+      "message": "\u001b[1m\u001b[31m  \u001b[1m● \u001b[22m\u001b[1manother › fail\u001b[39m\u001b[22m\n\n    \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\n    Expected: \u001b[32m0\u001b[39m\n    Received: \u001b[31m1\u001b[39m\n\u001b[2m\u001b[22m\n\u001b[2m    \u001b[0m \u001b[90m 2 |\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 3 |\u001b[39m   it(\u001b[32m\"fail\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[22m\n\u001b[2m    \u001b[31m\u001b[1m>\u001b[22m\u001b[2m\u001b[39m\u001b[90m 4 |\u001b[39m     expect(\u001b[35m1\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[22m\n\u001b[2m     \u001b[90m   |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[2m\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 5 |\u001b[39m   })\u001b[22m\n\u001b[2m     \u001b[90m 6 |\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 7 |\u001b[39m   it(\u001b[32m\"pass\"\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat Object.toBe (\u001b[22m\u001b[2m\u001b[0m\u001b[36manother.spec.js\u001b[39m\u001b[0m\u001b[2m:4:15)\u001b[22m\u001b[2m\u001b[22m\n",
+      "name": "/absolute_path/test_proj/jest/another.spec.js",
+      "startTime": 1714484637879,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

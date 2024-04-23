@@ -1,0 +1,19 @@
+[package]
+name = "testing-ls-rust-adapter"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+cc="*"
+
+[dependencies]
+testing-language-server = { path = "../../" }
+lsp-types = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+regex = { workspace = true }
+clap = { workspace = true }
+tree-sitter = "0.22.5"
+tree-sitter-rust = "0.21.2"
