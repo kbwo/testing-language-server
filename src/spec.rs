@@ -41,6 +41,15 @@ pub(crate) type FilePath = String;
 pub(crate) type AdapterCommandPath = String;
 pub(crate) type WorkspaceRootFilePath = String;
 
+#[derive(Debug, Deserialize, Clone)]
+pub(crate) struct AdapterConfiguration {
+    pub path: String,
+    #[serde(default)]
+    pub args: Vec<String>,
+    #[serde(default)]
+    pub envs: HashMap<String, String>,
+}
+
 pub type DetectWorkspaceRootResult = HashMap<WorkspaceRootFilePath, Vec<FilePath>>;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]

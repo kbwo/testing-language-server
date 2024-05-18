@@ -1,6 +1,7 @@
 use crate::error::LSError;
 use crate::log::Log;
 use crate::spec::AdapterCommandPath;
+use crate::spec::AdapterConfiguration;
 use crate::spec::DetectWorkspaceRootResult;
 use crate::spec::Extension;
 use crate::spec::RunFileTestResult;
@@ -31,7 +32,7 @@ use std::process::Command;
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct InitializedOptions {
-    pub adapter_command: HashMap<Extension, Vec<AdapterCommandPath>>,
+    adapter_command: HashMap<Extension, Vec<AdapterConfiguration>>,
 }
 
 pub struct TestingLS {
@@ -44,13 +45,6 @@ impl Default for TestingLS {
     fn default() -> Self {
         Self::new()
     }
-}
-
-fn is_executable(command: &str) -> bool {
-    std::process::Command::new(command)
-        .arg("--version")
-        .output()
-        .is_ok()
 }
 
 impl TestingLS {
@@ -134,7 +128,7 @@ impl TestingLS {
         }
     }
 
-    fn adapter_commands(&self) -> HashMap<Extension, Vec<AdapterCommandPath>> {
+    fn adapter_commands(&self) -> HashMap<Extension, Vec<AdapterConfiguration>> {
         self.options.adapter_command.clone()
     }
 
@@ -224,16 +218,19 @@ impl TestingLS {
                 continue;
             }
 
-            for adapter_command_str in adapter_commands {
-                let mut adapter_command = Command::new(adapter_command_str);
-                let mut args: Vec<&str> = vec![];
+            for adapter in adapter_commands {
+                let &AdapterConfiguration { path, args, envs } = &adapter;
+                let mut adapter_command = Command::new(path);
+                let mut args_file_path: Vec<&str> = vec![];
                 file_paths.iter().for_each(|file_path| {
-                    args.push("--file-paths");
-                    args.push(file_path);
+                    args_file_path.push("--file-paths");
+                    args_file_path.push(file_path);
                 });
                 let output = adapter_command
                     .arg("detect-workspace-root")
+                    .args(args_file_path)
                     .args(args)
+                    .envs(envs)
                     .output()
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 Log::info(format!("detect-workspace-root output: {:?}", output));
@@ -242,7 +239,7 @@ impl TestingLS {
                 let workspace_root: DetectWorkspaceRootResult =
                     serde_json::from_str(&adapter_result)?;
                 self.workspace_root_cache
-                    .insert(adapter_command_str.to_owned(), workspace_root);
+                    .insert(path.to_owned(), workspace_root);
             }
         }
         Ok(())
@@ -288,9 +285,6 @@ impl TestingLS {
         workspace_root: &str,
         paths: &[String],
     ) -> Result<impl Serialize, LSError> {
-        if !is_executable("cargo") {
-            Log::error("cargo not found");
-        }
         let mut adapter_command = Command::new(adapter_command);
         let cwd = PathBuf::from(workspace_root);
         let adapter_command = adapter_command.current_dir(&cwd);
@@ -338,55 +332,49 @@ mod tests {
 
     #[test]
     fn test_check_file() {
-        let absolute_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
-        let absolute_path_of_rust_adapter = std::env::current_dir()
-            .unwrap()
-            .join("target/debug/testing-ls-rust-adapter");
+        let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
         let mut server = TestingLS {
             initialize_params: InitializeParams {
                 workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(&absolute_path_of_test_proj).unwrap(),
+                    uri: Url::from_file_path(&abs_path_of_test_proj).unwrap(),
                     name: "test_proj".to_string(),
                 }]),
                 ..InitializeParams::default()
             },
             options: InitializedOptions {
-                adapter_command: HashMap::from([(
-                    String::from(".rs"),
-                    vec![absolute_path_of_rust_adapter
-                        .into_os_string()
-                        .into_string()
-                        .unwrap()],
-                )]),
+                adapter_command: HashMap::from([(String::from(".rs"), vec![])]),
             },
             workspace_root_cache: HashMap::new(),
         };
-        let librs = absolute_path_of_test_proj.join("lib.rs");
+        let librs = abs_path_of_test_proj.join("lib.rs");
         server.check_file(librs.to_str().unwrap(), true).unwrap();
     }
 
     #[test]
     fn test_check_workspace() {
-        let absolute_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
-        let absolute_path_of_rust_adapter = std::env::current_dir()
+        let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
+        let abs_path_of_rust_adapter = std::env::current_dir()
             .unwrap()
             .join("target/debug/testing-ls-rust-adapter");
+        let abs_path_of_rust_adapter = abs_path_of_rust_adapter
+            .into_os_string()
+            .into_string()
+            .unwrap();
+        let adapter_conf = AdapterConfiguration {
+            path: abs_path_of_rust_adapter,
+            args: vec![],
+            envs: HashMap::new(),
+        };
         let mut server = TestingLS {
             initialize_params: InitializeParams {
                 workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(absolute_path_of_test_proj).unwrap(),
+                    uri: Url::from_file_path(abs_path_of_test_proj).unwrap(),
                     name: "test_proj".to_string(),
                 }]),
                 ..InitializeParams::default()
             },
             options: InitializedOptions {
-                adapter_command: HashMap::from([(
-                    String::from(".rs"),
-                    vec![absolute_path_of_rust_adapter
-                        .into_os_string()
-                        .into_string()
-                        .unwrap()],
-                )]),
+                adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf])]),
             },
             workspace_root_cache: HashMap::new(),
         };

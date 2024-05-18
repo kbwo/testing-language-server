@@ -37,13 +37,19 @@ language server config:
       "javascript"
     ],
     "initializationOptions": {
-      "adapterCommand": {
-        ".rs": [
-          "<path>//testing-ls-rust-adapter"
-        ],
-        ".js": [
-          "<path>/testing-ls-jest-adapter"
-        ]
+      "initializationOptions": {
+        "adapterCommand": {
+          ".rs": [
+            {
+              "path": "/home/kbwo/go/projects/github.com/kbwo/testing-language-server/target/debug/testing-ls-rust-adapter"
+            }
+          ],
+          ".js": [
+            {
+              "path": "/home/kbwo/go/projects/github.com/kbwo/testing-language-server/target/debug/testing-ls-jest-adapter"
+            }
+          ]
+        }
       }
     }
   }
