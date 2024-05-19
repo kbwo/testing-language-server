@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = [ "crates/jest-adapter","crates/rust-adapter"]
+members = [ "crates/adapter", "crates/jest-adapter","crates/rust-adapter"]
 exclude = ["test_proj/rust"]
 
 [[bin]]

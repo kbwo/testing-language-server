@@ -17,6 +17,8 @@ pub enum AdapterCommands {
 pub struct DiscoverArgs {
     #[arg(short, long)]
     pub file_paths: Vec<String>,
+    #[arg(last = true)]
+    pub extra: Vec<String>,
 }
 
 #[derive(clap::Args, Debug)]
@@ -27,6 +29,9 @@ pub struct RunFileTestArgs {
 
     #[arg(short, long)]
     pub workspace_root: String,
+
+    #[arg(last = true)]
+    pub extra: Vec<String>,
 }
 
 #[derive(clap::Args, Debug)]
@@ -34,6 +39,8 @@ pub struct RunFileTestArgs {
 pub struct DetectWorkspaceRootArgs {
     #[arg(short, long)]
     pub file_paths: Vec<String>,
+    #[arg(last = true)]
+    pub extra: Vec<String>,
 }
 
 pub(crate) type Extension = String;
@@ -42,10 +49,10 @@ pub(crate) type AdapterCommandPath = String;
 pub(crate) type WorkspaceRootFilePath = String;
 
 #[derive(Debug, Deserialize, Clone)]
-pub(crate) struct AdapterConfiguration {
+pub struct AdapterConfiguration {
     pub path: String,
     #[serde(default)]
-    pub args: Vec<String>,
+    pub extra_args: Vec<String>,
     #[serde(default)]
     pub envs: HashMap<String, String>,
 }

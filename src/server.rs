@@ -38,7 +38,8 @@ pub struct InitializedOptions {
 pub struct TestingLS {
     pub initialize_params: InitializeParams,
     pub options: InitializedOptions,
-    pub workspace_root_cache: HashMap<AdapterCommandPath, DetectWorkspaceRootResult>,
+    pub workspace_root_cache:
+        HashMap<AdapterCommandPath, (AdapterConfiguration, DetectWorkspaceRootResult)>,
 }
 
 impl Default for TestingLS {
@@ -219,7 +220,11 @@ impl TestingLS {
             }
 
             for adapter in adapter_commands {
-                let &AdapterConfiguration { path, args, envs } = &adapter;
+                let &AdapterConfiguration {
+                    path,
+                    extra_args,
+                    envs,
+                } = &adapter;
                 let mut adapter_command = Command::new(path);
                 let mut args_file_path: Vec<&str> = vec![];
                 file_paths.iter().for_each(|file_path| {
@@ -229,7 +234,8 @@ impl TestingLS {
                 let output = adapter_command
                     .arg("detect-workspace-root")
                     .args(args_file_path)
-                    .args(args)
+                    .arg("--")
+                    .args(extra_args)
                     .envs(envs)
                     .output()
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
@@ -239,7 +245,7 @@ impl TestingLS {
                 let workspace_root: DetectWorkspaceRootResult =
                     serde_json::from_str(&adapter_result)?;
                 self.workspace_root_cache
-                    .insert(path.to_owned(), workspace_root);
+                    .insert(path.to_owned(), (adapter.clone(), workspace_root));
             }
         }
         Ok(())
@@ -250,9 +256,9 @@ impl TestingLS {
 
         self.workspace_root_cache
             .iter()
-            .for_each(|(adapter_command, workspaces)| {
+            .for_each(|(_, (adapter, workspaces))| {
                 workspaces.iter().for_each(|(workspace_root, paths)| {
-                    let _ = self.check(adapter_command, workspace_root, paths);
+                    let _ = self.check(adapter, workspace_root, paths);
                 })
             });
         Ok(())
@@ -268,12 +274,12 @@ impl TestingLS {
         }
         self.workspace_root_cache
             .iter()
-            .for_each(|(adapter_command, workspaces)| {
+            .for_each(|(_, (adapter, workspaces))| {
                 for (workspace_root, paths) in workspaces.iter() {
                     if !paths.contains(&path.to_string()) {
                         continue;
                     }
-                    let _ = self.check(adapter_command, workspace_root, paths);
+                    let _ = self.check(adapter, workspace_root, paths);
                 }
             });
         Ok(())
@@ -281,11 +287,11 @@ impl TestingLS {
 
     fn check(
         &self,
-        adapter_command: &AdapterCommandPath,
+        adapter: &AdapterConfiguration,
         workspace_root: &str,
         paths: &[String],
     ) -> Result<impl Serialize, LSError> {
-        let mut adapter_command = Command::new(adapter_command);
+        let mut adapter_command = Command::new(&adapter.path);
         let cwd = PathBuf::from(workspace_root);
         let adapter_command = adapter_command.current_dir(&cwd);
         let mut args: Vec<&str> = vec!["--workspace-root", cwd.to_str().unwrap()];
@@ -297,6 +303,8 @@ impl TestingLS {
         let output = adapter_command
             .arg("run-file-test")
             .args(args)
+            .arg("--")
+            .args(&adapter.extra_args)
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
 
@@ -362,7 +370,7 @@ mod tests {
             .unwrap();
         let adapter_conf = AdapterConfiguration {
             path: abs_path_of_rust_adapter,
-            args: vec![],
+            extra_args: vec![],
             envs: HashMap::new(),
         };
         let mut server = TestingLS {

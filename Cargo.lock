@@ -532,6 +532,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "testing-ls-adapter"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "lsp-types",
+ "regex",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "testing-language-server",
+ "tree-sitter",
+ "tree-sitter-javascript",
+ "tree-sitter-rust",
+]
+
+[[package]]
 name = "testing-ls-jest-adapter"
 version = "0.1.0"
 dependencies = [
