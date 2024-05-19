@@ -549,36 +549,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "testing-ls-jest-adapter"
-version = "0.1.0"
-dependencies = [
- "clap",
- "lsp-types",
- "regex",
- "serde",
- "serde_json",
- "tempfile",
- "testing-language-server",
- "tree-sitter",
- "tree-sitter-javascript",
-]
-
-[[package]]
-name = "testing-ls-rust-adapter"
-version = "0.1.0"
-dependencies = [
- "cc",
- "clap",
- "lsp-types",
- "regex",
- "serde",
- "serde_json",
- "testing-language-server",
- "tree-sitter",
- "tree-sitter-rust",
-]
-
-[[package]]
 name = "thiserror"
 version = "1.0.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -30,7 +30,7 @@ language server config:
 ```
 "languageserver": {
   "testing": {
-    "command": "<path>/testing-language-server",
+    "command": "<server path>/testing-language-server",
     "trace.server": "verbose",
     "filetypes": [
       "rust",
@@ -41,12 +41,14 @@ language server config:
         "adapterCommand": {
           ".rs": [
             {
-              "path": "/home/kbwo/go/projects/github.com/kbwo/testing-language-server/target/debug/testing-ls-rust-adapter"
+              "path": "<adapter path>/testing-ls-adapter",
+              "extra_args": ["--test-kind=cargo-test"]
             }
           ],
           ".js": [
             {
-              "path": "/home/kbwo/go/projects/github.com/kbwo/testing-language-server/target/debug/testing-ls-jest-adapter"
+              "path": "<adapter path>/testing-ls-adapter",
+              "extra_args": ["--test-kind=jest"]
             }
           ]
         }
