@@ -1,8 +1,10 @@
+use crate::model::AvailableTestKind;
+use crate::model::Runner;
 use clap::Parser;
 use std::str::FromStr;
 use testing_language_server::spec::AdapterCommands;
-use testing_ls_adapter::model::AvailableTestKind;
-use testing_ls_adapter::model::Runner;
+pub mod model;
+pub mod runner;
 
 fn detect_test_from_extra(extra: &[String]) -> Result<AvailableTestKind, anyhow::Error> {
     let test_kind = extra
@@ -37,8 +39,8 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use testing_ls_adapter::runner::cargo_test::CargoTestRunner;
-    use testing_ls_adapter::runner::jest::JestRunner;
+    use crate::runner::cargo_test::CargoTestRunner;
+    use crate::runner::jest::JestRunner;
 
     #[test]
     // If `--test-kind=<value>` is not present, then return Err
