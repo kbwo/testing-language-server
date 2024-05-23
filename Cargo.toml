@@ -2,6 +2,9 @@
 name = "testing-language-server"
 version = "0.1.0"
 edition = "2021"
+author = "Kodai Kabasawa <kabaaa1126@gmail.com>"
+description = "LSP server for testing"
+license = "MIT"
 
 [workspace]
 members = [ "crates/adapter"]
