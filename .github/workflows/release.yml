@@ -22,14 +22,18 @@ jobs:
     - name: Build project
       run: cargo build --release
 
-    - name: Archive the build artifacts
-      run: tar -czvf build.tar.gz -C target/release .
-
-    - name: Create Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ github.ref }}
-        files: build.tar.gz
+    # - name: Archive the build artifacts
+    #   run: tar -czvf build.tar.gz -C target/release .
+    #
+    # - name: Create Release
+    #   id: create_release
+    #   uses: softprops/action-gh-release@v1
+    #   with:
+    #     tag_name: ${{ github.ref }}
+    #     files: build.tar.gz
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish to crates.io
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      run: cargo publish --token $CARGO_REGISTRY_TOKEN
