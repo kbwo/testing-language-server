@@ -306,6 +306,7 @@ impl TestingLS {
             .args(args)
             .arg("--")
             .args(&adapter.extra_args)
+            .envs(&adapter.envs)
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
 
