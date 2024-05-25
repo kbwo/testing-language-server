@@ -269,6 +269,7 @@ impl TestingLS {
         path: &str,
         refresh_needed: bool,
     ) -> Result<impl Serialize, LSError> {
+        let path = path.replace("file://", "");
         if refresh_needed {
             self.refresh_workspace_root_cache()?;
         }
