@@ -6,6 +6,7 @@ use crate::spec::DetectWorkspaceRootResult;
 use crate::spec::Extension;
 use crate::spec::RunFileTestResult;
 use crate::spec::RunFileTestResultItem;
+use crate::spec::WorkspaceAnalysis;
 use crate::util::send_stdout;
 use lsp_types::Diagnostic;
 use lsp_types::DiagnosticOptions;
@@ -38,8 +39,7 @@ pub struct InitializedOptions {
 pub struct TestingLS {
     pub initialize_params: InitializeParams,
     pub options: InitializedOptions,
-    pub workspace_root_cache:
-        HashMap<AdapterCommandPath, (AdapterConfiguration, DetectWorkspaceRootResult)>,
+    pub workspace_root_cache: HashMap<AdapterCommandPath, WorkspaceAnalysis>,
 }
 
 impl Default for TestingLS {
@@ -104,6 +104,7 @@ impl TestingLS {
                 .as_str()
                 .ok_or(serde_json::Error::custom("`method` field is not found"))?;
             let params = &value["params"];
+            Log::info(format!("method: {}, params: {}", method, params));
 
             match *method {
                 "initialize" => {
@@ -122,6 +123,13 @@ impl TestingLS {
                     let uri = params["textDocument"]["uri"]
                         .as_str()
                         .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
+                    let _ = self.check_file(uri, false)?;
+                }
+                "$/runFileTest" => {
+                    let uri = params["uri"]
+                        .as_str()
+                        .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
+                    Log::info(format!("run file test: {}", uri));
                     let _ = self.check_file(uri, false)?;
                 }
                 _ => {}
@@ -244,23 +252,36 @@ impl TestingLS {
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let workspace_root: DetectWorkspaceRootResult =
                     serde_json::from_str(&adapter_result)?;
-                self.workspace_root_cache
-                    .insert(path.to_owned(), (adapter.clone(), workspace_root));
+                self.workspace_root_cache.insert(
+                    path.to_owned(),
+                    WorkspaceAnalysis::new(adapter.clone(), workspace_root),
+                );
             }
         }
+        send_stdout(&json!({
+            "jsonrpc": "2.0",
+            "method": "$/detectedWorkspaceRoots",
+            "params": self.workspace_root_cache,
+        }))?;
         Ok(())
     }
 
     pub fn check_workspace(&mut self) -> Result<impl Serialize, LSError> {
         self.refresh_workspace_root_cache()?;
 
-        self.workspace_root_cache
-            .iter()
-            .for_each(|(_, (adapter, workspaces))| {
+        self.workspace_root_cache.iter().for_each(
+            |(
+                _,
+                WorkspaceAnalysis {
+                    adapter_config: adapter,
+                    workspace_roots: workspaces,
+                },
+            )| {
                 workspaces.iter().for_each(|(workspace_root, paths)| {
                     let _ = self.check(adapter, workspace_root, paths);
                 })
-            });
+            },
+        );
         Ok(())
     }
 
@@ -273,16 +294,22 @@ impl TestingLS {
         if refresh_needed {
             self.refresh_workspace_root_cache()?;
         }
-        self.workspace_root_cache
-            .iter()
-            .for_each(|(_, (adapter, workspaces))| {
+        self.workspace_root_cache.iter().for_each(
+            |(
+                _,
+                WorkspaceAnalysis {
+                    adapter_config: adapter,
+                    workspace_roots: workspaces,
+                },
+            )| {
                 for (workspace_root, paths) in workspaces.iter() {
                     if !paths.contains(&path.to_string()) {
                         continue;
                     }
                     let _ = self.check(adapter, workspace_root, paths);
                 }
-            });
+            },
+        );
         Ok(())
     }
 

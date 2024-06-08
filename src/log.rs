@@ -13,18 +13,18 @@ impl Log {
     }
 
     pub fn debug(msg: impl std::fmt::Debug) {
-        tracing::debug!("{:?}", msg);
+        tracing::debug!("{:#?}", msg);
     }
 
     pub fn info(msg: impl std::fmt::Debug) {
-        tracing::info!("{:?}", msg);
+        tracing::info!("{:#?}", msg);
     }
 
     pub fn warn(msg: impl std::fmt::Debug) {
-        tracing::warn!("{:?}", msg);
+        tracing::warn!("{:#?}", msg);
     }
 
     pub fn error(msg: impl std::fmt::Debug) {
-        tracing::error!("{:?}", msg);
+        tracing::error!("{:#?}", msg);
     }
 }

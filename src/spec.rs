@@ -48,7 +48,25 @@ pub(crate) type FilePath = String;
 pub(crate) type AdapterCommandPath = String;
 pub(crate) type WorkspaceRootFilePath = String;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Clone)]
+pub struct WorkspaceAnalysis {
+    pub adapter_config: AdapterConfiguration,
+    pub workspace_roots: DetectWorkspaceRootResult,
+}
+
+impl WorkspaceAnalysis {
+    pub fn new(
+        adapter_config: AdapterConfiguration,
+        workspace_roots: DetectWorkspaceRootResult,
+    ) -> Self {
+        Self {
+            adapter_config,
+            workspace_roots,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct AdapterConfiguration {
     pub path: String,
     #[serde(default)]
