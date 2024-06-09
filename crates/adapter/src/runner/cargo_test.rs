@@ -245,6 +245,7 @@ impl Runner for CargoTestRunner {
         let test_result = std::process::Command::new("cargo")
             .current_dir(&workspace_root)
             .arg("test")
+            .args(args.extra)
             .output()
             .unwrap();
         let test_result = String::from_utf8(test_result.stdout)?;
