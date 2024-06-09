@@ -337,7 +337,7 @@ impl TestingLS {
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
 
-        Log::info(format!("adapter output: {:?}", output));
+        Log::info(format!("run-file-test output: {:?}", output));
         let adapter_result =
             String::from_utf8(output.stdout).map_err(|err| LSError::Adapter(err.to_string()))?;
         let diagnostics: RunFileTestResult = serde_json::from_str(&adapter_result)?;
@@ -392,7 +392,7 @@ mod tests {
         let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
         let abs_path_of_rust_adapter = std::env::current_dir()
             .unwrap()
-            .join("target/debug/testing-ls-rust-adapter");
+            .join("target/debug/testing-ls-adapter");
         let abs_path_of_rust_adapter = abs_path_of_rust_adapter
             .into_os_string()
             .into_string()
