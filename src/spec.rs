@@ -77,7 +77,7 @@ pub struct AdapterConfiguration {
 
 pub type DetectWorkspaceRootResult = HashMap<WorkspaceRootFilePath, Vec<FilePath>>;
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct RunFileTestResultItem {
     pub path: String,
     pub diagnostics: Vec<Diagnostic>,

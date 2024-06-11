@@ -352,9 +352,15 @@ impl TestingLS {
         let adapter_result =
             String::from_utf8(output.stdout).map_err(|err| LSError::Adapter(err.to_string()))?;
         let diagnostics: RunFileTestResult = serde_json::from_str(&adapter_result)?;
-        for RunFileTestResultItem { path, diagnostics } in diagnostics {
-            let uri = Url::from_file_path(path.replace("file://", "")).unwrap();
-            self.send_diagnostics(uri, diagnostics)?;
+        for target_file in paths {
+            let diagnostics_for_file: Vec<Diagnostic> = diagnostics
+                .clone()
+                .iter()
+                .filter(|RunFileTestResultItem { path, .. }| path == target_file)
+                .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics.clone())
+                .collect();
+            let uri = Url::from_file_path(target_file.replace("file://", "")).unwrap();
+            self.send_diagnostics(uri, diagnostics_for_file)?;
         }
         Ok(())
     }
