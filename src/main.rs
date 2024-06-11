@@ -5,6 +5,6 @@ fn main() {
     let mut server = TestingLS::new();
     let _guard = Log::init().expect("Failed to initialize logger");
     if let Err(ls_error) = server.main_loop() {
-        Log::error(ls_error);
+        tracing::error!("Error: {:?}", ls_error);
     }
 }

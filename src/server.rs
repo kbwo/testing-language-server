@@ -1,8 +1,8 @@
 use crate::error::LSError;
-use crate::log::Log;
 use crate::spec::AdapterCommandPath;
 use crate::spec::AdapterConfiguration;
 use crate::spec::DetectWorkspaceRootResult;
+use crate::spec::DiscoverResult;
 use crate::spec::Extension;
 use crate::spec::RunFileTestResult;
 use crate::spec::RunFileTestResultItem;
@@ -67,7 +67,7 @@ impl TestingLS {
                 handle.read_line(&mut buffer)?;
 
                 if buffer.is_empty() {
-                    Log::warn("buffer is empty")
+                    tracing::warn!("buffer is empty")
                 }
 
                 // The end of header section
@@ -78,7 +78,7 @@ impl TestingLS {
                 let splitted: Vec<&str> = buffer.split(' ').collect();
 
                 if splitted.len() != 2 {
-                    Log::warn("unexpected");
+                    tracing::warn!("unexpected");
                 }
 
                 let header_name = splitted[0].to_lowercase();
@@ -104,7 +104,7 @@ impl TestingLS {
                 .as_str()
                 .ok_or(serde_json::Error::custom("`method` field is not found"))?;
             let params = &value["params"];
-            Log::info(format!("method: {}, params: {}", method, params));
+            tracing::info!("method: {}, params: {}", method, params);
 
             match *method {
                 "initialize" => {
@@ -128,9 +128,21 @@ impl TestingLS {
                 "$/runFileTest" => {
                     let uri = params["uri"]
                         .as_str()
-                        .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
-                    Log::info(format!("run file test: {}", uri));
+                        .ok_or(serde_json::Error::custom("`uri` is not set"))?;
                     let _ = self.check_file(uri, false)?;
+                }
+                "$/discoverFileTest" => {
+                    let id = value["id"].as_i64().unwrap();
+                    let uri = params["uri"]
+                        .as_str()
+                        .ok_or(serde_json::Error::custom("`uri` is not set"))?;
+                    let result = self.discover_file(uri)?;
+                    tracing::info!("DEBUGPRINT[6]: server.rs:139: result={:#?}", result);
+                    send_stdout(&json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": result,
+                    }))?;
                 }
                 _ => {}
             }
@@ -247,7 +259,7 @@ impl TestingLS {
                     .envs(envs)
                     .output()
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
-                Log::info(format!("detect-workspace-root output: {:?}", output));
+                tracing::info!("detect-workspace-root output: {:?}", output);
                 let adapter_result = String::from_utf8(output.stdout)
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let workspace_root: DetectWorkspaceRootResult =
@@ -337,7 +349,6 @@ impl TestingLS {
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
 
-        Log::info(format!("run-file-test output: {:?}", output));
         let adapter_result =
             String::from_utf8(output.stdout).map_err(|err| LSError::Adapter(err.to_string()))?;
         let diagnostics: RunFileTestResult = serde_json::from_str(&adapter_result)?;
@@ -346,6 +357,55 @@ impl TestingLS {
             self.send_diagnostics(uri, diagnostics)?;
         }
         Ok(())
+    }
+
+    #[allow(clippy::for_kv_map)]
+    fn discover_file(&self, path: &str) -> Result<DiscoverResult, LSError> {
+        let path = path.replace("file://", "");
+        let target_paths = vec![path.to_string()];
+        let mut result: DiscoverResult = vec![];
+        for (
+            _,
+            WorkspaceAnalysis {
+                adapter_config: adapter,
+                workspace_roots: workspaces,
+            },
+        ) in &self.workspace_root_cache
+        {
+            for (_, paths) in workspaces.iter() {
+                if !paths.contains(&path.to_string()) {
+                    continue;
+                }
+                result.extend(self.discover(adapter, &target_paths)?);
+            }
+        }
+        Ok(result)
+    }
+
+    fn discover(
+        &self,
+        adapter: &AdapterConfiguration,
+        paths: &[String],
+    ) -> Result<DiscoverResult, LSError> {
+        let mut adapter_command = Command::new(&adapter.path);
+        let mut args: Vec<&str> = vec![];
+        paths.iter().for_each(|path| {
+            args.push("--file-paths");
+            args.push(path);
+        });
+        let output = adapter_command
+            .arg("discover")
+            .args(args)
+            .arg("--")
+            .args(&adapter.extra_args)
+            .envs(&adapter.envs)
+            .output()
+            .map_err(|err| LSError::Adapter(err.to_string()))?;
+
+        tracing::info!("discover output: {:?}", output);
+        let adapter_result =
+            String::from_utf8(output.stdout).map_err(|err| LSError::Adapter(err.to_string()))?;
+        Ok(serde_json::from_str(&adapter_result)?)
     }
 
     pub fn send_diagnostics(&self, uri: Url, diagnostics: Vec<Diagnostic>) -> Result<(), LSError> {

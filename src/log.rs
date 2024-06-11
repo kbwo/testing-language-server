@@ -11,20 +11,4 @@ impl Log {
         tracing_subscriber::fmt().with_writer(non_blocking).init();
         Ok(guard)
     }
-
-    pub fn debug(msg: impl std::fmt::Debug) {
-        tracing::debug!("{:#?}", msg);
-    }
-
-    pub fn info(msg: impl std::fmt::Debug) {
-        tracing::info!("{:#?}", msg);
-    }
-
-    pub fn warn(msg: impl std::fmt::Debug) {
-        tracing::warn!("{:#?}", msg);
-    }
-
-    pub fn error(msg: impl std::fmt::Debug) {
-        tracing::error!("{:#?}", msg);
-    }
 }
