@@ -1,7 +1,10 @@
 use crate::model::AvailableTestKind;
 use crate::model::Runner;
 use clap::Parser;
+use std::io;
+use std::io::Write;
 use std::str::FromStr;
+use testing_language_server::error::LSError;
 use testing_language_server::spec::AdapterCommands;
 use testing_language_server::spec::DetectWorkspaceRootArgs;
 use testing_language_server::spec::DiscoverArgs;
@@ -24,25 +27,32 @@ fn pick_test_from_extra(
     Ok((extra, AvailableTestKind::from_str(&language)?))
 }
 
+fn handle(commands: AdapterCommands) -> Result<(), LSError> {
+    match commands {
+        AdapterCommands::Discover(mut commands) => {
+            let (extra, test_kind) = pick_test_from_extra(&mut commands.extra).unwrap();
+            test_kind.disover(DiscoverArgs { extra, ..commands })?;
+            Ok(())
+        }
+        AdapterCommands::RunFileTest(mut commands) => {
+            let (extra, test_kind) = pick_test_from_extra(&mut commands.extra)?;
+            test_kind.run_file_test(RunFileTestArgs { extra, ..commands })?;
+            Ok(())
+        }
+        AdapterCommands::DetectWorkspaceRoot(mut commands) => {
+            let (extra, test_kind) = pick_test_from_extra(&mut commands.extra)?;
+            test_kind.detect_workspaces_root(DetectWorkspaceRootArgs { extra, ..commands })?;
+            Ok(())
+        }
+    }
+}
+
 fn main() {
     let args = AdapterCommands::parse();
-    match args {
-        AdapterCommands::Discover(mut args) => {
-            let (extra, test_kind) = pick_test_from_extra(&mut args.extra).unwrap();
-            test_kind.disover(DiscoverArgs { extra, ..args }).unwrap();
-        }
-        AdapterCommands::RunFileTest(mut args) => {
-            let (extra, test_kind) = pick_test_from_extra(&mut args.extra).unwrap();
-            test_kind
-                .run_file_test(RunFileTestArgs { extra, ..args })
-                .unwrap();
-        }
-        AdapterCommands::DetectWorkspaceRoot(mut args) => {
-            let (extra, test_kind) = pick_test_from_extra(&mut args.extra).unwrap();
-            test_kind
-                .detect_workspaces_root(DetectWorkspaceRootArgs { extra, ..args })
-                .unwrap();
-        }
+    if let Err(error) = handle(args) {
+        io::stderr()
+            .write_all(format!("{:#?}", error).as_bytes())
+            .unwrap();
     }
 }
 

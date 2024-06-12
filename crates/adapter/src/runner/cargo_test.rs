@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::process::Output;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
 use testing_language_server::spec::DetectWorkspaceRootResult;
@@ -248,7 +249,11 @@ impl Runner for CargoTestRunner {
             .args(args.extra)
             .output()
             .unwrap();
-        let test_result = String::from_utf8(test_result.stdout)?;
+        let Output { stdout, stderr, .. } = test_result;
+        if !stderr.is_empty() {
+            return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
+        }
+        let test_result = String::from_utf8(stdout)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace_root).unwrap(),

@@ -11,9 +11,12 @@ use crate::util::send_stdout;
 use lsp_types::Diagnostic;
 use lsp_types::DiagnosticOptions;
 use lsp_types::DiagnosticServerCapabilities;
+use lsp_types::DiagnosticSeverity;
 use lsp_types::InitializeParams;
 use lsp_types::InitializeResult;
+use lsp_types::Position;
 use lsp_types::PublishDiagnosticsParams;
+use lsp_types::Range;
 use lsp_types::ServerCapabilities;
 use lsp_types::TextDocumentSyncCapability;
 use lsp_types::TextDocumentSyncKind;
@@ -29,6 +32,7 @@ use std::io::BufRead;
 use std::io::{self, Read};
 use std::path::PathBuf;
 use std::process::Command;
+use std::process::Output;
 
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -137,7 +141,6 @@ impl TestingLS {
                         .as_str()
                         .ok_or(serde_json::Error::custom("`uri` is not set"))?;
                     let result = self.discover_file(uri)?;
-                    tracing::info!("DEBUGPRINT[6]: server.rs:139: result={:#?}", result);
                     send_stdout(&json!({
                             "jsonrpc": "2.0",
                             "id": id,
@@ -325,13 +328,14 @@ impl TestingLS {
         Ok(())
     }
 
-    fn check(
+    fn get_diagnostics(
         &self,
         adapter: &AdapterConfiguration,
         workspace_root: &str,
         paths: &[String],
-    ) -> Result<impl Serialize, LSError> {
+    ) -> Result<Vec<(String, Vec<Diagnostic>)>, LSError> {
         let mut adapter_command = Command::new(&adapter.path);
+        let mut diagnostics: Vec<(String, Vec<Diagnostic>)> = vec![];
         let cwd = PathBuf::from(workspace_root);
         let adapter_command = adapter_command.current_dir(&cwd);
         let mut args: Vec<&str> = vec!["--workspace-root", cwd.to_str().unwrap()];
@@ -348,19 +352,64 @@ impl TestingLS {
             .envs(&adapter.envs)
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
+        let Output { stdout, stderr, .. } = output;
+        if !stderr.is_empty() {
+            let message = "Cannot run test command: \n".to_string()
+                + &String::from_utf8(stderr.clone()).unwrap();
+            let placeholder_diagnostic = Diagnostic {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                },
+                message,
+                severity: Some(DiagnosticSeverity::WARNING),
+                code_description: None,
+                code: None,
+                source: None,
+                tags: None,
+                related_information: None,
+                data: None,
+            };
+            for path in paths {
+                diagnostics.push((path.to_string(), vec![placeholder_diagnostic.clone()]));
+            }
+        }
 
         let adapter_result =
-            String::from_utf8(output.stdout).map_err(|err| LSError::Adapter(err.to_string()))?;
-        let diagnostics: RunFileTestResult = serde_json::from_str(&adapter_result)?;
-        for target_file in paths {
-            let diagnostics_for_file: Vec<Diagnostic> = diagnostics
-                .clone()
-                .iter()
-                .filter(|RunFileTestResultItem { path, .. }| path == target_file)
-                .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics.clone())
-                .collect();
-            let uri = Url::from_file_path(target_file.replace("file://", "")).unwrap();
-            self.send_diagnostics(uri, diagnostics_for_file)?;
+            String::from_utf8(stdout).map_err(|err| LSError::Adapter(err.to_string()))?;
+        if let Ok(res) = serde_json::from_str::<RunFileTestResult>(&adapter_result) {
+            for target_file in paths {
+                let diagnostics_for_file: Vec<Diagnostic> = res
+                    .clone()
+                    .iter()
+                    .filter(|RunFileTestResultItem { path, .. }| path == target_file)
+                    .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics.clone())
+                    .collect();
+                let uri = Url::from_file_path(target_file.replace("file://", "")).unwrap();
+                diagnostics.push((uri.to_string(), diagnostics_for_file));
+            }
+        }
+        Ok(diagnostics)
+    }
+
+    fn check(
+        &self,
+        adapter: &AdapterConfiguration,
+        workspace_root: &str,
+        paths: &[String],
+    ) -> Result<impl Serialize, LSError> {
+        let diagnostics = self.get_diagnostics(adapter, workspace_root, paths)?;
+        for (path, diagnostics) in diagnostics {
+            self.send_diagnostics(
+                Url::from_file_path(path.replace("file://", "")).unwrap(),
+                diagnostics,
+            )?;
         }
         Ok(())
     }
@@ -494,5 +543,46 @@ mod tests {
         files.iter().for_each(|file| {
             assert_eq!(extension_from_url_str(file).unwrap(), ".js");
         });
+    }
+
+    #[test]
+    fn bubble_adapter_error() {
+        let adapter_conf: AdapterConfiguration = AdapterConfiguration {
+            path: std::env::current_dir()
+                .unwrap()
+                .join("target/debug/testing-ls-adapter")
+                .to_str()
+                .unwrap()
+                .to_string(),
+            extra_args: vec!["--invalid-arg".to_string()],
+            envs: HashMap::new(),
+        };
+        let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
+        let files = TestingLS::project_files(".rs", abs_path_of_test_proj.clone());
+
+        let server = TestingLS {
+            initialize_params: InitializeParams {
+                workspace_folders: Some(vec![WorkspaceFolder {
+                    uri: Url::from_file_path(&abs_path_of_test_proj).unwrap(),
+                    name: "test_proj".to_string(),
+                }]),
+                ..InitializeParams::default()
+            },
+            options: InitializedOptions {
+                adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf.clone()])]),
+            },
+            workspace_root_cache: HashMap::new(),
+        };
+        let diagnostics = server
+            .get_diagnostics(
+                &adapter_conf,
+                abs_path_of_test_proj.to_str().unwrap(),
+                &files,
+            )
+            .unwrap();
+        assert_eq!(diagnostics.len(), 1);
+        let diagnostic = diagnostics.first().unwrap().1.first().unwrap();
+        assert_eq!(diagnostic.severity.unwrap(), DiagnosticSeverity::WARNING);
+        assert!(diagnostic.message.contains("Cannot run test command:"));
     }
 }
