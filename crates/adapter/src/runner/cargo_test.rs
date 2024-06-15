@@ -250,7 +250,7 @@ impl Runner for CargoTestRunner {
             .output()
             .unwrap();
         let Output { stdout, stderr, .. } = test_result;
-        if !stderr.is_empty() {
+        if stdout.is_empty() && !stderr.is_empty() {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stdout)?;
