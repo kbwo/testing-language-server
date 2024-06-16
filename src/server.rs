@@ -14,17 +14,23 @@ use lsp_types::DiagnosticServerCapabilities;
 use lsp_types::DiagnosticSeverity;
 use lsp_types::InitializeParams;
 use lsp_types::InitializeResult;
+use lsp_types::NumberOrString;
 use lsp_types::Position;
+use lsp_types::ProgressParams;
+use lsp_types::ProgressParamsValue;
 use lsp_types::PublishDiagnosticsParams;
 use lsp_types::Range;
 use lsp_types::ServerCapabilities;
 use lsp_types::TextDocumentSyncCapability;
 use lsp_types::TextDocumentSyncKind;
 use lsp_types::Url;
+use lsp_types::WorkDoneProgress;
+use lsp_types::WorkDoneProgressBegin;
+use lsp_types::WorkDoneProgressCreateParams;
+use lsp_types::WorkDoneProgressEnd;
 use lsp_types::WorkDoneProgressOptions;
 use serde::de::Error;
 use serde::Deserialize;
-use serde::Serialize;
 use serde_json::json;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -104,50 +110,49 @@ impl TestingLS {
             let message = String::from_utf8(buf).unwrap();
 
             let value: Value = serde_json::from_str(&message)?;
-            let method = &value["method"]
-                .as_str()
-                .ok_or(serde_json::Error::custom("`method` field is not found"))?;
+            let method = &value["method"].as_str();
             let params = &value["params"];
-            tracing::info!("method: {}, params: {}", method, params);
 
-            match *method {
-                "initialize" => {
-                    self.initialize_params = InitializeParams::deserialize(params).unwrap();
-                    self.options = (self.handle_initialization_options(
-                        self.initialize_params.initialization_options.as_ref(),
-                    ))
-                    .unwrap();
-                    let id = value["id"].as_i64().unwrap();
-                    let _ = self.initialize(id)?;
+            if let Some(method) = method {
+                match *method {
+                    "initialize" => {
+                        self.initialize_params = InitializeParams::deserialize(params).unwrap();
+                        self.options = (self.handle_initialization_options(
+                            self.initialize_params.initialization_options.as_ref(),
+                        ))
+                        .unwrap();
+                        let id = value["id"].as_i64().unwrap();
+                        self.initialize(id)?;
+                    }
+                    "workspace/diagnostic" => {
+                        self.check_workspace()?;
+                    }
+                    "textDocument/diagnostic" | "textDocument/didSave" => {
+                        let uri = params["textDocument"]["uri"]
+                            .as_str()
+                            .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
+                        self.check_file(uri, false)?;
+                    }
+                    "$/runFileTest" => {
+                        let uri = params["uri"]
+                            .as_str()
+                            .ok_or(serde_json::Error::custom("`uri` is not set"))?;
+                        self.check_file(uri, false)?;
+                    }
+                    "$/discoverFileTest" => {
+                        let id = value["id"].as_i64().unwrap();
+                        let uri = params["uri"]
+                            .as_str()
+                            .ok_or(serde_json::Error::custom("`uri` is not set"))?;
+                        let result = self.discover_file(uri)?;
+                        send_stdout(&json!({
+                                "jsonrpc": "2.0",
+                                "id": id,
+                                "result": result,
+                        }))?;
+                    }
+                    _ => {}
                 }
-                "workspace/diagnostic" => {
-                    let _ = self.check_workspace()?;
-                }
-                "textDocument/diagnostic" | "textDocument/didSave" => {
-                    let uri = params["textDocument"]["uri"]
-                        .as_str()
-                        .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
-                    let _ = self.check_file(uri, false)?;
-                }
-                "$/runFileTest" => {
-                    let uri = params["uri"]
-                        .as_str()
-                        .ok_or(serde_json::Error::custom("`uri` is not set"))?;
-                    let _ = self.check_file(uri, false)?;
-                }
-                "$/discoverFileTest" => {
-                    let id = value["id"].as_i64().unwrap();
-                    let uri = params["uri"]
-                        .as_str()
-                        .ok_or(serde_json::Error::custom("`uri` is not set"))?;
-                    let result = self.discover_file(uri)?;
-                    send_stdout(&json!({
-                            "jsonrpc": "2.0",
-                            "id": id,
-                            "result": result,
-                    }))?;
-                }
-                _ => {}
             }
         }
     }
@@ -211,7 +216,7 @@ impl TestingLS {
         }
     }
 
-    pub fn initialize(&self, id: i64) -> Result<impl Serialize, LSError> {
+    pub fn initialize(&self, id: i64) -> Result<(), LSError> {
         let result = InitializeResult {
             capabilities: self.build_capabilities(),
             ..InitializeResult::default()
@@ -281,7 +286,7 @@ impl TestingLS {
         Ok(())
     }
 
-    pub fn check_workspace(&mut self) -> Result<impl Serialize, LSError> {
+    pub fn check_workspace(&mut self) -> Result<(), LSError> {
         self.refresh_workspace_root_cache()?;
 
         self.workspace_root_cache.iter().for_each(
@@ -300,11 +305,7 @@ impl TestingLS {
         Ok(())
     }
 
-    pub fn check_file(
-        &mut self,
-        path: &str,
-        refresh_needed: bool,
-    ) -> Result<impl Serialize, LSError> {
+    pub fn check_file(&mut self, path: &str, refresh_needed: bool) -> Result<(), LSError> {
         let path = path.replace("file://", "");
         if refresh_needed {
             self.refresh_workspace_root_cache()?;
@@ -403,7 +404,34 @@ impl TestingLS {
         adapter: &AdapterConfiguration,
         workspace_root: &str,
         paths: &[String],
-    ) -> Result<impl Serialize, LSError> {
+    ) -> Result<(), LSError> {
+        let token = NumberOrString::String("testing-ls/start_testing".to_string());
+        let progress_token = WorkDoneProgressCreateParams {
+            token: token.clone(),
+        };
+        send_stdout(&json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "window/workDoneProgress/create",
+            "params": progress_token,
+        }))
+        .unwrap();
+        let progress_begin = WorkDoneProgressBegin {
+            title: format!("Testing by adapter: {}", adapter.path),
+            cancellable: Some(false),
+            message: Some(format!("testing {} files ...", paths.len())),
+            percentage: Some(0),
+        };
+        let params = ProgressParams {
+            token: token.clone(),
+            value: ProgressParamsValue::WorkDone(WorkDoneProgress::Begin(progress_begin)),
+        };
+        send_stdout(&json!({
+            "jsonrpc": "2.0",
+            "method": "$/progress",
+            "params": params,
+        }))
+        .unwrap();
         let diagnostics = self.get_diagnostics(adapter, workspace_root, paths)?;
         for (path, diagnostics) in diagnostics {
             self.send_diagnostics(
@@ -411,6 +439,19 @@ impl TestingLS {
                 diagnostics,
             )?;
         }
+        let progress_end = WorkDoneProgressEnd {
+            message: Some(format!("tested {} files", paths.len())),
+        };
+        let params = ProgressParams {
+            token: token.clone(),
+            value: ProgressParamsValue::WorkDone(WorkDoneProgress::End(progress_end)),
+        };
+        send_stdout(&json!({
+            "jsonrpc": "2.0",
+            "method": "$/progress",
+            "params": params,
+        }))
+        .unwrap();
         Ok(())
     }
 
