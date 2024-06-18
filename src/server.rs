@@ -8,6 +8,8 @@ use crate::spec::RunFileTestResult;
 use crate::spec::RunFileTestResultItem;
 use crate::spec::WorkspaceAnalysis;
 use crate::util::send_stdout;
+use glob::glob;
+use glob::Pattern;
 use lsp_types::Diagnostic;
 use lsp_types::DiagnosticOptions;
 use lsp_types::DiagnosticServerCapabilities;
@@ -43,6 +45,7 @@ use std::process::Output;
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct InitializedOptions {
+    // TODO extension no longer needed due to design change. Should be removed
     adapter_command: HashMap<Extension, Vec<AdapterConfiguration>>,
 }
 
@@ -161,31 +164,34 @@ impl TestingLS {
         self.options.adapter_command.clone()
     }
 
-    // @TODO respect .gitignore
-    fn project_files(extension: &str, dir: PathBuf) -> Vec<String> {
-        let mut uris = vec![];
-        let Ok(read_dir) = dir.read_dir() else {
-            return uris;
-        };
+    fn project_files(
+        base_dir: PathBuf,
+        include_pattern: &[String],
+        exclude_pattern: &[String],
+    ) -> Vec<String> {
+        let mut result: Vec<String> = vec![];
+        let base_dir = base_dir.to_string_lossy().to_string();
 
-        for entry in read_dir {
-            let Ok(entry) = entry else {
-                continue;
-            };
-            if entry
-                .path()
-                .to_str()
-                .map(|s| s.ends_with(extension))
-                .unwrap_or(false)
-            {
-                if let Ok(uri) = Url::from_file_path(entry.path()) {
-                    uris.push(uri.path().to_owned());
+        let exclude_pattern = exclude_pattern
+            .iter()
+            .filter_map(|exclude_pattern| {
+                Pattern::new(&format!("!{base_dir}{exclude_pattern}")).ok()
+            })
+            .collect::<Vec<Pattern>>();
+        for include_pattern in include_pattern {
+            let matched = glob(format!("{base_dir}{include_pattern}").as_str());
+            if let Ok(entries) = matched {
+                for path in entries.flatten() {
+                    let should_exclude = exclude_pattern
+                        .iter()
+                        .any(|exclude_pattern| exclude_pattern.matches(path.to_str().unwrap()));
+                    if !should_exclude {
+                        result.push(path.display().to_string());
+                    }
                 }
-            } else if entry.path().is_dir() {
-                uris.extend(Self::project_files(extension, entry.path()));
             }
         }
-        uris
+        result
     }
 
     fn build_capabilities(&self) -> ServerCapabilities {
@@ -240,19 +246,23 @@ impl TestingLS {
             .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
         let default_workspace_uri = default_workspace_root[0].uri.clone();
         // Nested and multiple loops, but each count is small
-        for (extension, adapter_commands) in &adapter_commands {
-            let file_paths =
-                Self::project_files(extension, default_workspace_uri.to_file_path().unwrap());
-            if file_paths.is_empty() {
-                continue;
-            }
-
+        for adapter_commands in adapter_commands.values() {
             for adapter in adapter_commands {
                 let &AdapterConfiguration {
                     path,
                     extra_args,
                     envs,
+                    include_patterns,
+                    exclude_patterns,
                 } = &adapter;
+                let file_paths = Self::project_files(
+                    default_workspace_uri.to_file_path().unwrap(),
+                    include_patterns,
+                    exclude_patterns,
+                );
+                if file_paths.is_empty() {
+                    continue;
+                }
                 let mut adapter_command = Command::new(path);
                 let mut args_file_path: Vec<&str> = vec![];
                 file_paths.iter().for_each(|file_path| {
@@ -267,7 +277,6 @@ impl TestingLS {
                     .envs(envs)
                     .output()
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
-                tracing::info!("detect-workspace-root output: {:?}", output);
                 let adapter_result = String::from_utf8(output.stdout)
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let workspace_root: DetectWorkspaceRootResult =
@@ -498,7 +507,6 @@ impl TestingLS {
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
 
-        tracing::info!("discover output: {:?}", output);
         let adapter_result =
             String::from_utf8(output.stdout).map_err(|err| LSError::Adapter(err.to_string()))?;
         Ok(serde_json::from_str(&adapter_result)?)
@@ -555,13 +563,15 @@ mod tests {
             .unwrap();
         let adapter_conf = AdapterConfiguration {
             path: abs_path_of_rust_adapter,
-            extra_args: vec![],
+            extra_args: vec!["--test-kind=cargo-test".to_string()],
             envs: HashMap::new(),
+            include_patterns: vec![],
+            exclude_patterns: vec![],
         };
         let mut server = TestingLS {
             initialize_params: InitializeParams {
                 workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(abs_path_of_test_proj).unwrap(),
+                    uri: Url::from_file_path(abs_path_of_test_proj.clone()).unwrap(),
                     name: "test_proj".to_string(),
                 }]),
                 ..InitializeParams::default()
@@ -572,15 +582,37 @@ mod tests {
             workspace_root_cache: HashMap::new(),
         };
         server.check_workspace().unwrap();
+        server.workspace_root_cache.iter().for_each(
+            |(adapter_command_path, workspace_analysis)| {
+                assert!(adapter_command_path.contains("target/debug/testing-ls-adapter"));
+                workspace_analysis
+                    .workspace_roots
+                    .iter()
+                    .for_each(|(workspace_root, paths)| {
+                        assert_eq!(workspace_root, abs_path_of_test_proj.to_str().unwrap());
+                        paths.iter().for_each(|path| {
+                            assert!(path.contains("rust/src"));
+                        });
+                    });
+            },
+        );
     }
 
     #[test]
     fn project_files_are_filtered_by_extension() {
         let absolute_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj");
-        let files = TestingLS::project_files(".rs", absolute_path_of_test_proj.clone());
+        let files = TestingLS::project_files(
+            absolute_path_of_test_proj.clone(),
+            &["/rust/src/lib.rs".to_string()],
+            &["/rust/src/target/**/*".to_string()],
+        );
         let librs = absolute_path_of_test_proj.join("rust/src/lib.rs");
         assert_eq!(files, vec![librs.to_str().unwrap()]);
-        let files = TestingLS::project_files(".js", absolute_path_of_test_proj.clone());
+        let files = TestingLS::project_files(
+            absolute_path_of_test_proj.clone(),
+            &["**/*.js".to_string()],
+            &["**/node_modules/**/*".to_string()],
+        );
         files.iter().for_each(|file| {
             assert_eq!(extension_from_url_str(file).unwrap(), ".js");
         });
@@ -597,9 +629,15 @@ mod tests {
                 .to_string(),
             extra_args: vec!["--invalid-arg".to_string()],
             envs: HashMap::new(),
+            include_patterns: vec![],
+            exclude_patterns: vec![],
         };
         let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
-        let files = TestingLS::project_files(".rs", abs_path_of_test_proj.clone());
+        let files = TestingLS::project_files(
+            abs_path_of_test_proj.clone(),
+            &["/**/*.rs".to_string()],
+            &[],
+        );
 
         let server = TestingLS {
             initialize_params: InitializeParams {
