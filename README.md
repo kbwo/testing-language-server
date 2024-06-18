@@ -42,13 +42,17 @@ language server config:
           ".rs": [
             {
               "path": "<adapter path>/testing-ls-adapter",
-              "extra_args": ["--test-kind=cargo-test"]
+              "extra_args": ["--test-kind=cargo-test"],
+              "include_pattern": ["**/*.rs"],
+              "exclude_pattern": ["**/target/**"]
             }
           ],
           ".js": [
             {
               "path": "<adapter path>/testing-ls-adapter",
-              "extra_args": ["--test-kind=jest"]
+              "extra_args": ["--test-kind=jest"],
+              "include_patterns": ["/**/*.js"],
+              "exclude_patterns": ["/node_modules/**/*"]
             }
           ]
         }

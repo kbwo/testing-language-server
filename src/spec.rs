@@ -73,6 +73,8 @@ pub struct AdapterConfiguration {
     pub extra_args: Vec<String>,
     #[serde(default)]
     pub envs: HashMap<String, String>,
+    pub include_patterns: Vec<String>,
+    pub exclude_patterns: Vec<String>,
 }
 
 pub type DetectWorkspaceRootResult = HashMap<WorkspaceRootFilePath, Vec<FilePath>>;
