@@ -280,7 +280,7 @@ impl Runner for JestRunner {
         args: testing_language_server::spec::RunFileTestArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let workspace_root = args.workspace_root;
+        let workspace_root = args.workspace;
         let tempdir = tempdir().unwrap();
         let tempdir_path = tempdir.path();
         let tempfile_path = tempdir_path.join("jest.json");

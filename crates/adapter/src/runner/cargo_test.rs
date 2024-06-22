@@ -242,7 +242,7 @@ impl Runner for CargoTestRunner {
         args: testing_language_server::spec::RunFileTestArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let workspace_root = args.workspace_root;
+        let workspace_root = args.workspace;
         let test_result = std::process::Command::new("cargo")
             .current_dir(&workspace_root)
             .arg("test")
