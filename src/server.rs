@@ -52,7 +52,7 @@ pub struct InitializedOptions {
 pub struct TestingLS {
     pub initialize_params: InitializeParams,
     pub options: InitializedOptions,
-    pub workspace_root_cache: Vec<WorkspaceAnalysis>,
+    pub workspaces_cache: Vec<WorkspaceAnalysis>,
 }
 
 impl Default for TestingLS {
@@ -66,7 +66,7 @@ impl TestingLS {
         Self {
             initialize_params: Default::default(),
             options: Default::default(),
-            workspace_root_cache: Vec::new(),
+            workspaces_cache: Vec::new(),
         }
     }
 
@@ -236,20 +236,20 @@ impl TestingLS {
         Ok(())
     }
 
-    pub fn refresh_workspace_root_cache(&mut self) -> Result<(), LSError> {
+    pub fn refresh_workspaces_cache(&mut self) -> Result<(), LSError> {
         let adapter_commands = self.adapter_commands();
-        let default_workspace_root = self
+        let default_project_dir = self
             .initialize_params
             .clone()
             .workspace_folders
             .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
-        let default_workspace_uri = default_workspace_root[0].uri.clone();
+        let default_workspace_uri = default_project_dir[0].uri.clone();
         let project_dir = self
             .options
             .project_dir
             .clone()
             .unwrap_or(default_workspace_uri.to_file_path().unwrap());
-        self.workspace_root_cache = vec![];
+        self.workspaces_cache = vec![];
         // Nested and multiple loops, but each count is small
         for adapter_commands in adapter_commands.values() {
             for adapter in adapter_commands {
@@ -281,29 +281,29 @@ impl TestingLS {
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let adapter_result = String::from_utf8(output.stdout)
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
-                let workspace_root: DetectWorkspaceResult = serde_json::from_str(&adapter_result)?;
-                self.workspace_root_cache
-                    .push(WorkspaceAnalysis::new(adapter.clone(), workspace_root))
+                let workspace: DetectWorkspaceResult = serde_json::from_str(&adapter_result)?;
+                self.workspaces_cache
+                    .push(WorkspaceAnalysis::new(adapter.clone(), workspace))
             }
         }
         send_stdout(&json!({
             "jsonrpc": "2.0",
-            "method": "$/detectedWorkspaceRoots",
-            "params": self.workspace_root_cache,
+            "method": "$/detectedWorkspace",
+            "params": self.workspaces_cache,
         }))?;
         Ok(())
     }
 
     pub fn check_workspace(&mut self) -> Result<(), LSError> {
-        self.refresh_workspace_root_cache()?;
+        self.refresh_workspaces_cache()?;
 
-        self.workspace_root_cache.iter().for_each(
+        self.workspaces_cache.iter().for_each(
             |WorkspaceAnalysis {
                  adapter_config: adapter,
-                 workspace_roots: workspaces,
+                 workspaces,
              }| {
-                workspaces.iter().for_each(|(workspace_root, paths)| {
-                    let _ = self.check(adapter, workspace_root, paths);
+                workspaces.iter().for_each(|(workspace, paths)| {
+                    let _ = self.check(adapter, workspace, paths);
                 })
             },
         );
@@ -313,18 +313,18 @@ impl TestingLS {
     pub fn check_file(&mut self, path: &str, refresh_needed: bool) -> Result<(), LSError> {
         let path = path.replace("file://", "");
         if refresh_needed {
-            self.refresh_workspace_root_cache()?;
+            self.refresh_workspaces_cache()?;
         }
-        self.workspace_root_cache.iter().for_each(
+        self.workspaces_cache.iter().for_each(
             |WorkspaceAnalysis {
                  adapter_config: adapter,
-                 workspace_roots: workspaces,
+                 workspaces,
              }| {
-                for (workspace_root, paths) in workspaces.iter() {
+                for (workspace, paths) in workspaces.iter() {
                     if !paths.contains(&path.to_string()) {
                         continue;
                     }
-                    let _ = self.check(adapter, workspace_root, paths);
+                    let _ = self.check(adapter, workspace, paths);
                 }
             },
         );
@@ -334,12 +334,12 @@ impl TestingLS {
     fn get_diagnostics(
         &self,
         adapter: &AdapterConfiguration,
-        workspace_root: &str,
+        workspace: &str,
         paths: &[String],
     ) -> Result<Vec<(String, Vec<Diagnostic>)>, LSError> {
         let mut adapter_command = Command::new(&adapter.path);
         let mut diagnostics: Vec<(String, Vec<Diagnostic>)> = vec![];
-        let cwd = PathBuf::from(workspace_root);
+        let cwd = PathBuf::from(workspace);
         let adapter_command = adapter_command.current_dir(&cwd);
         let mut args: Vec<&str> = vec!["--workspace", cwd.to_str().unwrap()];
         paths.iter().for_each(|path| {
@@ -404,7 +404,7 @@ impl TestingLS {
     fn check(
         &self,
         adapter: &AdapterConfiguration,
-        workspace_root: &str,
+        workspace: &str,
         paths: &[String],
     ) -> Result<(), LSError> {
         let token = NumberOrString::String("testing-ls/start_testing".to_string());
@@ -434,7 +434,7 @@ impl TestingLS {
             "params": params,
         }))
         .unwrap();
-        let diagnostics = self.get_diagnostics(adapter, workspace_root, paths)?;
+        let diagnostics = self.get_diagnostics(adapter, workspace, paths)?;
         for (path, diagnostics) in diagnostics {
             self.send_diagnostics(
                 Url::from_file_path(path.replace("file://", "")).unwrap(),
@@ -464,8 +464,8 @@ impl TestingLS {
         let mut result: DiscoverResult = vec![];
         for WorkspaceAnalysis {
             adapter_config: adapter,
-            workspace_roots: workspaces,
-        } in &self.workspace_root_cache
+            workspaces,
+        } in &self.workspaces_cache
         {
             for (_, paths) in workspaces.iter() {
                 if !paths.contains(&path.to_string()) {
@@ -536,7 +536,7 @@ mod tests {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![])]),
                 project_dir: None,
             },
-            workspace_root_cache: Vec::new(),
+            workspaces_cache: Vec::new(),
         };
         let librs = abs_path_of_test_proj.join("lib.rs");
         server.check_file(librs.to_str().unwrap(), true).unwrap();
@@ -571,20 +571,20 @@ mod tests {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf])]),
                 project_dir: None,
             },
-            workspace_root_cache: Vec::new(),
+            workspaces_cache: Vec::new(),
         };
         server.check_workspace().unwrap();
         server
-            .workspace_root_cache
+            .workspaces_cache
             .iter()
             .for_each(|workspace_analysis| {
                 let adapter_command_path = workspace_analysis.adapter_config.path.clone();
                 assert!(adapter_command_path.contains("target/debug/testing-ls-adapter"));
                 workspace_analysis
-                    .workspace_roots
+                    .workspaces
                     .iter()
-                    .for_each(|(workspace_root, paths)| {
-                        assert_eq!(workspace_root, abs_path_of_test_proj.to_str().unwrap());
+                    .for_each(|(workspace, paths)| {
+                        assert_eq!(workspace, abs_path_of_test_proj.to_str().unwrap());
                         paths.iter().for_each(|path| {
                             assert!(path.contains("rust/src"));
                         });
@@ -645,7 +645,7 @@ mod tests {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf.clone()])]),
                 project_dir: None,
             },
-            workspace_root_cache: Vec::new(),
+            workspaces_cache: Vec::new(),
         };
         let diagnostics = server
             .get_diagnostics(

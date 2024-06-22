@@ -28,7 +28,7 @@ pub struct RunFileTestArgs {
     pub file_paths: Vec<String>,
 
     #[arg(short, long)]
-    pub workspace_root: String,
+    pub workspace: String,
 
     #[arg(last = true)]
     pub extra: Vec<String>,
@@ -50,17 +50,14 @@ pub(crate) type WorkspaceFilePath = String;
 #[derive(Debug, Serialize, Clone)]
 pub struct WorkspaceAnalysis {
     pub adapter_config: AdapterConfiguration,
-    pub workspace_roots: DetectWorkspaceResult,
+    pub workspaces: DetectWorkspaceResult,
 }
 
 impl WorkspaceAnalysis {
-    pub fn new(
-        adapter_config: AdapterConfiguration,
-        workspace_roots: DetectWorkspaceResult,
-    ) -> Self {
+    pub fn new(adapter_config: AdapterConfiguration, workspaces: DetectWorkspaceResult) -> Self {
         Self {
             adapter_config,
-            workspace_roots,
+            workspaces,
         }
     }
 }

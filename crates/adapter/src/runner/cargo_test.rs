@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::process::Output;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
-use testing_language_server::spec::DetectWorkspaceRootResult;
+use testing_language_server::spec::DetectWorkspaceResult;
 use testing_language_server::spec::RunFileTestResult;
 use testing_language_server::spec::TestItem;
 use tree_sitter::Point;
@@ -194,7 +194,7 @@ fn detect_workspace_from_file(file_path: PathBuf) -> Option<String> {
     }
 }
 
-fn detect_workspaces(file_paths: Vec<String>) -> Result<DetectWorkspaceRootResult, LSError> {
+fn detect_workspaces(file_paths: Vec<String>) -> Result<DetectWorkspaceResult, LSError> {
     let mut result_map: HashMap<String, Vec<String>> = HashMap::new();
     let mut file_paths = file_paths.clone();
     file_paths.sort_by_key(|b| std::cmp::Reverse(b.len()));
@@ -265,7 +265,7 @@ impl Runner for CargoTestRunner {
 
     fn detect_workspaces_root(
         &self,
-        args: testing_language_server::spec::DetectWorkspaceRootArgs,
+        args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let detect_result = detect_workspaces(file_paths)?;

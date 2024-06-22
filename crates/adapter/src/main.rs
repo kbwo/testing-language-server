@@ -6,7 +6,7 @@ use std::io::Write;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
 use testing_language_server::spec::AdapterCommands;
-use testing_language_server::spec::DetectWorkspaceRootArgs;
+use testing_language_server::spec::DetectWorkspaceArgs;
 use testing_language_server::spec::DiscoverArgs;
 use testing_language_server::spec::RunFileTestArgs;
 pub mod model;
@@ -39,9 +39,9 @@ fn handle(commands: AdapterCommands) -> Result<(), LSError> {
             test_kind.run_file_test(RunFileTestArgs { extra, ..commands })?;
             Ok(())
         }
-        AdapterCommands::DetectWorkspaceRoot(mut commands) => {
+        AdapterCommands::DetectWorkspace(mut commands) => {
             let (extra, test_kind) = pick_test_from_extra(&mut commands.extra)?;
-            test_kind.detect_workspaces_root(DetectWorkspaceRootArgs { extra, ..commands })?;
+            test_kind.detect_workspaces_root(DetectWorkspaceArgs { extra, ..commands })?;
             Ok(())
         }
     }

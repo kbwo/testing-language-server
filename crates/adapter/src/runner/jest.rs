@@ -10,7 +10,7 @@ use std::str::FromStr;
 use tempfile::tempdir;
 use testing_language_server::error::LSError;
 
-use testing_language_server::spec::DetectWorkspaceRootResult;
+use testing_language_server::spec::DetectWorkspaceResult;
 use testing_language_server::spec::DiscoverResult;
 use testing_language_server::spec::DiscoverResultItem;
 use testing_language_server::spec::RunFileTestResult;
@@ -94,7 +94,7 @@ fn detect_workspace_from_file(file_path: PathBuf) -> Option<String> {
     }
 }
 
-fn detect_workspaces(file_paths: Vec<String>) -> Result<DetectWorkspaceRootResult, LSError> {
+fn detect_workspaces(file_paths: Vec<String>) -> Result<DetectWorkspaceResult, LSError> {
     let mut result_map: HashMap<String, Vec<String>> = HashMap::new();
     let mut file_paths: Vec<String> = file_paths
         .into_iter()
@@ -305,7 +305,7 @@ impl Runner for JestRunner {
 
     fn detect_workspaces_root(
         &self,
-        args: testing_language_server::spec::DetectWorkspaceRootArgs,
+        args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let detect_result = detect_workspaces(file_paths)?;

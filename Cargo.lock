@@ -521,6 +521,28 @@ dependencies = [
 [[package]]
 name = "testing-language-server"
 version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8cc86bccfcfd40400582bd0e9a970e0904e0fcfd3890ca935caaa868cf0a787c"
+dependencies = [
+ "anyhow",
+ "clap",
+ "dirs",
+ "glob",
+ "lsp-types",
+ "once_cell",
+ "regex",
+ "serde",
+ "serde_json",
+ "strum",
+ "thiserror",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "testing-language-server"
+version = "0.0.3"
 dependencies = [
  "anyhow",
  "clap",
@@ -549,7 +571,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tempfile",
- "testing-language-server",
+ "testing-language-server 0.0.2",
  "tree-sitter",
  "tree-sitter-javascript",
  "tree-sitter-rust",

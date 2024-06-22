@@ -1,7 +1,7 @@
 use crate::runner::cargo_test::CargoTestRunner;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
-use testing_language_server::spec::DetectWorkspaceRootArgs;
+use testing_language_server::spec::DetectWorkspaceArgs;
 use testing_language_server::spec::DiscoverArgs;
 use testing_language_server::spec::RunFileTestArgs;
 
@@ -27,7 +27,7 @@ impl Runner for AvailableTestKind {
         }
     }
 
-    fn detect_workspaces_root(&self, args: DetectWorkspaceRootArgs) -> Result<(), LSError> {
+    fn detect_workspaces_root(&self, args: DetectWorkspaceArgs) -> Result<(), LSError> {
         match self {
             AvailableTestKind::CargoTest(runner) => runner.detect_workspaces_root(args),
             AvailableTestKind::Jest(runner) => runner.detect_workspaces_root(args),
@@ -50,5 +50,5 @@ impl FromStr for AvailableTestKind {
 pub trait Runner {
     fn disover(&self, args: DiscoverArgs) -> Result<(), LSError>;
     fn run_file_test(&self, args: RunFileTestArgs) -> Result<(), LSError>;
-    fn detect_workspaces_root(&self, args: DetectWorkspaceRootArgs) -> Result<(), LSError>;
+    fn detect_workspaces_root(&self, args: DetectWorkspaceArgs) -> Result<(), LSError>;
 }
