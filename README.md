@@ -39,7 +39,7 @@ language server config:
     "initializationOptions": {
       "initializationOptions": {
         "adapterCommand": {
-          ".rs": [
+          "cargo test": [
             {
               "path": "<adapter path>/testing-ls-adapter",
               "extra_args": ["--test-kind=cargo-test"],
@@ -47,7 +47,7 @@ language server config:
               "exclude_pattern": ["**/target/**"]
             }
           ],
-          ".js": [
+          "jest": [
             {
               "path": "<adapter path>/testing-ls-adapter",
               "extra_args": ["--test-kind=jest"],
