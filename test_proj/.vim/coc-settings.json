@@ -1,0 +1,29 @@
+{
+  "languageserver": {
+    "testing": {
+      "command": "testing-language-server",
+      "trace.server": "verbose",
+      "filetypes": ["rust", "javascript"],
+      "initializationOptions": {
+        "adapterCommand": {
+          ".rs": [
+            {
+              "path": "testing-ls-adapter",
+              "extra_args": ["--test-kind=cargo-test"],
+              "include_patterns": ["/**/*.rs"],
+              "exclude_patterns": ["/**/target/**"]
+            }
+          ],
+          ".js": [
+            {
+              "path": "testing-ls-adapter",
+              "extra_args": ["--test-kind=jest"],
+              "include_patterns": ["/**/*.js"],
+              "exclude_patterns": ["/node_modules/**/*"]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
