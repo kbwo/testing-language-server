@@ -1,7 +1,7 @@
 use crate::error::LSError;
 use crate::spec::AdapterConfiguration;
 use crate::spec::AdapterId;
-use crate::spec::DetectWorkspaceRootResult;
+use crate::spec::DetectWorkspaceResult;
 use crate::spec::DiscoverResult;
 use crate::spec::RunFileTestResult;
 use crate::spec::RunFileTestResultItem;
@@ -272,7 +272,7 @@ impl TestingLS {
                     args_file_path.push(file_path);
                 });
                 let output = adapter_command
-                    .arg("detect-workspace-root")
+                    .arg("detect-workspace")
                     .args(args_file_path)
                     .arg("--")
                     .args(extra_args)
@@ -281,8 +281,7 @@ impl TestingLS {
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let adapter_result = String::from_utf8(output.stdout)
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
-                let workspace_root: DetectWorkspaceRootResult =
-                    serde_json::from_str(&adapter_result)?;
+                let workspace_root: DetectWorkspaceResult = serde_json::from_str(&adapter_result)?;
                 self.workspace_root_cache
                     .push(WorkspaceAnalysis::new(adapter.clone(), workspace_root))
             }
@@ -342,7 +341,7 @@ impl TestingLS {
         let mut diagnostics: Vec<(String, Vec<Diagnostic>)> = vec![];
         let cwd = PathBuf::from(workspace_root);
         let adapter_command = adapter_command.current_dir(&cwd);
-        let mut args: Vec<&str> = vec!["--workspace-root", cwd.to_str().unwrap()];
+        let mut args: Vec<&str> = vec!["--workspace", cwd.to_str().unwrap()];
         paths.iter().for_each(|path| {
             args.push("--file-paths");
             args.push(path);

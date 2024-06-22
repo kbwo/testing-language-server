@@ -9,7 +9,7 @@ use std::collections::HashMap;
 pub enum AdapterCommands {
     Discover(DiscoverArgs),
     RunFileTest(RunFileTestArgs),
-    DetectWorkspaceRoot(DetectWorkspaceRootArgs),
+    DetectWorkspace(DetectWorkspaceArgs),
 }
 
 #[derive(clap::Args, Debug)]
@@ -36,7 +36,7 @@ pub struct RunFileTestArgs {
 
 #[derive(clap::Args, Debug)]
 #[command(version, about, long_about = None)]
-pub struct DetectWorkspaceRootArgs {
+pub struct DetectWorkspaceArgs {
     #[arg(short, long)]
     pub file_paths: Vec<String>,
     #[arg(last = true)]
@@ -45,18 +45,18 @@ pub struct DetectWorkspaceRootArgs {
 
 pub(crate) type AdapterId = String;
 pub(crate) type FilePath = String;
-pub(crate) type WorkspaceRootFilePath = String;
+pub(crate) type WorkspaceFilePath = String;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct WorkspaceAnalysis {
     pub adapter_config: AdapterConfiguration,
-    pub workspace_roots: DetectWorkspaceRootResult,
+    pub workspace_roots: DetectWorkspaceResult,
 }
 
 impl WorkspaceAnalysis {
     pub fn new(
         adapter_config: AdapterConfiguration,
-        workspace_roots: DetectWorkspaceRootResult,
+        workspace_roots: DetectWorkspaceResult,
     ) -> Self {
         Self {
             adapter_config,
@@ -76,7 +76,7 @@ pub struct AdapterConfiguration {
     pub exclude_patterns: Vec<String>,
 }
 
-pub type DetectWorkspaceRootResult = HashMap<WorkspaceRootFilePath, Vec<FilePath>>;
+pub type DetectWorkspaceResult = HashMap<WorkspaceFilePath, Vec<FilePath>>;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct RunFileTestResultItem {

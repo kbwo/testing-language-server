@@ -1,6 +1,6 @@
 [package]
 name = "testing-language-server"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 author = "Kodai Kabasawa <kabaaa1126@gmail.com>"
 description = "LSP server for testing"
@@ -8,7 +8,7 @@ license = "MIT"
 
 [workspace]
 members = [ "crates/adapter"]
-exclude = ["test_proj/rust"]
+exclude = ["test_proj"]
 
 [[bin]]
 name = "testing-language-server"
