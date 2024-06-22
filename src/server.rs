@@ -1,9 +1,8 @@
 use crate::error::LSError;
-use crate::spec::AdapterCommandPath;
 use crate::spec::AdapterConfiguration;
+use crate::spec::AdapterId;
 use crate::spec::DetectWorkspaceRootResult;
 use crate::spec::DiscoverResult;
-use crate::spec::Extension;
 use crate::spec::RunFileTestResult;
 use crate::spec::RunFileTestResultItem;
 use crate::spec::WorkspaceAnalysis;
@@ -38,6 +37,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::io::BufRead;
 use std::io::{self, Read};
+use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Output;
@@ -45,14 +45,14 @@ use std::process::Output;
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct InitializedOptions {
-    // TODO extension no longer needed due to design change. Should be removed
-    adapter_command: HashMap<Extension, Vec<AdapterConfiguration>>,
+    adapter_command: HashMap<AdapterId, Vec<AdapterConfiguration>>,
+    project_dir: Option<PathBuf>,
 }
 
 pub struct TestingLS {
     pub initialize_params: InitializeParams,
     pub options: InitializedOptions,
-    pub workspace_root_cache: HashMap<AdapterCommandPath, WorkspaceAnalysis>,
+    pub workspace_root_cache: Vec<WorkspaceAnalysis>,
 }
 
 impl Default for TestingLS {
@@ -66,7 +66,7 @@ impl TestingLS {
         Self {
             initialize_params: Default::default(),
             options: Default::default(),
-            workspace_root_cache: HashMap::new(),
+            workspace_root_cache: Vec::new(),
         }
     }
 
@@ -119,11 +119,10 @@ impl TestingLS {
             if let Some(method) = method {
                 match *method {
                     "initialize" => {
-                        self.initialize_params = InitializeParams::deserialize(params).unwrap();
+                        self.initialize_params = InitializeParams::deserialize(params)?;
                         self.options = (self.handle_initialization_options(
                             self.initialize_params.initialization_options.as_ref(),
-                        ))
-                        .unwrap();
+                        ))?;
                         let id = value["id"].as_i64().unwrap();
                         self.initialize(id)?;
                     }
@@ -160,12 +159,12 @@ impl TestingLS {
         }
     }
 
-    fn adapter_commands(&self) -> HashMap<Extension, Vec<AdapterConfiguration>> {
+    fn adapter_commands(&self) -> HashMap<AdapterId, Vec<AdapterConfiguration>> {
         self.options.adapter_command.clone()
     }
 
     fn project_files(
-        base_dir: PathBuf,
+        base_dir: &Path,
         include_pattern: &[String],
         exclude_pattern: &[String],
     ) -> Vec<String> {
@@ -245,6 +244,12 @@ impl TestingLS {
             .workspace_folders
             .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
         let default_workspace_uri = default_workspace_root[0].uri.clone();
+        let project_dir = self
+            .options
+            .project_dir
+            .clone()
+            .unwrap_or(default_workspace_uri.to_file_path().unwrap());
+        self.workspace_root_cache = vec![];
         // Nested and multiple loops, but each count is small
         for adapter_commands in adapter_commands.values() {
             for adapter in adapter_commands {
@@ -255,11 +260,8 @@ impl TestingLS {
                     include_patterns,
                     exclude_patterns,
                 } = &adapter;
-                let file_paths = Self::project_files(
-                    default_workspace_uri.to_file_path().unwrap(),
-                    include_patterns,
-                    exclude_patterns,
-                );
+                let file_paths =
+                    Self::project_files(&project_dir, include_patterns, exclude_patterns);
                 if file_paths.is_empty() {
                     continue;
                 }
@@ -281,10 +283,8 @@ impl TestingLS {
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let workspace_root: DetectWorkspaceRootResult =
                     serde_json::from_str(&adapter_result)?;
-                self.workspace_root_cache.insert(
-                    path.to_owned(),
-                    WorkspaceAnalysis::new(adapter.clone(), workspace_root),
-                );
+                self.workspace_root_cache
+                    .push(WorkspaceAnalysis::new(adapter.clone(), workspace_root))
             }
         }
         send_stdout(&json!({
@@ -299,13 +299,10 @@ impl TestingLS {
         self.refresh_workspace_root_cache()?;
 
         self.workspace_root_cache.iter().for_each(
-            |(
-                _,
-                WorkspaceAnalysis {
-                    adapter_config: adapter,
-                    workspace_roots: workspaces,
-                },
-            )| {
+            |WorkspaceAnalysis {
+                 adapter_config: adapter,
+                 workspace_roots: workspaces,
+             }| {
                 workspaces.iter().for_each(|(workspace_root, paths)| {
                     let _ = self.check(adapter, workspace_root, paths);
                 })
@@ -320,13 +317,10 @@ impl TestingLS {
             self.refresh_workspace_root_cache()?;
         }
         self.workspace_root_cache.iter().for_each(
-            |(
-                _,
-                WorkspaceAnalysis {
-                    adapter_config: adapter,
-                    workspace_roots: workspaces,
-                },
-            )| {
+            |WorkspaceAnalysis {
+                 adapter_config: adapter,
+                 workspace_roots: workspaces,
+             }| {
                 for (workspace_root, paths) in workspaces.iter() {
                     if !paths.contains(&path.to_string()) {
                         continue;
@@ -469,13 +463,10 @@ impl TestingLS {
         let path = path.replace("file://", "");
         let target_paths = vec![path.to_string()];
         let mut result: DiscoverResult = vec![];
-        for (
-            _,
-            WorkspaceAnalysis {
-                adapter_config: adapter,
-                workspace_roots: workspaces,
-            },
-        ) in &self.workspace_root_cache
+        for WorkspaceAnalysis {
+            adapter_config: adapter,
+            workspace_roots: workspaces,
+        } in &self.workspace_root_cache
         {
             for (_, paths) in workspaces.iter() {
                 if !paths.contains(&path.to_string()) {
@@ -544,8 +535,9 @@ mod tests {
             },
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![])]),
+                project_dir: None,
             },
-            workspace_root_cache: HashMap::new(),
+            workspace_root_cache: Vec::new(),
         };
         let librs = abs_path_of_test_proj.join("lib.rs");
         server.check_file(librs.to_str().unwrap(), true).unwrap();
@@ -578,12 +570,16 @@ mod tests {
             },
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf])]),
+                project_dir: None,
             },
-            workspace_root_cache: HashMap::new(),
+            workspace_root_cache: Vec::new(),
         };
         server.check_workspace().unwrap();
-        server.workspace_root_cache.iter().for_each(
-            |(adapter_command_path, workspace_analysis)| {
+        server
+            .workspace_root_cache
+            .iter()
+            .for_each(|workspace_analysis| {
+                let adapter_command_path = workspace_analysis.adapter_config.path.clone();
                 assert!(adapter_command_path.contains("target/debug/testing-ls-adapter"));
                 workspace_analysis
                     .workspace_roots
@@ -594,22 +590,21 @@ mod tests {
                             assert!(path.contains("rust/src"));
                         });
                     });
-            },
-        );
+            });
     }
 
     #[test]
     fn project_files_are_filtered_by_extension() {
         let absolute_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj");
         let files = TestingLS::project_files(
-            absolute_path_of_test_proj.clone(),
+            &absolute_path_of_test_proj.clone(),
             &["/rust/src/lib.rs".to_string()],
             &["/rust/src/target/**/*".to_string()],
         );
         let librs = absolute_path_of_test_proj.join("rust/src/lib.rs");
         assert_eq!(files, vec![librs.to_str().unwrap()]);
         let files = TestingLS::project_files(
-            absolute_path_of_test_proj.clone(),
+            &absolute_path_of_test_proj.clone(),
             &["**/*.js".to_string()],
             &["**/node_modules/**/*".to_string()],
         );
@@ -634,7 +629,7 @@ mod tests {
         };
         let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
         let files = TestingLS::project_files(
-            abs_path_of_test_proj.clone(),
+            &abs_path_of_test_proj.clone(),
             &["/**/*.rs".to_string()],
             &[],
         );
@@ -649,8 +644,9 @@ mod tests {
             },
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf.clone()])]),
+                project_dir: None,
             },
-            workspace_root_cache: HashMap::new(),
+            workspace_root_cache: Vec::new(),
         };
         let diagnostics = server
             .get_diagnostics(

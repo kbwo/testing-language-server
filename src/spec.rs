@@ -43,9 +43,8 @@ pub struct DetectWorkspaceRootArgs {
     pub extra: Vec<String>,
 }
 
-pub(crate) type Extension = String;
+pub(crate) type AdapterId = String;
 pub(crate) type FilePath = String;
-pub(crate) type AdapterCommandPath = String;
 pub(crate) type WorkspaceRootFilePath = String;
 
 #[derive(Debug, Serialize, Clone)]
