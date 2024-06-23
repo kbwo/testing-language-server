@@ -363,7 +363,7 @@ impl TestingLS {
                     if !paths.contains(&path.to_string()) {
                         continue;
                     }
-                    let _ = self.check(adapter, workspace, paths);
+                    let _ = self.check(adapter, workspace, &[path.to_string()]);
                 }
             },
         );
