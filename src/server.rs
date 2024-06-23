@@ -6,6 +6,7 @@ use crate::spec::DiscoverResult;
 use crate::spec::RunFileTestResult;
 use crate::spec::RunFileTestResultItem;
 use crate::spec::WorkspaceAnalysis;
+use crate::util::format_uri;
 use crate::util::send_stdout;
 use glob::glob;
 use glob::Pattern;
@@ -68,6 +69,21 @@ impl TestingLS {
             options: Default::default(),
             workspaces_cache: Vec::new(),
         }
+    }
+
+    fn project_dir(&self) -> Result<PathBuf, LSError> {
+        let default_project_dir = self
+            .initialize_params
+            .clone()
+            .workspace_folders
+            .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
+        let default_workspace_uri = default_project_dir[0].uri.clone();
+        let project_dir = self
+            .options
+            .project_dir
+            .clone()
+            .unwrap_or(default_workspace_uri.to_file_path().unwrap());
+        Ok(project_dir)
     }
 
     pub fn main_loop(&mut self) -> Result<(), LSError> {
@@ -133,12 +149,23 @@ impl TestingLS {
                         let uri = params["textDocument"]["uri"]
                             .as_str()
                             .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
+                        let uri = &format_uri(uri);
                         self.check_file(uri, false)?;
+                    }
+                    "textDocument/didOpen" => {
+                        let uri = params["textDocument"]["uri"]
+                            .as_str()
+                            .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
+                        let uri = &format_uri(uri);
+                        if self.refreshing_needed(uri) {
+                            self.refresh_workspaces_cache()?;
+                        }
                     }
                     "$/runFileTest" => {
                         let uri = params["uri"]
                             .as_str()
                             .ok_or(serde_json::Error::custom("`uri` is not set"))?;
+                        let uri = &format_uri(uri);
                         self.check_file(uri, false)?;
                     }
                     "$/discoverFileTest" => {
@@ -146,6 +173,7 @@ impl TestingLS {
                         let uri = params["uri"]
                             .as_str()
                             .ok_or(serde_json::Error::custom("`uri` is not set"))?;
+                        let uri = &format_uri(uri);
                         let result = self.discover_file(uri)?;
                         send_stdout(&json!({
                                 "jsonrpc": "2.0",
@@ -165,19 +193,19 @@ impl TestingLS {
 
     fn project_files(
         base_dir: &Path,
-        include_pattern: &[String],
-        exclude_pattern: &[String],
+        include_patterns: &[String],
+        exclude_patterns: &[String],
     ) -> Vec<String> {
         let mut result: Vec<String> = vec![];
         let base_dir = base_dir.to_string_lossy().to_string();
 
-        let exclude_pattern = exclude_pattern
+        let exclude_pattern = exclude_patterns
             .iter()
             .filter_map(|exclude_pattern| {
                 Pattern::new(&format!("!{base_dir}{exclude_pattern}")).ok()
             })
             .collect::<Vec<Pattern>>();
-        for include_pattern in include_pattern {
+        for include_pattern in include_patterns {
             let matched = glob(format!("{base_dir}{include_pattern}").as_str());
             if let Ok(entries) = matched {
                 for path in entries.flatten() {
@@ -238,17 +266,7 @@ impl TestingLS {
 
     pub fn refresh_workspaces_cache(&mut self) -> Result<(), LSError> {
         let adapter_commands = self.adapter_commands();
-        let default_project_dir = self
-            .initialize_params
-            .clone()
-            .workspace_folders
-            .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
-        let default_workspace_uri = default_project_dir[0].uri.clone();
-        let project_dir = self
-            .options
-            .project_dir
-            .clone()
-            .unwrap_or(default_workspace_uri.to_file_path().unwrap());
+        let project_dir = self.project_dir()?;
         self.workspaces_cache = vec![];
         // Nested and multiple loops, but each count is small
         for adapter_commands in adapter_commands.values() {
@@ -286,6 +304,10 @@ impl TestingLS {
                     .push(WorkspaceAnalysis::new(adapter.clone(), workspace))
             }
         }
+        eprintln!(
+            "DEBUGPRINT[2]: server.rs:301: workspaces_cache={:#?}",
+            self.workspaces_cache
+        );
         send_stdout(&json!({
             "jsonrpc": "2.0",
             "method": "$/detectedWorkspace",
@@ -310,8 +332,28 @@ impl TestingLS {
         Ok(())
     }
 
+    pub fn refreshing_needed(&self, path: &str) -> bool {
+        let base_dir = self.project_dir();
+        match base_dir {
+            Ok(base_dir) => self.workspaces_cache.iter().any(|cache| {
+                let include_patterns = &cache.adapter_config.include_patterns;
+                let exclude_patterns = &cache.adapter_config.exclude_patterns;
+                if cache
+                    .workspaces
+                    .iter()
+                    .any(|(_, workspace)| workspace.contains(&path.to_string()))
+                {
+                    return false;
+                }
+
+                Self::project_files(&base_dir, include_patterns, exclude_patterns)
+                    .contains(&path.to_owned())
+            }),
+            Err(_) => false,
+        }
+    }
+
     pub fn check_file(&mut self, path: &str, refresh_needed: bool) -> Result<(), LSError> {
-        let path = path.replace("file://", "");
         if refresh_needed {
             self.refresh_workspaces_cache()?;
         }
@@ -459,7 +501,6 @@ impl TestingLS {
 
     #[allow(clippy::for_kv_map)]
     fn discover_file(&self, path: &str) -> Result<DiscoverResult, LSError> {
-        let path = path.replace("file://", "");
         let target_paths = vec![path.to_string()];
         let mut result: DiscoverResult = vec![];
         for WorkspaceAnalysis {
