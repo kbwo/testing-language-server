@@ -87,6 +87,8 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
         .expect("Error loading Rust grammar");
     let source_code = std::fs::read_to_string(file_path)?;
     let tree = parser.parse(&source_code, None).unwrap();
+    // from https://github.com/rouge8/neotest-rust/blob/0418811e1e3499b2501593f2e131d02f5e6823d4/lua/neotest-rust/init.lua#L167
+    // license: https://github.com/rouge8/neotest-rust/blob/0418811e1e3499b2501593f2e131d02f5e6823d4/LICENSE
     let query_string = r#"
         (
   (attribute_item

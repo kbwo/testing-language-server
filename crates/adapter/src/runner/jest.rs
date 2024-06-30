@@ -93,6 +93,8 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
         .expect("Error loading JavaScript grammar");
     let source_code = std::fs::read_to_string(file_path)?;
     let tree = parser.parse(&source_code, None).unwrap();
+    // from https://github.com/nvim-neotest/neotest-jest/blob/514fd4eae7da15fd409133086bb8e029b65ac43f/lua/neotest-jest/init.lua#L162
+    // license: https://github.com/nvim-neotest/neotest-jest/blob/514fd4eae7da15fd409133086bb8e029b65ac43f/LICENSE.md
     let query_string = r#"
     ; -- Namespaces --
     ; Matches: `describe('context', () => {})`
