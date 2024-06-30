@@ -18,6 +18,8 @@ use testing_language_server::spec::RunFileTestResultItem;
 
 use crate::model::Runner;
 
+use super::util::detect_workspaces_from_file_paths;
+
 // If the character value is greater than the line length it defaults back to the line length.
 const MAX_CHAR_LENGTH: u32 = 10000;
 
@@ -181,41 +183,8 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
     Ok(test_items)
 }
 
-fn detect_workspace_from_file(file_path: PathBuf) -> Option<String> {
-    let parent = file_path.parent();
-    if let Some(parent) = parent {
-        if parent.join("Cargo.toml").exists() {
-            return Some(parent.to_string_lossy().to_string());
-        } else {
-            detect_workspace_from_file(parent.to_path_buf())
-        }
-    } else {
-        None
-    }
-}
-
-fn detect_workspaces(file_paths: Vec<String>) -> Result<DetectWorkspaceResult, LSError> {
-    let mut result_map: HashMap<String, Vec<String>> = HashMap::new();
-    let mut file_paths = file_paths.clone();
-    file_paths.sort_by_key(|b| std::cmp::Reverse(b.len()));
-    for file_path in file_paths {
-        let existing_workspace = result_map
-            .iter()
-            .find(|(workspace_root, _)| file_path.contains(workspace_root.as_str()));
-        if let Some((workspace_root, _)) = existing_workspace {
-            result_map
-                .entry(workspace_root.to_string())
-                .or_default()
-                .push(file_path);
-        } else {
-            let workspace = detect_workspace_from_file(PathBuf::from_str(&file_path).unwrap());
-            if let Some(workspace) = workspace {
-                result_map.entry(workspace).or_default().push(file_path);
-            }
-        }
-    }
-
-    Ok(result_map)
+fn detect_workspaces(file_paths: &[String]) -> DetectWorkspaceResult {
+    detect_workspaces_from_file_paths(file_paths, &["Cargo.toml".to_string()])
 }
 
 #[derive(Eq, PartialEq, Hash, Debug)]
@@ -263,12 +232,12 @@ impl Runner for CargoTestRunner {
         Ok(())
     }
 
-    fn detect_workspaces_root(
+    fn detect_workspaces(
         &self,
         args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let detect_result = detect_workspaces(file_paths)?;
+        let detect_result = detect_workspaces(&file_paths);
         serde_json::to_writer(std::io::stdout(), &detect_result)?;
         Ok(())
     }
@@ -350,7 +319,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
             .map(|file_path| file_path.to_str().unwrap().to_string())
             .collect();
 
-        let workspaces = detect_workspaces(file_paths).unwrap();
+        let workspaces = detect_workspaces(&file_paths);
         assert_eq!(workspaces.len(), 2);
         assert!(workspaces.contains_key(&absolute_path_of_test_proj.to_str().unwrap().to_string()));
         assert!(workspaces.contains_key(&current_dir.to_str().unwrap().to_string()));
