@@ -1,0 +1,161 @@
+{"Time":"2024-05-25T17:06:16.98464582+09:00","Action":"start","Package":"neotest_go"}
+{"Time":"2024-05-25T17:06:16.986822201+09:00","Action":"run","Package":"neotest_go","Test":"TestSubtract"}
+{"Time":"2024-05-25T17:06:16.986838849+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract","Output":"=== RUN   TestSubtract\n"}
+{"Time":"2024-05-25T17:06:16.986859373+09:00","Action":"run","Package":"neotest_go","Test":"TestSubtract/test_one"}
+{"Time":"2024-05-25T17:06:16.98686856+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_one","Output":"        \tError Trace:\tcases_test.go:31\n"}
+{"Time":"2024-05-25T17:06:16.986871386+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_one","Output":"        \tError:      \tNot equal: \n"}
+{"Time":"2024-05-25T17:06:16.986874139+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_one","Output":"        \t            \texpected: 3\n"}
+{"Time":"2024-05-25T17:06:16.986876748+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_one","Output":"        \t            \tactual  : -1\n"}
+{"Time":"2024-05-25T17:06:16.986879547+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_one","Output":"        \tTest:       \tTestSubtract/test_one\n"}
+{"Time":"2024-05-25T17:06:16.986883029+09:00","Action":"run","Package":"neotest_go","Test":"TestSubtract/test_two"}
+{"Time":"2024-05-25T17:06:16.986885264+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_two","Output":"=== RUN   TestSubtract/test_two\n"}
+{"Time":"2024-05-25T17:06:16.986888429+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_two","Output":"    cases_test.go:31: \n"}
+{"Time":"2024-05-25T17:06:16.986891613+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_two","Output":"        \tError Trace:\tcases_test.go:31\n"}
+{"Time":"2024-05-25T17:06:16.986894222+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_two","Output":"        \tError:      \tNot equal: \n"}
+{"Time":"2024-05-25T17:06:16.986896835+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_two","Output":"        \t            \texpected: 7\n"}
+{"Time":"2024-05-25T17:06:16.986899333+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_two","Output":"        \t            \tactual  : -1\n"}
+{"Time":"2024-05-25T17:06:16.986901904+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_two","Output":"        \tTest:       \tTestSubtract/test_two\n"}
+{"Time":"2024-05-25T17:06:16.986906401+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract","Output":"--- FAIL: TestSubtract (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.986910144+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_one","Output":"    --- FAIL: TestSubtract/test_one (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.986913275+09:00","Action":"fail","Package":"neotest_go","Test":"TestSubtract/test_one","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.986916945+09:00","Action":"output","Package":"neotest_go","Test":"TestSubtract/test_two","Output":"    --- FAIL: TestSubtract/test_two (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.986919709+09:00","Action":"fail","Package":"neotest_go","Test":"TestSubtract/test_two","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.986922033+09:00","Action":"fail","Package":"neotest_go","Test":"TestSubtract","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.986924322+09:00","Action":"run","Package":"neotest_go","Test":"TestAdd"}
+{"Time":"2024-05-25T17:06:16.986926439+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd","Output":"=== RUN   TestAdd\n"}
+{"Time":"2024-05-25T17:06:16.986929637+09:00","Action":"run","Package":"neotest_go","Test":"TestAdd/test_one"}
+{"Time":"2024-05-25T17:06:16.986931891+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_one","Output":"=== RUN   TestAdd/test_one\n"}
+{"Time":"2024-05-25T17:06:16.98693449+09:00","Action":"run","Package":"neotest_go","Test":"TestAdd/test_two"}
+{"Time":"2024-05-25T17:06:16.986936644+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_two","Output":"=== RUN   TestAdd/test_two\n"}
+{"Time":"2024-05-25T17:06:16.986939093+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_two","Output":"    cases_test.go:42: \n"}
+{"Time":"2024-05-25T17:06:16.986941721+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_two","Output":"        \tError Trace:\tcases_test.go:42\n"}
+{"Time":"2024-05-25T17:06:16.986944261+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_two","Output":"        \tError:      \tNot equal: \n"}
+{"Time":"2024-05-25T17:06:16.986946773+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_two","Output":"        \t            \texpected: 5\n"}
+{"Time":"2024-05-25T17:06:16.986949247+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_two","Output":"        \t            \tactual  : 3\n"}
+{"Time":"2024-05-25T17:06:16.986951706+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_two","Output":"        \tTest:       \tTestAdd/test_two\n"}
+{"Time":"2024-05-25T17:06:16.986954288+09:00","Action":"run","Package":"neotest_go","Test":"TestAdd/string"}
+{"Time":"2024-05-25T17:06:16.986956496+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/string","Output":"=== RUN   TestAdd/string\n"}
+{"Time":"2024-05-25T17:06:16.986959568+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd","Output":"--- FAIL: TestAdd (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.986964387+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_one","Output":"    --- PASS: TestAdd/test_one (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.986967557+09:00","Action":"pass","Package":"neotest_go","Test":"TestAdd/test_one","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.986970137+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/test_two","Output":"    --- FAIL: TestAdd/test_two (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.986973398+09:00","Action":"fail","Package":"neotest_go","Test":"TestAdd/test_two","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.986976554+09:00","Action":"output","Package":"neotest_go","Test":"TestAdd/string","Output":"    --- PASS: TestAdd/string (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.986979769+09:00","Action":"pass","Package":"neotest_go","Test":"TestAdd/string","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.98698262+09:00","Action":"fail","Package":"neotest_go","Test":"TestAdd","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.98698541+09:00","Action":"run","Package":"neotest_go","Test":"TestAddOne"}
+{"Time":"2024-05-25T17:06:16.986987976+09:00","Action":"output","Package":"neotest_go","Test":"TestAddOne","Output":"=== RUN   TestAddOne\n"}
+{"Time":"2024-05-25T17:06:16.986990912+09:00","Action":"output","Package":"neotest_go","Test":"TestAddOne","Output":"--- PASS: TestAddOne (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.986994224+09:00","Action":"pass","Package":"neotest_go","Test":"TestAddOne","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.986996509+09:00","Action":"run","Package":"neotest_go","Test":"TestAddTwo"}
+{"Time":"2024-05-25T17:06:16.986999108+09:00","Action":"output","Package":"neotest_go","Test":"TestAddTwo","Output":"=== RUN   TestAddTwo\n"}
+{"Time":"2024-05-25T17:06:16.98700243+09:00","Action":"output","Package":"neotest_go","Test":"TestAddTwo","Output":"--- PASS: TestAddTwo (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987005287+09:00","Action":"pass","Package":"neotest_go","Test":"TestAddTwo","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987008349+09:00","Action":"run","Package":"neotest_go","Test":"TestSomeTest"}
+{"Time":"2024-05-25T17:06:16.987011032+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest","Output":"=== RUN   TestSomeTest\n"}
+{"Time":"2024-05-25T17:06:16.987014678+09:00","Action":"run","Package":"neotest_go","Test":"TestSomeTest/AccessDenied1"}
+{"Time":"2024-05-25T17:06:16.987017664+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied1","Output":"=== RUN   TestSomeTest/AccessDenied1\n"}
+{"Time":"2024-05-25T17:06:16.98702332+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied1","Output":"AccessDenied1 GET /api/nothing lalala 403\n"}
+{"Time":"2024-05-25T17:06:16.987030097+09:00","Action":"run","Package":"neotest_go","Test":"TestSomeTest/AccessDenied2"}
+{"Time":"2024-05-25T17:06:16.9870326+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied2","Output":"=== RUN   TestSomeTest/AccessDenied2\n"}
+{"Time":"2024-05-25T17:06:16.987035243+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied2","Output":"AccessDenied2 GET /api/nothing lalala 403\n"}
+{"Time":"2024-05-25T17:06:16.98703803+09:00","Action":"run","Package":"neotest_go","Test":"TestSomeTest/AccessDenied3"}
+{"Time":"2024-05-25T17:06:16.987040299+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied3","Output":"=== RUN   TestSomeTest/AccessDenied3\n"}
+{"Time":"2024-05-25T17:06:16.987042979+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied3","Output":"AccessDenied3 GET /api/nothing lalala 403\n"}
+{"Time":"2024-05-25T17:06:16.987045694+09:00","Action":"run","Package":"neotest_go","Test":"TestSomeTest/AccessDenied4"}
+{"Time":"2024-05-25T17:06:16.987048493+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied4","Output":"=== RUN   TestSomeTest/AccessDenied4\n"}
+{"Time":"2024-05-25T17:06:16.987051059+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied4","Output":"AccessDenied4 GET /api/nothing lalala 403\n"}
+{"Time":"2024-05-25T17:06:16.987053703+09:00","Action":"run","Package":"neotest_go","Test":"TestSomeTest/AccessDenied5"}
+{"Time":"2024-05-25T17:06:16.987055897+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied5","Output":"=== RUN   TestSomeTest/AccessDenied5\n"}
+{"Time":"2024-05-25T17:06:16.987058733+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied5","Output":"AccessDenied5 GET /api/nothing lalala 403\n"}
+{"Time":"2024-05-25T17:06:16.987062114+09:00","Action":"run","Package":"neotest_go","Test":"TestSomeTest/AccessDenied6"}
+{"Time":"2024-05-25T17:06:16.987064491+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied6","Output":"=== RUN   TestSomeTest/AccessDenied6\n"}
+{"Time":"2024-05-25T17:06:16.987067709+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied6","Output":"AccessDenied6 GET /api/nothing lalala 403\n"}
+{"Time":"2024-05-25T17:06:16.987076359+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest","Output":"--- PASS: TestSomeTest (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987079722+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied1","Output":"    --- PASS: TestSomeTest/AccessDenied1 (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987082855+09:00","Action":"pass","Package":"neotest_go","Test":"TestSomeTest/AccessDenied1","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987085329+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied2","Output":"    --- PASS: TestSomeTest/AccessDenied2 (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987088221+09:00","Action":"pass","Package":"neotest_go","Test":"TestSomeTest/AccessDenied2","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987090756+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied3","Output":"    --- PASS: TestSomeTest/AccessDenied3 (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987094115+09:00","Action":"pass","Package":"neotest_go","Test":"TestSomeTest/AccessDenied3","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987096613+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied4","Output":"    --- PASS: TestSomeTest/AccessDenied4 (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987099588+09:00","Action":"pass","Package":"neotest_go","Test":"TestSomeTest/AccessDenied4","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987104022+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied5","Output":"    --- PASS: TestSomeTest/AccessDenied5 (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987107814+09:00","Action":"pass","Package":"neotest_go","Test":"TestSomeTest/AccessDenied5","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987110865+09:00","Action":"output","Package":"neotest_go","Test":"TestSomeTest/AccessDenied6","Output":"    --- PASS: TestSomeTest/AccessDenied6 (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987113695+09:00","Action":"pass","Package":"neotest_go","Test":"TestSomeTest/AccessDenied6","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987116401+09:00","Action":"pass","Package":"neotest_go","Test":"TestSomeTest","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987119142+09:00","Action":"run","Package":"neotest_go","Test":"TestSplit"}
+{"Time":"2024-05-25T17:06:16.987121813+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit","Output":"=== RUN   TestSplit\n"}
+{"Time":"2024-05-25T17:06:16.987124271+09:00","Action":"run","Package":"neotest_go","Test":"TestSplit/simple"}
+{"Time":"2024-05-25T17:06:16.987126899+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/simple","Output":"=== RUN   TestSplit/simple\n"}
+{"Time":"2024-05-25T17:06:16.987129965+09:00","Action":"run","Package":"neotest_go","Test":"TestSplit/wrong_sep"}
+{"Time":"2024-05-25T17:06:16.987132221+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/wrong_sep","Output":"=== RUN   TestSplit/wrong_sep\n"}
+{"Time":"2024-05-25T17:06:16.98713529+09:00","Action":"run","Package":"neotest_go","Test":"TestSplit/no_sep"}
+{"Time":"2024-05-25T17:06:16.987138035+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/no_sep","Output":"=== RUN   TestSplit/no_sep\n"}
+{"Time":"2024-05-25T17:06:16.987140671+09:00","Action":"run","Package":"neotest_go","Test":"TestSplit/trailing_sep"}
+{"Time":"2024-05-25T17:06:16.987143812+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/trailing_sep","Output":"=== RUN   TestSplit/trailing_sep\n"}
+{"Time":"2024-05-25T17:06:16.987148473+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/trailing_sep","Output":"    map_table_test.go:25: trailing sep: expected: [a b c], got: [a b c ]\n"}
+{"Time":"2024-05-25T17:06:16.987152641+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit","Output":"--- FAIL: TestSplit (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987156528+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/simple","Output":"    --- PASS: TestSplit/simple (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.98716009+09:00","Action":"pass","Package":"neotest_go","Test":"TestSplit/simple","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987163018+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/wrong_sep","Output":"    --- PASS: TestSplit/wrong_sep (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987166426+09:00","Action":"pass","Package":"neotest_go","Test":"TestSplit/wrong_sep","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987169756+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/no_sep","Output":"    --- PASS: TestSplit/no_sep (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987173446+09:00","Action":"pass","Package":"neotest_go","Test":"TestSplit/no_sep","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987176509+09:00","Action":"output","Package":"neotest_go","Test":"TestSplit/trailing_sep","Output":"    --- FAIL: TestSplit/trailing_sep (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987179658+09:00","Action":"fail","Package":"neotest_go","Test":"TestSplit/trailing_sep","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.9871823+09:00","Action":"fail","Package":"neotest_go","Test":"TestSplit","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987185013+09:00","Action":"run","Package":"neotest_go","Test":"TestExampleTestSuite"}
+{"Time":"2024-05-25T17:06:16.987187634+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite","Output":"=== RUN   TestExampleTestSuite\n"}
+{"Time":"2024-05-25T17:06:16.987358969+09:00","Action":"run","Package":"neotest_go","Test":"TestExampleTestSuite/TestExample"}
+{"Time":"2024-05-25T17:06:16.987372775+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExample","Output":"=== RUN   TestExampleTestSuite/TestExample\n"}
+{"Time":"2024-05-25T17:06:16.987378537+09:00","Action":"run","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure"}
+{"Time":"2024-05-25T17:06:16.987383079+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Output":"=== RUN   TestExampleTestSuite/TestExampleFailure\n"}
+{"Time":"2024-05-25T17:06:16.987611537+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Output":"    suite_test.go:32: \n"}
+{"Time":"2024-05-25T17:06:16.987626951+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Output":"        \tError Trace:\tsuite_test.go:32\n"}
+{"Time":"2024-05-25T17:06:16.987631582+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Output":"        \tError:      \tNot equal: \n"}
+{"Time":"2024-05-25T17:06:16.987635334+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Output":"        \t            \texpected: 5\n"}
+{"Time":"2024-05-25T17:06:16.9876384+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Output":"        \t            \tactual  : 3\n"}
+{"Time":"2024-05-25T17:06:16.987641353+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Output":"        \tTest:       \tTestExampleTestSuite/TestExampleFailure\n"}
+{"Time":"2024-05-25T17:06:16.987649622+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite","Output":"--- FAIL: TestExampleTestSuite (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987655287+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExample","Output":"    --- PASS: TestExampleTestSuite/TestExample (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987659094+09:00","Action":"pass","Package":"neotest_go","Test":"TestExampleTestSuite/TestExample","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987663126+09:00","Action":"output","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Output":"    --- FAIL: TestExampleTestSuite/TestExampleFailure (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987666501+09:00","Action":"fail","Package":"neotest_go","Test":"TestExampleTestSuite/TestExampleFailure","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.9876691+09:00","Action":"fail","Package":"neotest_go","Test":"TestExampleTestSuite","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987671645+09:00","Action":"run","Package":"neotest_go","Test":"TestOdd"}
+{"Time":"2024-05-25T17:06:16.987674132+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd","Output":"=== RUN   TestOdd\n"}
+{"Time":"2024-05-25T17:06:16.987676921+09:00","Action":"run","Package":"neotest_go","Test":"TestOdd/odd"}
+{"Time":"2024-05-25T17:06:16.987680637+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd/odd","Output":"=== RUN   TestOdd/odd\n"}
+{"Time":"2024-05-25T17:06:16.987683855+09:00","Action":"run","Package":"neotest_go","Test":"TestOdd/odd/5_is_odd"}
+{"Time":"2024-05-25T17:06:16.98769839+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd/odd/5_is_odd","Output":"=== RUN   TestOdd/odd/5_is_odd\n"}
+{"Time":"2024-05-25T17:06:16.987711715+09:00","Action":"run","Package":"neotest_go","Test":"TestOdd/odd/5_is_odd/9_is_odd"}
+{"Time":"2024-05-25T17:06:16.987713743+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd/odd/5_is_odd/9_is_odd","Output":"=== RUN   TestOdd/odd/5_is_odd/9_is_odd\n"}
+{"Time":"2024-05-25T17:06:16.987715909+09:00","Action":"run","Package":"neotest_go","Test":"TestOdd/odd/7_is_odd"}
+{"Time":"2024-05-25T17:06:16.987717512+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd/odd/7_is_odd","Output":"=== RUN   TestOdd/odd/7_is_odd\n"}
+{"Time":"2024-05-25T17:06:16.987720928+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd","Output":"--- PASS: TestOdd (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987723417+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd/odd","Output":"    --- PASS: TestOdd/odd (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987726445+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd/odd/5_is_odd","Output":"        --- PASS: TestOdd/odd/5_is_odd (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987728552+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd/odd/5_is_odd/9_is_odd","Output":"            --- PASS: TestOdd/odd/5_is_odd/9_is_odd (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.98773067+09:00","Action":"pass","Package":"neotest_go","Test":"TestOdd/odd/5_is_odd/9_is_odd","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987733354+09:00","Action":"pass","Package":"neotest_go","Test":"TestOdd/odd/5_is_odd","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987734868+09:00","Action":"output","Package":"neotest_go","Test":"TestOdd/odd/7_is_odd","Output":"        --- PASS: TestOdd/odd/7_is_odd (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987736884+09:00","Action":"pass","Package":"neotest_go","Test":"TestOdd/odd/7_is_odd","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987738363+09:00","Action":"pass","Package":"neotest_go","Test":"TestOdd/odd","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987739718+09:00","Action":"pass","Package":"neotest_go","Test":"TestOdd","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.987741167+09:00","Action":"run","Package":"neotest_go","Test":"Example_hello_ok"}
+{"Time":"2024-05-25T17:06:16.987742665+09:00","Action":"output","Package":"neotest_go","Test":"Example_hello_ok","Output":"=== RUN   Example_hello_ok\n"}
+{"Time":"2024-05-25T17:06:16.987748658+09:00","Action":"output","Package":"neotest_go","Test":"Example_hello_ok","Output":"--- PASS: Example_hello_ok (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987750589+09:00","Action":"pass","Package":"neotest_go","Test":"Example_hello_ok","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.98775208+09:00","Action":"run","Package":"neotest_go","Test":"Example_hello_ng"}
+{"Time":"2024-05-25T17:06:16.987753501+09:00","Action":"output","Package":"neotest_go","Test":"Example_hello_ng","Output":"=== RUN   Example_hello_ng\n"}
+{"Time":"2024-05-25T17:06:16.987755588+09:00","Action":"output","Package":"neotest_go","Test":"Example_hello_ng","Output":"--- FAIL: Example_hello_ng (0.00s)\n"}
+{"Time":"2024-05-25T17:06:16.987757621+09:00","Action":"output","Package":"neotest_go","Test":"Example_hello_ng","Output":"got:\n"}
+{"Time":"2024-05-25T17:06:16.987759383+09:00","Action":"output","Package":"neotest_go","Test":"Example_hello_ng","Output":"hello world\n"}
+{"Time":"2024-05-25T17:06:16.987761201+09:00","Action":"output","Package":"neotest_go","Test":"Example_hello_ng","Output":"want:\n"}
+{"Time":"2024-05-25T17:06:16.987762945+09:00","Action":"output","Package":"neotest_go","Test":"Example_hello_ng","Output":"NG pattern\n"}
+{"Time":"2024-05-25T17:06:16.987764982+09:00","Action":"fail","Package":"neotest_go","Test":"Example_hello_ng","Elapsed":0}
+{"Time":"2024-05-25T17:06:16.988651539+09:00","Action":"output","Package":"neotest_go","Output":"FAIL\n"}
+{"Time":"2024-05-25T17:06:16.988706481+09:00","Action":"output","Package":"neotest_go","Output":"FAIL\tneotest_go\t0.004s\n"}
+{"Time":"2024-05-25T17:06:16.988710395+09:00","Action":"fail","Package":"neotest_go","Elapsed":0.004}
