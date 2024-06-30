@@ -1,4 +1,5 @@
 use crate::runner::cargo_test::CargoTestRunner;
+use crate::runner::go::GoTestRunner;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
 use testing_language_server::spec::DetectWorkspaceArgs;
@@ -11,12 +12,14 @@ use crate::runner::jest::JestRunner;
 pub enum AvailableTestKind {
     CargoTest(CargoTestRunner),
     Jest(JestRunner),
+    GoTest(GoTestRunner),
 }
 impl Runner for AvailableTestKind {
     fn disover(&self, args: DiscoverArgs) -> Result<(), LSError> {
         match self {
             AvailableTestKind::CargoTest(runner) => runner.disover(args),
             AvailableTestKind::Jest(runner) => runner.disover(args),
+            AvailableTestKind::GoTest(runner) => runner.disover(args),
         }
     }
 
@@ -24,13 +27,15 @@ impl Runner for AvailableTestKind {
         match self {
             AvailableTestKind::CargoTest(runner) => runner.run_file_test(args),
             AvailableTestKind::Jest(runner) => runner.run_file_test(args),
+            AvailableTestKind::GoTest(runner) => runner.run_file_test(args),
         }
     }
 
-    fn detect_workspaces_root(&self, args: DetectWorkspaceArgs) -> Result<(), LSError> {
+    fn detect_workspaces(&self, args: DetectWorkspaceArgs) -> Result<(), LSError> {
         match self {
-            AvailableTestKind::CargoTest(runner) => runner.detect_workspaces_root(args),
-            AvailableTestKind::Jest(runner) => runner.detect_workspaces_root(args),
+            AvailableTestKind::CargoTest(runner) => runner.detect_workspaces(args),
+            AvailableTestKind::Jest(runner) => runner.detect_workspaces(args),
+            AvailableTestKind::GoTest(runner) => runner.detect_workspaces(args),
         }
     }
 }
@@ -42,6 +47,7 @@ impl FromStr for AvailableTestKind {
         match s {
             "cargo-test" => Ok(AvailableTestKind::CargoTest(CargoTestRunner)),
             "jest" => Ok(AvailableTestKind::Jest(JestRunner)),
+            "go-test" => Ok(AvailableTestKind::GoTest(GoTestRunner)),
             _ => Err(anyhow::anyhow!("Unknown test kind: {}", s)),
         }
     }
@@ -50,5 +56,5 @@ impl FromStr for AvailableTestKind {
 pub trait Runner {
     fn disover(&self, args: DiscoverArgs) -> Result<(), LSError>;
     fn run_file_test(&self, args: RunFileTestArgs) -> Result<(), LSError>;
-    fn detect_workspaces_root(&self, args: DetectWorkspaceArgs) -> Result<(), LSError>;
+    fn detect_workspaces(&self, args: DetectWorkspaceArgs) -> Result<(), LSError>;
 }

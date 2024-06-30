@@ -3,10 +3,10 @@
     "testing": {
       "command": "testing-language-server",
       "trace.server": "verbose",
-      "filetypes": ["rust", "javascript"],
+      "filetypes": ["rust", "javascript", "go"],
       "initializationOptions": {
         "adapterCommand": {
-          ".rs": [
+          "rust": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=cargo-test"],
@@ -14,12 +14,20 @@
               "exclude_patterns": ["/**/target/**"]
             }
           ],
-          ".js": [
+          "javascript": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=jest"],
               "include_patterns": ["/**/*.js"],
               "exclude_patterns": ["/node_modules/**/*"]
+            }
+          ],
+          "go": [
+            {
+              "path": "testing-ls-adapter",
+              "extra_args": ["--test-kind=go-test"],
+              "include_patterns": ["/**/*.go"],
+              "exclude_patterns": []
             }
           ]
         }
