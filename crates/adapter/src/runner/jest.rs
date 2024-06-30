@@ -5,8 +5,6 @@ use regex::Regex;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
-use std::str::FromStr;
 use tempfile::tempdir;
 use testing_language_server::error::LSError;
 
@@ -21,6 +19,8 @@ use tree_sitter::Query;
 use tree_sitter::QueryCursor;
 
 use crate::model::Runner;
+
+use super::util::detect_workspaces_from_file_paths;
 
 // If the character value is greater than the line length it defaults back to the line length.
 const MAX_CHAR_LENGTH: u32 = 10000;
@@ -81,43 +81,8 @@ fn parse_diagnostics(
         .collect())
 }
 
-fn detect_workspace_from_file(file_path: PathBuf) -> Option<String> {
-    let parent = file_path.parent();
-    if let Some(parent) = parent {
-        if parent.join("package.json").exists() {
-            return Some(parent.to_string_lossy().to_string());
-        } else {
-            detect_workspace_from_file(parent.to_path_buf())
-        }
-    } else {
-        None
-    }
-}
-
-fn detect_workspaces(file_paths: Vec<String>) -> Result<DetectWorkspaceResult, LSError> {
-    let mut result_map: HashMap<String, Vec<String>> = HashMap::new();
-    let mut file_paths: Vec<String> = file_paths
-        .into_iter()
-        .filter(|path| !path.contains("node_modules/"))
-        .collect();
-    file_paths.sort_by_key(|b| std::cmp::Reverse(b.len()));
-    for file_path in file_paths {
-        let existing_workspace = result_map
-            .iter()
-            .find(|(workspace_root, _)| file_path.contains(workspace_root.as_str()));
-        if let Some((workspace_root, _)) = existing_workspace {
-            result_map
-                .entry(workspace_root.to_string())
-                .or_default()
-                .push(file_path);
-        } else {
-            let workspace = detect_workspace_from_file(PathBuf::from_str(&file_path).unwrap());
-            if let Some(workspace) = workspace {
-                result_map.entry(workspace).or_default().push(file_path);
-            }
-        }
-    }
-    Ok(result_map)
+fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
+    detect_workspaces_from_file_paths(&file_paths, &["package.json".to_string()])
 }
 
 fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
@@ -303,12 +268,12 @@ impl Runner for JestRunner {
         Ok(())
     }
 
-    fn detect_workspaces_root(
+    fn detect_workspaces(
         &self,
         args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let detect_result = detect_workspaces(file_paths)?;
+        let detect_result = detect_workspaces(file_paths);
         serde_json::to_writer(std::io::stdout(), &detect_result)?;
         Ok(())
     }
@@ -346,7 +311,7 @@ mod tests {
             .iter()
             .map(|file_path| file_path.to_str().unwrap().to_string())
             .collect();
-        let detect_result = detect_workspaces(file_paths).unwrap();
+        let detect_result = detect_workspaces(file_paths);
         assert_eq!(detect_result.len(), 1);
         detect_result.iter().for_each(|(workspace, _)| {
             assert_eq!(workspace, absolute_path_of_test_proj.to_str().unwrap());
@@ -365,21 +330,21 @@ mod tests {
                 name: String::from("fail"),
                 start_position: Range {
                     start: Position {
-                        line: 2,
+                        line: 1,
                         character: 2
                     },
                     end: Position {
-                        line: 2,
+                        line: 1,
                         character: MAX_CHAR_LENGTH
                     }
                 },
                 end_position: Range {
                     start: Position {
-                        line: 4,
+                        line: 3,
                         character: 0
                     },
                     end: Position {
-                        line: 4,
+                        line: 3,
                         character: 4
                     }
                 }

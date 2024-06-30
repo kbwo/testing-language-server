@@ -25,7 +25,7 @@ pub fn detect_workspaces_from_file_paths(
 ) -> HashMap<String, Vec<String>> {
     let mut result_map: HashMap<String, Vec<String>> = HashMap::new();
     let mut file_paths = target_file_paths.to_vec();
-    file_paths.sort_by_key(|b| std::cmp::Reverse(b.len()));
+    file_paths.sort_by_key(|b| b.len());
     for file_path in file_paths {
         let existing_workspace = result_map
             .iter()
@@ -35,15 +35,17 @@ pub fn detect_workspaces_from_file_paths(
                 .entry(workspace_root.to_string())
                 .or_default()
                 .push(file_path.clone());
-        } else {
-            let workspace =
-                detect_workspace_from_file(PathBuf::from_str(&file_path).unwrap(), file_names);
-            if let Some(workspace) = workspace {
-                result_map
-                    .entry(workspace)
-                    .or_default()
-                    .push(file_path.clone());
-            }
+        }
+        // Push the file path to the found workspace even if the existing_workspace becomes Some.
+        // In some cases, the simple method of finding a workspace, such as the relationship
+        // between the project root and the adapter crate in this repository, does not work.
+        let workspace =
+            detect_workspace_from_file(PathBuf::from_str(&file_path).unwrap(), file_names);
+        if let Some(workspace) = workspace {
+            result_map
+                .entry(workspace)
+                .or_default()
+                .push(file_path.clone());
         }
     }
     result_map
