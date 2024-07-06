@@ -1,5 +1,11 @@
-use testing_language_server::log::Log;
-use testing_language_server::server::TestingLS;
+mod error;
+mod log;
+mod server;
+mod spec;
+mod util;
+
+use crate::log::Log;
+use crate::server::TestingLS;
 
 fn main() {
     let mut server = TestingLS::new();
