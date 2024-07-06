@@ -2,6 +2,9 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use serde::Serialize;
+use testing_language_server::error::LSError;
+
 /// determine if a particular file is the root of workspace based on whether it is in the same directory
 pub fn detect_workspace_from_file(file_path: PathBuf, file_names: &[String]) -> Option<String> {
     let parent = file_path.parent();
@@ -49,4 +52,13 @@ pub fn detect_workspaces_from_file_paths(
         }
     }
     result_map
+}
+
+pub fn send_stdout<T>(value: &T) -> Result<(), LSError>
+where
+    T: ?Sized + Serialize + std::fmt::Debug,
+{
+    tracing::info!("adapter stdout: {:#?}", value);
+    serde_json::to_writer(std::io::stdout(), &value)?;
+    Ok(())
 }

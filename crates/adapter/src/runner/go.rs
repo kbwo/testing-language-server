@@ -1,4 +1,5 @@
 use crate::model::Runner;
+use crate::runner::util::send_stdout;
 use anyhow::anyhow;
 use lsp_types::Diagnostic;
 use lsp_types::Position;
@@ -306,7 +307,7 @@ impl Runner for GoTestRunner {
                 path: file_path,
             });
         }
-        serde_json::to_writer(std::io::stdout(), &discover_results)?;
+        send_stdout(&discover_results)?;
         Ok(())
     }
 
@@ -334,7 +335,7 @@ impl Runner for GoTestRunner {
             PathBuf::from_str(&workspace).unwrap(),
             &file_paths,
         )?;
-        serde_json::to_writer(std::io::stdout(), &diagnostics)?;
+        send_stdout(&diagnostics)?;
         Ok(())
     }
 
@@ -342,10 +343,10 @@ impl Runner for GoTestRunner {
         &self,
         args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), testing_language_server::error::LSError> {
-        serde_json::to_writer(
-            std::io::stdout(),
-            &detect_workspaces_from_file_paths(&args.file_paths, &["go.mod".to_string()]),
-        )?;
+        send_stdout(&detect_workspaces_from_file_paths(
+            &args.file_paths,
+            &["go.mod".to_string()],
+        ))?;
         Ok(())
     }
 }

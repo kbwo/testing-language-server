@@ -1,3 +1,4 @@
+use crate::runner::util::send_stdout;
 use lsp_types::Diagnostic;
 use lsp_types::Position;
 use lsp_types::Range;
@@ -238,7 +239,7 @@ impl Runner for JestRunner {
                 path: file_path,
             })
         }
-        serde_json::to_writer(std::io::stdout(), &discover_results)?;
+        send_stdout(&discover_results)?;
         Ok(())
     }
 
@@ -266,7 +267,7 @@ impl Runner for JestRunner {
             .unwrap();
         let test_result = fs::read_to_string(tempfile_path)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(&test_result, file_paths)?;
-        serde_json::to_writer(std::io::stdout(), &diagnostics)?;
+        send_stdout(&diagnostics)?;
         Ok(())
     }
 
@@ -276,7 +277,7 @@ impl Runner for JestRunner {
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let detect_result = detect_workspaces(file_paths);
-        serde_json::to_writer(std::io::stdout(), &detect_result)?;
+        send_stdout(&detect_result)?;
         Ok(())
     }
 }

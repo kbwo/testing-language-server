@@ -1,3 +1,4 @@
+use crate::runner::util::send_stdout;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Output;
@@ -204,7 +205,7 @@ impl Runner for CargoTestRunner {
                 path: file_path,
             });
         }
-        serde_json::to_writer(std::io::stdout(), &discover_results)?;
+        send_stdout(&discover_results)?;
         Ok(())
     }
 
@@ -213,11 +214,26 @@ impl Runner for CargoTestRunner {
         args: testing_language_server::spec::RunFileTestArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
+        let tests = file_paths
+            .iter()
+            .map(|path| {
+                discover(path).map(|test_items| {
+                    test_items
+                        .into_iter()
+                        .map(|item| item.id)
+                        .collect::<Vec<String>>()
+                })
+            })
+            .filter_map(Result::ok)
+            .flatten()
+            .collect::<Vec<_>>();
         let workspace_root = args.workspace;
         let test_result = std::process::Command::new("cargo")
             .current_dir(&workspace_root)
             .arg("test")
             .args(args.extra)
+            .arg("--")
+            .args(tests)
             .output()
             .unwrap();
         let Output { stdout, stderr, .. } = test_result;
@@ -230,7 +246,7 @@ impl Runner for CargoTestRunner {
             PathBuf::from_str(&workspace_root).unwrap(),
             &file_paths,
         );
-        serde_json::to_writer(std::io::stdout(), &diagnostics)?;
+        send_stdout(&diagnostics)?;
         Ok(())
     }
 
@@ -240,7 +256,7 @@ impl Runner for CargoTestRunner {
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let detect_result = detect_workspaces(&file_paths);
-        serde_json::to_writer(std::io::stdout(), &detect_result)?;
+        send_stdout(&detect_result)?;
         Ok(())
     }
 }
