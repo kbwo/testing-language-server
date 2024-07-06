@@ -1,10 +1,9 @@
 describe("another", () => {
-
   it("fail", () => {
-    expect(1).toBe(0)
-  })
+    expect(1).toBe(0);
+  });
 
   it("pass", () => {
-    expect(1).toBe(1)
-  })
-})
+    expect(1).toBe(1);
+  });
+});

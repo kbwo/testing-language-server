@@ -8,7 +8,6 @@ use crate::spec::RunFileTestResultItem;
 use crate::spec::WorkspaceAnalysis;
 use crate::util::format_uri;
 use crate::util::send_stdout;
-use glob::glob;
 use glob::Pattern;
 use lsp_types::Diagnostic;
 use lsp_types::DiagnosticOptions;
@@ -130,7 +129,9 @@ impl TestingLS {
 
             let value: Value = serde_json::from_str(&message)?;
             let method = &value["method"].as_str();
+            tracing::info!("method={:#?}", method);
             let params = &value["params"];
+            tracing::info!("params={:#?}", params);
 
             if let Some(method) = method {
                 match *method {
@@ -197,25 +198,25 @@ impl TestingLS {
         exclude_patterns: &[String],
     ) -> Vec<String> {
         let mut result: Vec<String> = vec![];
-        let base_dir = base_dir.to_string_lossy().to_string();
 
         let exclude_pattern = exclude_patterns
             .iter()
             .filter_map(|exclude_pattern| {
-                Pattern::new(&format!("!{base_dir}{exclude_pattern}")).ok()
+                Pattern::new(base_dir.join(exclude_pattern).to_str().unwrap()).ok()
             })
             .collect::<Vec<Pattern>>();
-        for include_pattern in include_patterns {
-            let matched = glob(format!("{base_dir}{include_pattern}").as_str());
-            if let Ok(entries) = matched {
-                for path in entries.flatten() {
-                    let should_exclude = exclude_pattern
-                        .iter()
-                        .any(|exclude_pattern| exclude_pattern.matches(path.to_str().unwrap()));
-                    if !should_exclude {
-                        result.push(path.display().to_string());
-                    }
-                }
+        let base_dir = base_dir.to_str().unwrap();
+        let entries = globwalk::GlobWalkerBuilder::from_patterns(base_dir, include_patterns)
+            .follow_links(true)
+            .build()
+            .unwrap()
+            .filter_map(Result::ok);
+        for path in entries {
+            let should_exclude = exclude_pattern
+                .iter()
+                .any(|exclude_pattern| exclude_pattern.matches(path.path().to_str().unwrap()));
+            if !should_exclude {
+                result.push(path.path().to_str().unwrap().to_owned());
             }
         }
         result
@@ -458,7 +459,7 @@ impl TestingLS {
         }))
         .unwrap();
         let progress_begin = WorkDoneProgressBegin {
-            title: format!("Testing by adapter: {}", adapter.path),
+            title: "Testing".to_string(),
             cancellable: Some(false),
             message: Some(format!("testing {} files ...", paths.len())),
             percentage: Some(0),
@@ -553,7 +554,6 @@ impl TestingLS {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::extension_from_url_str;
     use lsp_types::{Url, WorkspaceFolder};
     use std::collections::HashMap;
 
@@ -636,18 +636,17 @@ mod tests {
         let files = TestingLS::project_files(
             &absolute_path_of_test_proj.clone(),
             &["/rust/src/lib.rs".to_string()],
-            &["/rust/src/target/**/*".to_string()],
+            &["/rust/target/**/*".to_string()],
         );
         let librs = absolute_path_of_test_proj.join("rust/src/lib.rs");
         assert_eq!(files, vec![librs.to_str().unwrap()]);
         let files = TestingLS::project_files(
             &absolute_path_of_test_proj.clone(),
-            &["**/*.js".to_string()],
-            &["**/node_modules/**/*".to_string()],
+            &["jest/*.spec.js".to_string()],
+            &["jest/another.spec.js".to_string()],
         );
-        files.iter().for_each(|file| {
-            assert_eq!(extension_from_url_str(file).unwrap(), ".js");
-        });
+        let test_file = absolute_path_of_test_proj.join("jest/index.spec.js");
+        assert_eq!(files, vec![test_file.to_str().unwrap()]);
     }
 
     #[test]

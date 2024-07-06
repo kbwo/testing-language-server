@@ -43,9 +43,9 @@ pub struct DetectWorkspaceArgs {
     pub extra: Vec<String>,
 }
 
-pub(crate) type AdapterId = String;
-pub(crate) type FilePath = String;
-pub(crate) type WorkspaceFilePath = String;
+pub type AdapterId = String;
+pub type FilePath = String;
+pub type WorkspaceFilePath = String;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct WorkspaceAnalysis {
