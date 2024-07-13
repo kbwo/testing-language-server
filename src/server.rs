@@ -7,6 +7,7 @@ use crate::spec::RunFileTestResult;
 use crate::spec::RunFileTestResultItem;
 use crate::spec::WorkspaceAnalysis;
 use crate::util::format_uri;
+use crate::util::resolve_path;
 use crate::util::send_stdout;
 use glob::Pattern;
 use lsp_types::Diagnostic;
@@ -35,6 +36,7 @@ use serde::Deserialize;
 use serde_json::json;
 use serde_json::Value;
 use std::collections::HashMap;
+use std::env::current_dir;
 use std::io::BufRead;
 use std::io::{self, Read};
 use std::path::Path;
@@ -46,7 +48,6 @@ use std::process::Output;
 #[serde(rename_all = "camelCase")]
 pub struct InitializedOptions {
     adapter_command: HashMap<AdapterId, Vec<AdapterConfiguration>>,
-    project_dir: Option<PathBuf>,
 }
 
 pub struct TestingLS {
@@ -71,18 +72,18 @@ impl TestingLS {
     }
 
     fn project_dir(&self) -> Result<PathBuf, LSError> {
-        let default_project_dir = self
-            .initialize_params
-            .clone()
-            .workspace_folders
-            .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
-        let default_workspace_uri = default_project_dir[0].uri.clone();
-        let project_dir = self
-            .options
-            .project_dir
-            .clone()
-            .unwrap_or(default_workspace_uri.to_file_path().unwrap());
-        Ok(project_dir)
+        let cwd = current_dir();
+        if let Ok(cwd) = cwd {
+            Ok(cwd)
+        } else {
+            let default_project_dir = self
+                .initialize_params
+                .clone()
+                .workspace_folders
+                .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
+            let default_workspace_uri = default_project_dir[0].uri.clone();
+            Ok(default_workspace_uri.to_file_path().unwrap())
+        }
     }
 
     pub fn main_loop(&mut self) -> Result<(), LSError> {
@@ -278,6 +279,8 @@ impl TestingLS {
                     envs,
                     include_patterns,
                     exclude_patterns,
+                    workspace_dir,
+                    ..
                 } = &adapter;
                 let file_paths =
                     Self::project_files(&project_dir, include_patterns, exclude_patterns);
@@ -301,6 +304,19 @@ impl TestingLS {
                 let adapter_result = String::from_utf8(output.stdout)
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let workspace: DetectWorkspaceResult = serde_json::from_str(&adapter_result)?;
+                let workspace = if let Some(workspace_dir) = workspace_dir {
+                    let workspace_dir = resolve_path(&project_dir, workspace_dir)
+                        .to_str()
+                        .unwrap()
+                        .to_string();
+                    let target_paths = workspace
+                        .into_iter()
+                        .flat_map(|kv| kv.1)
+                        .collect::<Vec<_>>();
+                    HashMap::from([(workspace_dir.clone(), target_paths)])
+                } else {
+                    workspace
+                };
                 self.workspaces_cache
                     .push(WorkspaceAnalysis::new(adapter.clone(), workspace))
             }
@@ -361,6 +377,9 @@ impl TestingLS {
                  workspaces,
              }| {
                 for (workspace, paths) in workspaces.iter() {
+                    tracing::info!("DEBUGPRINT[7]: server.rs:366: workspace={:#?}", workspace);
+                    tracing::info!("DEBUGPRINT[7]: server.rs:366: workspace_paths={:#?}", paths);
+                    tracing::info!("DEBUGPRINT[7]: server.rs:366: path={:#?}", path);
                     if !paths.contains(&path.to_string()) {
                         continue;
                     }
@@ -572,7 +591,6 @@ mod tests {
             },
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![])]),
-                project_dir: None,
             },
             workspaces_cache: Vec::new(),
         };
@@ -593,9 +611,7 @@ mod tests {
         let adapter_conf = AdapterConfiguration {
             path: abs_path_of_rust_adapter,
             extra_args: vec!["--test-kind=cargo-test".to_string()],
-            envs: HashMap::new(),
-            include_patterns: vec![],
-            exclude_patterns: vec![],
+            ..Default::default()
         };
         let mut server = TestingLS {
             initialize_params: InitializeParams {
@@ -607,7 +623,6 @@ mod tests {
             },
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf])]),
-                project_dir: None,
             },
             workspaces_cache: Vec::new(),
         };
@@ -659,9 +674,7 @@ mod tests {
                 .unwrap()
                 .to_string(),
             extra_args: vec!["--invalid-arg".to_string()],
-            envs: HashMap::new(),
-            include_patterns: vec![],
-            exclude_patterns: vec![],
+            ..Default::default()
         };
         let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
         let files = TestingLS::project_files(
@@ -680,7 +693,6 @@ mod tests {
             },
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf.clone()])]),
-                project_dir: None,
             },
             workspaces_cache: Vec::new(),
         };

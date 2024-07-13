@@ -1,0 +1,17 @@
+{
+  "testing.enable": true,
+  "testing.fileTypes": ["rust"],
+  "testing.adapterCommand": {
+    "rust": [
+      {
+        "path": "testing-ls-adapter",
+        "extra_args": ["--test-kind=cargo-test", "--workspace"],
+        "include_patterns": ["/**/*.rs"],
+        "exclude_patterns": ["/test_proj/**/*"],
+        "workspace_dir": "."
+      }
+    ]
+  },
+  "testing.server.path": "testing-language-server",
+  "testing.trace.server": "verbose"
+}
