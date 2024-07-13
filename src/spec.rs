@@ -62,7 +62,7 @@ impl WorkspaceAnalysis {
     }
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, Default)]
 pub struct AdapterConfiguration {
     pub path: String,
     #[serde(default)]
@@ -71,6 +71,7 @@ pub struct AdapterConfiguration {
     pub envs: HashMap<String, String>,
     pub include_patterns: Vec<String>,
     pub exclude_patterns: Vec<String>,
+    pub workspace_dir: Option<String>,
 }
 
 pub type DetectWorkspaceResult = HashMap<WorkspaceFilePath, Vec<FilePath>>;
