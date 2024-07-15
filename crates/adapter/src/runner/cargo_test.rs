@@ -315,6 +315,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
                         }
                     },
                     message: message.to_string(),
+                    severity: Some(DiagnosticSeverity::ERROR),
                     ..Diagnostic::default()
                 }]
             }]
