@@ -2,8 +2,12 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use regex::Regex;
 use serde::Serialize;
 use testing_language_server::error::LSError;
+
+// If the character value is greater than the line length it defaults back to the line length.
+pub const MAX_CHAR_LENGTH: u32 = 10000;
 
 /// determine if a particular file is the root of workspace based on whether it is in the same directory
 pub fn detect_workspace_from_file(file_path: PathBuf, file_names: &[String]) -> Option<String> {
@@ -61,4 +65,9 @@ where
     tracing::info!("adapter stdout: {:#?}", value);
     serde_json::to_writer(std::io::stdout(), &value)?;
     Ok(())
+}
+
+pub fn clean_ansi(input: &str) -> String {
+    let re = Regex::new(r"\x1B\[([0-9]{1,2}(;[0-9]{1,2})*)?[m|K]").unwrap();
+    re.replace_all(input, "").to_string()
 }
