@@ -1,4 +1,5 @@
 use crate::runner::util::send_stdout;
+use lsp_types::DiagnosticSeverity;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Output;
@@ -62,6 +63,7 @@ fn parse_diagnostics(
                         },
                     },
                     message,
+                    severity: Some(DiagnosticSeverity::ERROR),
                     ..Diagnostic::default()
                 };
                 result_map
@@ -339,7 +341,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
         let workspaces = detect_workspaces(&file_paths);
         assert_eq!(workspaces.len(), 2);
-        assert!(workspaces.contains_key(&absolute_path_of_test_proj.to_str().unwrap().to_string()));
-        assert!(workspaces.contains_key(&current_dir.to_str().unwrap().to_string()));
+        assert!(workspaces.contains_key(absolute_path_of_test_proj.to_str().unwrap()));
+        assert!(workspaces.contains_key(current_dir.to_str().unwrap()));
     }
 }

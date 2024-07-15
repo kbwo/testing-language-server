@@ -1,8 +1,8 @@
 use crate::runner::util::send_stdout;
 use lsp_types::Diagnostic;
+use lsp_types::DiagnosticSeverity;
 use lsp_types::Position;
 use lsp_types::Range;
-use regex::Regex;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs;
@@ -21,15 +21,11 @@ use tree_sitter::QueryCursor;
 
 use crate::model::Runner;
 
+use super::util::clean_ansi;
 use super::util::detect_workspaces_from_file_paths;
 
 // If the character value is greater than the line length it defaults back to the line length.
 const MAX_CHAR_LENGTH: u32 = 10000;
-
-fn clean_ansi(input: &str) -> String {
-    let re = Regex::new(r"\x1B\[([0-9]{1,2}(;[0-9]{1,2})*)?[m|K]").unwrap();
-    re.replace_all(input, "").to_string()
-}
 
 fn parse_diagnostics(
     test_result: &str,
@@ -67,6 +63,7 @@ fn parse_diagnostics(
                         },
                     },
                     message,
+                    severity: Some(DiagnosticSeverity::ERROR),
                     ..Diagnostic::default()
                 };
                 result_map

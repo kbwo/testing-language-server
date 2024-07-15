@@ -2,6 +2,7 @@ use crate::model::Runner;
 use crate::runner::util::send_stdout;
 use anyhow::anyhow;
 use lsp_types::Diagnostic;
+use lsp_types::DiagnosticSeverity;
 use lsp_types::Position;
 use lsp_types::Range;
 use regex::Regex;
@@ -116,6 +117,7 @@ fn parse_diagnostics(
                     },
                 },
                 message: message.clone(),
+                severity: Some(DiagnosticSeverity::ERROR),
                 ..Diagnostic::default()
             };
             let file_path = workspace_root
