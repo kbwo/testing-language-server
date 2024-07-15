@@ -15,8 +15,6 @@ use super::util::detect_workspaces_from_file_paths;
 use super::util::discover_rust_tests;
 use super::util::parse_cargo_diagnostics;
 
-// If the character value is greater than the line length it defaults back to the line length.
-
 fn parse_diagnostics(
     contents: &str,
     workspace_root: PathBuf,
@@ -30,9 +28,9 @@ fn detect_workspaces(file_paths: &[String]) -> DetectWorkspaceResult {
 }
 
 #[derive(Eq, PartialEq, Hash, Debug)]
-pub struct CargoTestRunner;
+pub struct CargoNextestRunner;
 
-impl Runner for CargoTestRunner {
+impl Runner for CargoNextestRunner {
     fn disover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = vec![];
@@ -69,17 +67,26 @@ impl Runner for CargoTestRunner {
         let workspace_root = args.workspace;
         let test_result = std::process::Command::new("cargo")
             .current_dir(&workspace_root)
-            .arg("test")
+            .arg("nextest")
+            .arg("run")
+            .arg("--workspace")
+            .arg("--no-fail-fast")
             .args(args.extra)
             .arg("--")
             .args(tests)
             .output()
             .unwrap();
-        let Output { stdout, stderr, .. } = test_result;
-        if stdout.is_empty() && !stderr.is_empty() {
+        let Output {
+            stdout,
+            stderr,
+            status,
+            ..
+        } = test_result;
+        let unexpected_status_code = status.code().map(|code| code != 100);
+        if stdout.is_empty() && !stderr.is_empty() && unexpected_status_code.unwrap_or(false) {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
-        let test_result = String::from_utf8(stdout)?;
+        let test_result = String::from_utf8(stderr)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace_root).unwrap(),
