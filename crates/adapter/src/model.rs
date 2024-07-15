@@ -1,3 +1,4 @@
+use crate::runner::cargo_nextest::CargoNextestRunner;
 use crate::runner::cargo_test::CargoTestRunner;
 use crate::runner::go::GoTestRunner;
 use crate::runner::vitest::VitestRunner;
@@ -12,6 +13,7 @@ use crate::runner::jest::JestRunner;
 #[derive(Debug, Eq, PartialEq)]
 pub enum AvailableTestKind {
     CargoTest(CargoTestRunner),
+    CargoNextest(CargoNextestRunner),
     Jest(JestRunner),
     Vitest(VitestRunner),
     GoTest(GoTestRunner),
@@ -20,6 +22,7 @@ impl Runner for AvailableTestKind {
     fn disover(&self, args: DiscoverArgs) -> Result<(), LSError> {
         match self {
             AvailableTestKind::CargoTest(runner) => runner.disover(args),
+            AvailableTestKind::CargoNextest(runner) => runner.disover(args),
             AvailableTestKind::Jest(runner) => runner.disover(args),
             AvailableTestKind::GoTest(runner) => runner.disover(args),
             AvailableTestKind::Vitest(runner) => runner.disover(args),
@@ -29,6 +32,7 @@ impl Runner for AvailableTestKind {
     fn run_file_test(&self, args: RunFileTestArgs) -> Result<(), LSError> {
         match self {
             AvailableTestKind::CargoTest(runner) => runner.run_file_test(args),
+            AvailableTestKind::CargoNextest(runner) => runner.run_file_test(args),
             AvailableTestKind::Jest(runner) => runner.run_file_test(args),
             AvailableTestKind::GoTest(runner) => runner.run_file_test(args),
             AvailableTestKind::Vitest(runner) => runner.run_file_test(args),
@@ -38,6 +42,7 @@ impl Runner for AvailableTestKind {
     fn detect_workspaces(&self, args: DetectWorkspaceArgs) -> Result<(), LSError> {
         match self {
             AvailableTestKind::CargoTest(runner) => runner.detect_workspaces(args),
+            AvailableTestKind::CargoNextest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::Jest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::GoTest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::Vitest(runner) => runner.detect_workspaces(args),
@@ -51,6 +56,7 @@ impl FromStr for AvailableTestKind {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "cargo-test" => Ok(AvailableTestKind::CargoTest(CargoTestRunner)),
+            "cargo-nextest" => Ok(AvailableTestKind::CargoNextest(CargoNextestRunner)),
             "jest" => Ok(AvailableTestKind::Jest(JestRunner)),
             "go-test" => Ok(AvailableTestKind::GoTest(GoTestRunner)),
             "vitest" => Ok(AvailableTestKind::Vitest(VitestRunner)),

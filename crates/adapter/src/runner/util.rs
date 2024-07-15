@@ -2,9 +2,12 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 use regex::Regex;
 use serde::Serialize;
-use testing_language_server::error::LSError;
+use testing_language_server::spec::{RunFileTestResultItem, TestItem};
+use testing_language_server::{error::LSError, spec::RunFileTestResult};
+use tree_sitter::{Point, Query, QueryCursor};
 
 // If the character value is greater than the line length it defaults back to the line length.
 pub const MAX_CHAR_LENGTH: u32 = 10000;
@@ -70,4 +73,167 @@ where
 pub fn clean_ansi(input: &str) -> String {
     let re = Regex::new(r"\x1B\[([0-9]{1,2}(;[0-9]{1,2})*)?[m|K]").unwrap();
     re.replace_all(input, "").to_string()
+}
+
+pub fn discover_rust_tests(file_path: &str) -> Result<Vec<TestItem>, LSError> {
+    let mut parser = tree_sitter::Parser::new();
+    let mut test_items: Vec<TestItem> = vec![];
+    parser
+        .set_language(&tree_sitter_rust::language())
+        .expect("Error loading Rust grammar");
+    let source_code = std::fs::read_to_string(file_path)?;
+    let tree = parser.parse(&source_code, None).unwrap();
+    // from https://github.com/rouge8/neotest-rust/blob/0418811e1e3499b2501593f2e131d02f5e6823d4/lua/neotest-rust/init.lua#L167
+    // license: https://github.com/rouge8/neotest-rust/blob/0418811e1e3499b2501593f2e131d02f5e6823d4/LICENSE
+    let query_string = r#"
+        (
+  (attribute_item
+    [
+      (attribute
+        (identifier) @macro_name
+      )
+      (attribute
+        [
+	  (identifier) @macro_name
+	  (scoped_identifier
+	    name: (identifier) @macro_name
+          )
+        ]
+      )
+    ]
+  )
+  [
+  (attribute_item
+    (attribute
+      (identifier)
+    )
+  )
+  (line_comment)
+  ]*
+  .
+  (function_item
+    name: (identifier) @test.name
+  ) @test.definition
+  (#any-of? @macro_name "test" "rstest" "case")
+
+)
+(mod_item name: (identifier) @namespace.name)? @namespace.definition
+"#;
+    let query =
+        Query::new(&tree_sitter_rust::language(), query_string).expect("Error creating query");
+
+    let mut cursor = QueryCursor::new();
+    cursor.set_byte_range(tree.root_node().byte_range());
+    let source = source_code.as_bytes();
+    let matches = cursor.matches(&query, tree.root_node(), source);
+    for m in matches {
+        let mut namespace_name = "";
+        let mut test_start_position = Point::default();
+        let mut test_end_position = Point::default();
+        for capture in m.captures {
+            let capture_name = query.capture_names()[capture.index as usize];
+            let value = capture.node.utf8_text(source)?;
+            let start_position = capture.node.start_position();
+            let end_position = capture.node.end_position();
+            match capture_name {
+                "namespace.name" => {
+                    namespace_name = value;
+                }
+                "test.definition" => {
+                    test_start_position = start_position;
+                    test_end_position = end_position;
+                }
+                "test.name" => {
+                    let test_name = value;
+                    let test_item = TestItem {
+                        id: format!("{}:{}", namespace_name, test_name),
+                        name: test_name.to_string(),
+                        start_position: Range {
+                            start: Position {
+                                line: test_start_position.row as u32,
+                                character: test_start_position.column as u32,
+                            },
+                            end: Position {
+                                line: test_start_position.row as u32,
+                                character: MAX_CHAR_LENGTH,
+                            },
+                        },
+                        end_position: Range {
+                            start: Position {
+                                line: test_end_position.row as u32,
+                                character: 0,
+                            },
+                            end: Position {
+                                line: test_end_position.row as u32,
+                                character: test_end_position.column as u32,
+                            },
+                        },
+                    };
+                    test_items.push(test_item);
+                    test_start_position = Point::default();
+                    test_end_position = Point::default();
+                }
+                _ => {}
+            }
+        }
+    }
+
+    Ok(test_items)
+}
+
+pub fn parse_cargo_diagnostics(
+    contents: &str,
+    workspace_root: PathBuf,
+    file_paths: &[String],
+) -> RunFileTestResult {
+    let contents = contents.replace("\r\n", "\n");
+    let lines = contents.lines();
+    let mut result_map: HashMap<String, Vec<Diagnostic>> = HashMap::new();
+    for (i, line) in lines.clone().enumerate() {
+        let re = Regex::new(r"thread '([^']+)' panicked at ([^:]+):(\d+):(\d+):").unwrap();
+        if let Some(m) = re.captures(line) {
+            let mut message = String::new();
+            let file = m.get(2).unwrap().as_str().to_string();
+            if let Some(file_path) = file_paths
+                .iter()
+                .find(|path| path.contains(workspace_root.join(&file).to_str().unwrap()))
+            {
+                let lnum = m.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
+                let col = m.get(4).unwrap().as_str().parse::<u32>().unwrap() - 1;
+                let mut next_i = i + 1;
+                while next_i < lines.clone().count()
+                    && !lines.clone().nth(next_i).unwrap().is_empty()
+                {
+                    message = format!("{}{}\n", message, lines.clone().nth(next_i).unwrap());
+                    next_i += 1;
+                }
+                let diagnostic = Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: lnum,
+                            character: col,
+                        },
+                        end: Position {
+                            line: lnum,
+                            character: MAX_CHAR_LENGTH,
+                        },
+                    },
+                    message,
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    ..Diagnostic::default()
+                };
+                result_map
+                    .entry(file_path.to_string())
+                    .or_default()
+                    .push(diagnostic);
+            } else {
+                continue;
+            }
+        }
+    }
+
+    result_map
+        .into_iter()
+        .map(|(path, diagnostics)| RunFileTestResultItem { path, diagnostics })
+        .collect()
 }

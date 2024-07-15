@@ -1,3 +1,4 @@
+pub mod cargo_nextest;
 pub mod cargo_test;
 pub mod go;
 pub mod jest;
