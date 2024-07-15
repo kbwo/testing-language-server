@@ -8,7 +8,7 @@ license = "MIT"
 
 [workspace]
 members = [ "crates/adapter"]
-exclude = ["test_proj"]
+exclude = ["demo"]
 
 [[bin]]
 name = "testing-language-server"

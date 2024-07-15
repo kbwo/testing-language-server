@@ -381,7 +381,7 @@ mod tests {
 
     #[test]
     fn test_discover() {
-        let file_path = "../../test_proj/go/cases_test.go";
+        let file_path = "../../demo/go/cases_test.go";
         let test_items = discover(file_path).unwrap();
         assert!(!test_items.is_empty());
     }

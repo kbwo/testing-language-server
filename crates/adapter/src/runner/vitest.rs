@@ -270,7 +270,7 @@ mod tests {
 
     #[test]
     fn test_discover() {
-        let file_path = "../../test_proj/vitest/basic.test.ts";
+        let file_path = "../../demo/vitest/basic.test.ts";
         let test_items = discover(file_path).unwrap();
         assert_eq!(test_items.len(), 2);
         assert_eq!(

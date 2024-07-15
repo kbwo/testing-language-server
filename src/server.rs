@@ -577,12 +577,12 @@ mod tests {
 
     #[test]
     fn test_check_file() {
-        let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
+        let abs_path_of_demo = std::env::current_dir().unwrap().join("demo/rust");
         let mut server = TestingLS {
             initialize_params: InitializeParams {
                 workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(&abs_path_of_test_proj).unwrap(),
-                    name: "test_proj".to_string(),
+                    uri: Url::from_file_path(&abs_path_of_demo).unwrap(),
+                    name: "demo".to_string(),
                 }]),
                 ..InitializeParams::default()
             },
@@ -591,13 +591,13 @@ mod tests {
             },
             workspaces_cache: Vec::new(),
         };
-        let librs = abs_path_of_test_proj.join("lib.rs");
+        let librs = abs_path_of_demo.join("lib.rs");
         server.check_file(librs.to_str().unwrap(), true).unwrap();
     }
 
     #[test]
     fn test_check_workspace() {
-        let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
+        let abs_path_of_demo = std::env::current_dir().unwrap().join("demo/rust");
         let abs_path_of_rust_adapter = std::env::current_dir()
             .unwrap()
             .join("target/debug/testing-ls-adapter");
@@ -613,8 +613,8 @@ mod tests {
         let mut server = TestingLS {
             initialize_params: InitializeParams {
                 workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(abs_path_of_test_proj.clone()).unwrap(),
-                    name: "test_proj".to_string(),
+                    uri: Url::from_file_path(abs_path_of_demo.clone()).unwrap(),
+                    name: "demo".to_string(),
                 }]),
                 ..InitializeParams::default()
             },
@@ -634,7 +634,7 @@ mod tests {
                     .workspaces
                     .iter()
                     .for_each(|(workspace, paths)| {
-                        assert_eq!(workspace, abs_path_of_test_proj.to_str().unwrap());
+                        assert_eq!(workspace, abs_path_of_demo.to_str().unwrap());
                         paths.iter().for_each(|path| {
                             assert!(path.contains("rust/src"));
                         });
@@ -644,20 +644,20 @@ mod tests {
 
     #[test]
     fn project_files_are_filtered_by_extension() {
-        let absolute_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj");
+        let absolute_path_of_demo = std::env::current_dir().unwrap().join("demo");
         let files = TestingLS::project_files(
-            &absolute_path_of_test_proj.clone(),
+            &absolute_path_of_demo.clone(),
             &["/rust/src/lib.rs".to_string()],
             &["/rust/target/**/*".to_string()],
         );
-        let librs = absolute_path_of_test_proj.join("rust/src/lib.rs");
+        let librs = absolute_path_of_demo.join("rust/src/lib.rs");
         assert_eq!(files, vec![librs.to_str().unwrap()]);
         let files = TestingLS::project_files(
-            &absolute_path_of_test_proj.clone(),
+            &absolute_path_of_demo.clone(),
             &["jest/*.spec.js".to_string()],
             &["jest/another.spec.js".to_string()],
         );
-        let test_file = absolute_path_of_test_proj.join("jest/index.spec.js");
+        let test_file = absolute_path_of_demo.join("jest/index.spec.js");
         assert_eq!(files, vec![test_file.to_str().unwrap()]);
     }
 
@@ -673,18 +673,15 @@ mod tests {
             extra_args: vec!["--invalid-arg".to_string()],
             ..Default::default()
         };
-        let abs_path_of_test_proj = std::env::current_dir().unwrap().join("test_proj/rust");
-        let files = TestingLS::project_files(
-            &abs_path_of_test_proj.clone(),
-            &["/**/*.rs".to_string()],
-            &[],
-        );
+        let abs_path_of_demo = std::env::current_dir().unwrap().join("demo/rust");
+        let files =
+            TestingLS::project_files(&abs_path_of_demo.clone(), &["/**/*.rs".to_string()], &[]);
 
         let server = TestingLS {
             initialize_params: InitializeParams {
                 workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(&abs_path_of_test_proj).unwrap(),
-                    name: "test_proj".to_string(),
+                    uri: Url::from_file_path(&abs_path_of_demo).unwrap(),
+                    name: "demo".to_string(),
                 }]),
                 ..InitializeParams::default()
             },
@@ -694,11 +691,7 @@ mod tests {
             workspaces_cache: Vec::new(),
         };
         let diagnostics = server
-            .get_diagnostics(
-                &adapter_conf,
-                abs_path_of_test_proj.to_str().unwrap(),
-                &files,
-            )
+            .get_diagnostics(&adapter_conf, abs_path_of_demo.to_str().unwrap(), &files)
             .unwrap();
         assert_eq!(diagnostics.len(), 1);
         let diagnostic = diagnostics.first().unwrap().1.first().unwrap();

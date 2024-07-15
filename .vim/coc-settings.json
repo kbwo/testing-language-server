@@ -7,7 +7,7 @@
         "path": "testing-ls-adapter",
         "extra_args": ["--test-kind=cargo-test", "--workspace"],
         "include_patterns": ["/**/*.rs"],
-        "exclude_patterns": ["/test_proj/**/*"],
+        "exclude_patterns": ["/demo/**/*"],
         "workspace_dir": "."
       }
     ]

@@ -1,4 +1,4 @@
-# test_proj
+# demo
 
 To install dependencies:
 

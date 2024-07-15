@@ -289,13 +289,13 @@ mod tests {
     fn test_parse_diagnostics() {
         let test_result = std::env::current_dir()
             .unwrap()
-            .join("../../test_proj/jest/output.json");
+            .join("../../demo/jest/output.json");
         let test_result = std::fs::read_to_string(test_result).unwrap();
         let diagnostics = parse_diagnostics(
             &test_result,
             vec![
-                "/absolute_path/test_proj/jest/index.spec.js".to_string(),
-                "/absolute_path/test_proj/jest/another.spec.js".to_string(),
+                "/absolute_path/demo/jest/index.spec.js".to_string(),
+                "/absolute_path/demo/jest/another.spec.js".to_string(),
             ],
         )
         .unwrap();
@@ -305,22 +305,22 @@ mod tests {
     #[test]
     fn test_detect_workspace() {
         let current_dir = std::env::current_dir().unwrap();
-        let absolute_path_of_test_proj = current_dir.join("../../test_proj/jest");
-        let test_proj_indexjs = absolute_path_of_test_proj.join("index.spec.js");
-        let file_paths: Vec<String> = [test_proj_indexjs]
+        let absolute_path_of_demo = current_dir.join("../../demo/jest");
+        let demo_indexjs = absolute_path_of_demo.join("index.spec.js");
+        let file_paths: Vec<String> = [demo_indexjs]
             .iter()
             .map(|file_path| file_path.to_str().unwrap().to_string())
             .collect();
         let detect_result = detect_workspaces(file_paths);
         assert_eq!(detect_result.len(), 1);
         detect_result.iter().for_each(|(workspace, _)| {
-            assert_eq!(workspace, absolute_path_of_test_proj.to_str().unwrap());
+            assert_eq!(workspace, absolute_path_of_demo.to_str().unwrap());
         });
     }
 
     #[test]
     fn test_discover() {
-        let file_path = "../../test_proj/jest/index.spec.js";
+        let file_path = "../../demo/jest/index.spec.js";
         let test_items = discover(file_path).unwrap();
         assert_eq!(test_items.len(), 1);
         assert_eq!(
