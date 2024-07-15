@@ -1,4 +1,5 @@
 use crate::runner::util::send_stdout;
+use lsp_types::DiagnosticSeverity;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Output;
@@ -62,6 +63,7 @@ fn parse_diagnostics(
                         },
                     },
                     message,
+                    severity: Some(DiagnosticSeverity::ERROR),
                     ..Diagnostic::default()
                 };
                 result_map
@@ -313,6 +315,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
                         }
                     },
                     message: message.to_string(),
+                    severity: Some(DiagnosticSeverity::ERROR),
                     ..Diagnostic::default()
                 }]
             }]
@@ -321,7 +324,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
     #[test]
     fn test_discover() {
-        let file_path = "../../test_proj/rust/src/lib.rs";
+        let file_path = "../../demo/rust/src/lib.rs";
         discover(file_path).unwrap();
     }
 
@@ -330,16 +333,16 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
         let current_dir = std::env::current_dir().unwrap();
         let librs = current_dir.join("src/lib.rs");
         let mainrs = current_dir.join("src/main.rs");
-        let absolute_path_of_test_proj = current_dir.join("../../test_proj/rust");
-        let test_proj_librs = absolute_path_of_test_proj.join("src/lib.rs");
-        let file_paths: Vec<String> = [librs, mainrs, test_proj_librs]
+        let absolute_path_of_demo = current_dir.join("../../demo/rust");
+        let demo_librs = absolute_path_of_demo.join("src/lib.rs");
+        let file_paths: Vec<String> = [librs, mainrs, demo_librs]
             .iter()
             .map(|file_path| file_path.to_str().unwrap().to_string())
             .collect();
 
         let workspaces = detect_workspaces(&file_paths);
         assert_eq!(workspaces.len(), 2);
-        assert!(workspaces.contains_key(&absolute_path_of_test_proj.to_str().unwrap().to_string()));
-        assert!(workspaces.contains_key(&current_dir.to_str().unwrap().to_string()));
+        assert!(workspaces.contains_key(absolute_path_of_demo.to_str().unwrap()));
+        assert!(workspaces.contains_key(current_dir.to_str().unwrap()));
     }
 }

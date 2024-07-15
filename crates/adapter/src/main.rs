@@ -52,6 +52,7 @@ fn handle(commands: AdapterCommands) -> Result<(), LSError> {
 fn main() {
     let _guard = Log::init().expect("Failed to initialize logger");
     let args = AdapterCommands::parse();
+    tracing::info!("adapter args={:#?}", args);
     if let Err(error) = handle(args) {
         io::stderr()
             .write_all(format!("{:#?}", error).as_bytes())

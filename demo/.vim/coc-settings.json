@@ -3,7 +3,7 @@
     "testing": {
       "command": "testing-language-server",
       "trace.server": "verbose",
-      "filetypes": ["rust", "javascript", "go"],
+      "filetypes": ["rust", "javascript", "go", "typescript"],
       "initializationOptions": {
         "adapterCommand": {
           "rust": [
@@ -14,12 +14,23 @@
               "exclude_patterns": ["/**/target/**"]
             }
           ],
-          "javascript": [
+          "jest": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=jest"],
-              "include_patterns": ["/**/*.js"],
-              "exclude_patterns": ["/**/node_modules/**/*"]
+              "include_patterns": ["/jest/*.js"],
+              "exclude_patterns": ["/jest/**/node_modules/**/*"]
+            }
+          ],
+          "vitest": [
+            {
+              "path": "testing-ls-adapter",
+              "extra_args": ["--test-kind=vitest"],
+              "include_patterns": [
+                "/vitest/*.test.ts",
+                "/vitest/config/**/*.test.ts"
+              ],
+              "exclude_patterns": ["/vitest/**/node_modules/**/*"]
             }
           ],
           "go": [

@@ -1,5 +1,5 @@
 {
-  "name": "test_proj",
+  "name": "demo",
   "module": "index.js",
   "type": "module",
   "devDependencies": {

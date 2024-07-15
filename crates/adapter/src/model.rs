@@ -1,5 +1,6 @@
 use crate::runner::cargo_test::CargoTestRunner;
 use crate::runner::go::GoTestRunner;
+use crate::runner::vitest::VitestRunner;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
 use testing_language_server::spec::DetectWorkspaceArgs;
@@ -12,6 +13,7 @@ use crate::runner::jest::JestRunner;
 pub enum AvailableTestKind {
     CargoTest(CargoTestRunner),
     Jest(JestRunner),
+    Vitest(VitestRunner),
     GoTest(GoTestRunner),
 }
 impl Runner for AvailableTestKind {
@@ -20,6 +22,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::CargoTest(runner) => runner.disover(args),
             AvailableTestKind::Jest(runner) => runner.disover(args),
             AvailableTestKind::GoTest(runner) => runner.disover(args),
+            AvailableTestKind::Vitest(runner) => runner.disover(args),
         }
     }
 
@@ -28,6 +31,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::CargoTest(runner) => runner.run_file_test(args),
             AvailableTestKind::Jest(runner) => runner.run_file_test(args),
             AvailableTestKind::GoTest(runner) => runner.run_file_test(args),
+            AvailableTestKind::Vitest(runner) => runner.run_file_test(args),
         }
     }
 
@@ -36,6 +40,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::CargoTest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::Jest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::GoTest(runner) => runner.detect_workspaces(args),
+            AvailableTestKind::Vitest(runner) => runner.detect_workspaces(args),
         }
     }
 }
@@ -48,6 +53,7 @@ impl FromStr for AvailableTestKind {
             "cargo-test" => Ok(AvailableTestKind::CargoTest(CargoTestRunner)),
             "jest" => Ok(AvailableTestKind::Jest(JestRunner)),
             "go-test" => Ok(AvailableTestKind::GoTest(GoTestRunner)),
+            "vitest" => Ok(AvailableTestKind::Vitest(VitestRunner)),
             _ => Err(anyhow::anyhow!("Unknown test kind: {}", s)),
         }
     }
