@@ -1,5 +1,6 @@
 use crate::runner::cargo_nextest::CargoNextestRunner;
 use crate::runner::cargo_test::CargoTestRunner;
+use crate::runner::deno::DenoRunner;
 use crate::runner::go::GoTestRunner;
 use crate::runner::vitest::VitestRunner;
 use std::str::FromStr;
@@ -16,6 +17,7 @@ pub enum AvailableTestKind {
     CargoNextest(CargoNextestRunner),
     Jest(JestRunner),
     Vitest(VitestRunner),
+    Deno(DenoRunner),
     GoTest(GoTestRunner),
 }
 impl Runner for AvailableTestKind {
@@ -24,6 +26,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::CargoTest(runner) => runner.disover(args),
             AvailableTestKind::CargoNextest(runner) => runner.disover(args),
             AvailableTestKind::Jest(runner) => runner.disover(args),
+            AvailableTestKind::Deno(runner) => runner.disover(args),
             AvailableTestKind::GoTest(runner) => runner.disover(args),
             AvailableTestKind::Vitest(runner) => runner.disover(args),
         }
@@ -34,6 +37,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::CargoTest(runner) => runner.run_file_test(args),
             AvailableTestKind::CargoNextest(runner) => runner.run_file_test(args),
             AvailableTestKind::Jest(runner) => runner.run_file_test(args),
+            AvailableTestKind::Deno(runner) => runner.run_file_test(args),
             AvailableTestKind::GoTest(runner) => runner.run_file_test(args),
             AvailableTestKind::Vitest(runner) => runner.run_file_test(args),
         }
@@ -44,6 +48,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::CargoTest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::CargoNextest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::Jest(runner) => runner.detect_workspaces(args),
+            AvailableTestKind::Deno(runner) => runner.detect_workspaces(args),
             AvailableTestKind::GoTest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::Vitest(runner) => runner.detect_workspaces(args),
         }
@@ -60,6 +65,7 @@ impl FromStr for AvailableTestKind {
             "jest" => Ok(AvailableTestKind::Jest(JestRunner)),
             "go-test" => Ok(AvailableTestKind::GoTest(GoTestRunner)),
             "vitest" => Ok(AvailableTestKind::Vitest(VitestRunner)),
+            "deno" => Ok(AvailableTestKind::Deno(DenoRunner)),
             _ => Err(anyhow::anyhow!("Unknown test kind: {}", s)),
         }
     }
