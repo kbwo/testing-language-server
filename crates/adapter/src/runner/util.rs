@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
@@ -236,4 +236,28 @@ pub fn parse_cargo_diagnostics(
         .into_iter()
         .map(|(path, diagnostics)| RunFileTestResultItem { path, diagnostics })
         .collect()
+}
+
+/// remove this function because duplicate implementation
+pub fn resolve_path(base_dir: &Path, relative_path: &str) -> PathBuf {
+    let absolute = if Path::new(relative_path).is_absolute() {
+        PathBuf::from(relative_path)
+    } else {
+        base_dir.join(relative_path)
+    };
+
+    let mut components = Vec::new();
+    for component in absolute.components() {
+        match component {
+            std::path::Component::ParentDir => {
+                components.pop();
+            }
+            std::path::Component::Normal(_) | std::path::Component::RootDir => {
+                components.push(component);
+            }
+            _ => {}
+        }
+    }
+
+    PathBuf::from_iter(components)
 }

@@ -41,6 +41,14 @@
               "exclude_patterns": ["/vitest/**/node_modules/**/*"]
             }
           ],
+          "deno": [
+            {
+              "path": "testing-ls-adapter",
+              "extra_args": ["--test-kind=deno"],
+              "include_patterns": ["/deno/*.ts"],
+              "exclude_patterns": []
+            }
+          ],
           "go": [
             {
               "path": "testing-ls-adapter",
@@ -52,5 +60,6 @@
         }
       }
     }
-  }
+  },
+  "deno.enable": true
 }
