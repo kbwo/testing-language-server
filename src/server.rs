@@ -145,7 +145,7 @@ impl TestingLS {
                         self.initialize(id)?;
                     }
                     "workspace/diagnostic" => {
-                        self.check_workspace()?;
+                        self.diagnose_workspace()?;
                     }
                     "textDocument/diagnostic" | "textDocument/didSave" => {
                         let uri = params["textDocument"]["uri"]
@@ -330,7 +330,7 @@ impl TestingLS {
         Ok(())
     }
 
-    pub fn check_workspace(&mut self) -> Result<(), LSError> {
+    pub fn diagnose_workspace(&mut self) -> Result<(), LSError> {
         self.refresh_workspaces_cache()?;
 
         self.workspaces_cache.iter().for_each(
@@ -339,7 +339,7 @@ impl TestingLS {
                  workspaces,
              }| {
                 workspaces.iter().for_each(|(workspace, paths)| {
-                    let _ = self.check(adapter, workspace, paths);
+                    let _ = self.diagnose(adapter, workspace, paths);
                 })
             },
         );
@@ -380,7 +380,7 @@ impl TestingLS {
                     if !paths.contains(&path.to_string()) {
                         continue;
                     }
-                    let _ = self.check(adapter, workspace, &[path.to_string()]);
+                    let _ = self.diagnose(adapter, workspace, &[path.to_string()]);
                 }
             },
         );
@@ -457,7 +457,7 @@ impl TestingLS {
         Ok(diagnostics)
     }
 
-    fn check(
+    fn diagnose(
         &self,
         adapter: &AdapterConfiguration,
         workspace: &str,
@@ -623,7 +623,7 @@ mod tests {
             },
             workspaces_cache: Vec::new(),
         };
-        server.check_workspace().unwrap();
+        server.diagnose_workspace().unwrap();
         server
             .workspaces_cache
             .iter()
