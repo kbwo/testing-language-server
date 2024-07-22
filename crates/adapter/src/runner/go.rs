@@ -17,14 +17,10 @@ use testing_language_server::spec::DiscoverResultItem;
 use testing_language_server::spec::RunFileTestResult;
 use testing_language_server::spec::RunFileTestResultItem;
 use testing_language_server::spec::TestItem;
-use tree_sitter::Point;
-use tree_sitter::Query;
-use tree_sitter::QueryCursor;
 
 use super::util::detect_workspaces_from_file_paths;
-
-// If the character value is greater than the line length it defaults back to the line length.
-const MAX_CHAR_LENGTH: u32 = 10000;
+use super::util::discover_with_treesitter;
+use super::util::MAX_CHAR_LENGTH;
 
 #[derive(Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -140,16 +136,9 @@ fn parse_diagnostics(
 }
 
 fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
-    let mut parser = tree_sitter::Parser::new();
-    let mut test_items: Vec<TestItem> = vec![];
-    parser
-        .set_language(&tree_sitter_go::language())
-        .expect("Error loading Rust grammar");
-    let source_code = std::fs::read_to_string(file_path)?;
-    let tree = parser.parse(&source_code, None).unwrap();
     // from https://github.com/nvim-neotest/neotest-go/blob/92950ad7be2ca02a41abca5c6600ff6ffaf5b5d6/lua/neotest-go/init.lua#L54
     // license: https://github.com/nvim-neotest/neotest-go/blob/92950ad7be2ca02a41abca5c6600ff6ffaf5b5d6/README.md
-    let query_string = r#"
+    let query = r#"
     ;;query
     ((function_declaration
       name: (identifier) @test.name)
@@ -230,66 +219,7 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
                 ((identifier) @test.key.name1
                 (#eq? @test.key.name @test.key.name1))))))))
 "#;
-    let query =
-        Query::new(&tree_sitter_go::language(), query_string).expect("Error creating query");
-
-    let mut cursor = QueryCursor::new();
-    cursor.set_byte_range(tree.root_node().byte_range());
-    let source = source_code.as_bytes();
-    let matches = cursor.matches(&query, tree.root_node(), source);
-    for m in matches {
-        let mut namespace_name = "";
-        let mut test_start_position = Point::default();
-        let mut test_end_position = Point::default();
-        for capture in m.captures {
-            let capture_name = query.capture_names()[capture.index as usize];
-            let value = capture.node.utf8_text(source)?;
-            let start_position = capture.node.start_position();
-            let end_position = capture.node.end_position();
-            match capture_name {
-                "namespace.name" => {
-                    namespace_name = value;
-                }
-                "test.definition" => {
-                    test_start_position = start_position;
-                    test_end_position = end_position;
-                }
-                "test.name" => {
-                    let test_name = value;
-                    let test_item = TestItem {
-                        id: format!("{}:{}", namespace_name, test_name),
-                        name: test_name.to_string(),
-                        start_position: Range {
-                            start: Position {
-                                line: test_start_position.row as u32,
-                                character: test_start_position.column as u32,
-                            },
-                            end: Position {
-                                line: test_start_position.row as u32,
-                                character: MAX_CHAR_LENGTH,
-                            },
-                        },
-                        end_position: Range {
-                            start: Position {
-                                line: test_end_position.row as u32,
-                                character: 0,
-                            },
-                            end: Position {
-                                line: test_end_position.row as u32,
-                                character: test_end_position.column as u32,
-                            },
-                        },
-                    };
-                    test_items.push(test_item);
-                    test_start_position = Point::default();
-                    test_end_position = Point::default();
-                }
-                _ => {}
-            }
-        }
-    }
-
-    Ok(test_items)
+    discover_with_treesitter(file_path, &tree_sitter_go::language(), query)
 }
 
 #[derive(Eq, PartialEq, Hash, Debug)]

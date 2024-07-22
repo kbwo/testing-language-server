@@ -1,8 +1,6 @@
 use crate::runner::util::send_stdout;
 use lsp_types::Diagnostic;
 use lsp_types::DiagnosticSeverity;
-use lsp_types::Position;
-use lsp_types::Range;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs;
@@ -15,17 +13,13 @@ use testing_language_server::spec::DiscoverResultItem;
 use testing_language_server::spec::RunFileTestResult;
 use testing_language_server::spec::RunFileTestResultItem;
 use testing_language_server::spec::TestItem;
-use tree_sitter::Point;
-use tree_sitter::Query;
-use tree_sitter::QueryCursor;
 
 use crate::model::Runner;
 
 use super::util::clean_ansi;
 use super::util::detect_workspaces_from_file_paths;
-
-// If the character value is greater than the line length it defaults back to the line length.
-const MAX_CHAR_LENGTH: u32 = 10000;
+use super::util::discover_with_treesitter;
+use super::util::MAX_CHAR_LENGTH;
 
 fn parse_diagnostics(
     test_result: &str,
@@ -84,16 +78,9 @@ fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
 }
 
 fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
-    let mut parser = tree_sitter::Parser::new();
-    let mut test_items: Vec<TestItem> = vec![];
-    parser
-        .set_language(&tree_sitter_javascript::language())
-        .expect("Error loading JavaScript grammar");
-    let source_code = std::fs::read_to_string(file_path)?;
-    let tree = parser.parse(&source_code, None).unwrap();
     // from https://github.com/nvim-neotest/neotest-jest/blob/514fd4eae7da15fd409133086bb8e029b65ac43f/lua/neotest-jest/init.lua#L162
     // license: https://github.com/nvim-neotest/neotest-jest/blob/514fd4eae7da15fd409133086bb8e029b65ac43f/LICENSE.md
-    let query_string = r#"
+    let query = r#"
     ; -- Namespaces --
     ; Matches: `describe('context', () => {})`
     ((call_expression
@@ -162,65 +149,7 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
       arguments: (arguments (string (string_fragment) @test.name) [(arrow_function) (function_expression)])
     )) @test.definition
         "#;
-    let query = Query::new(&tree_sitter_javascript::language(), query_string)
-        .expect("Error creating query");
-    let mut cursor = QueryCursor::new();
-    cursor.set_byte_range(tree.root_node().byte_range());
-    let source = source_code.as_bytes();
-    let matches = cursor.matches(&query, tree.root_node(), source);
-    for m in matches {
-        let mut namespace_name = "";
-        let mut test_start_position = Point::default();
-        let mut test_end_position = Point::default();
-        for capture in m.captures {
-            let capture_name = query.capture_names()[capture.index as usize];
-            let value = capture.node.utf8_text(source)?;
-            let start_position = capture.node.start_position();
-            let end_position = capture.node.end_position();
-            match capture_name {
-                "namespace.name" => {
-                    namespace_name = value;
-                }
-                "test.definition" => {
-                    test_start_position = start_position;
-                    test_end_position = end_position;
-                }
-                "test.name" => {
-                    let test_name = value;
-                    let test_item = TestItem {
-                        id: format!("{}:{}", namespace_name, test_name),
-                        name: test_name.to_string(),
-                        start_position: Range {
-                            start: Position {
-                                line: test_start_position.row as u32,
-                                character: test_start_position.column as u32,
-                            },
-                            end: Position {
-                                line: test_start_position.row as u32,
-                                character: MAX_CHAR_LENGTH,
-                            },
-                        },
-                        end_position: Range {
-                            start: Position {
-                                line: test_end_position.row as u32,
-                                character: 0,
-                            },
-                            end: Position {
-                                line: test_end_position.row as u32,
-                                character: test_end_position.column as u32,
-                            },
-                        },
-                    };
-                    test_items.push(test_item);
-                    test_start_position = Point::default();
-                    test_end_position = Point::default();
-                }
-                _ => {}
-            }
-        }
-    }
-
-    Ok(test_items)
+    discover_with_treesitter(file_path, &tree_sitter_javascript::language(), query)
 }
 
 #[derive(Eq, PartialEq, Debug)]

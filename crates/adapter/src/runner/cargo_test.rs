@@ -15,8 +15,6 @@ use super::util::detect_workspaces_from_file_paths;
 use super::util::discover_rust_tests;
 use super::util::parse_cargo_diagnostics;
 
-// If the character value is greater than the line length it defaults back to the line length.
-
 fn parse_diagnostics(
     contents: &str,
     workspace_root: PathBuf,

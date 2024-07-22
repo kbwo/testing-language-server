@@ -7,7 +7,7 @@ use regex::Regex;
 use serde::Serialize;
 use testing_language_server::spec::{RunFileTestResultItem, TestItem};
 use testing_language_server::{error::LSError, spec::RunFileTestResult};
-use tree_sitter::{Point, Query, QueryCursor};
+use tree_sitter::{Language, Point, Query, QueryCursor};
 
 // If the character value is greater than the line length it defaults back to the line length.
 pub const MAX_CHAR_LENGTH: u32 = 10000;
@@ -76,16 +76,9 @@ pub fn clean_ansi(input: &str) -> String {
 }
 
 pub fn discover_rust_tests(file_path: &str) -> Result<Vec<TestItem>, LSError> {
-    let mut parser = tree_sitter::Parser::new();
-    let mut test_items: Vec<TestItem> = vec![];
-    parser
-        .set_language(&tree_sitter_rust::language())
-        .expect("Error loading Rust grammar");
-    let source_code = std::fs::read_to_string(file_path)?;
-    let tree = parser.parse(&source_code, None).unwrap();
     // from https://github.com/rouge8/neotest-rust/blob/0418811e1e3499b2501593f2e131d02f5e6823d4/lua/neotest-rust/init.lua#L167
     // license: https://github.com/rouge8/neotest-rust/blob/0418811e1e3499b2501593f2e131d02f5e6823d4/LICENSE
-    let query_string = r#"
+    let query = r#"
         (
   (attribute_item
     [
@@ -119,8 +112,22 @@ pub fn discover_rust_tests(file_path: &str) -> Result<Vec<TestItem>, LSError> {
 )
 (mod_item name: (identifier) @namespace.name)? @namespace.definition
 "#;
-    let query =
-        Query::new(&tree_sitter_rust::language(), query_string).expect("Error creating query");
+    discover_with_treesitter(file_path, &tree_sitter_rust::language(), query)
+}
+
+pub fn discover_with_treesitter(
+    file_path: &str,
+    language: &Language,
+    query: &str,
+) -> Result<Vec<TestItem>, LSError> {
+    let mut parser = tree_sitter::Parser::new();
+    let mut test_items: Vec<TestItem> = vec![];
+    parser
+        .set_language(language)
+        .expect("Error loading Rust grammar");
+    let source_code = std::fs::read_to_string(file_path)?;
+    let tree = parser.parse(&source_code, None).unwrap();
+    let query = Query::new(language, query).expect("Error creating query");
 
     let mut cursor = QueryCursor::new();
     cursor.set_byte_range(tree.root_node().byte_range());
