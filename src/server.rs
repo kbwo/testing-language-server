@@ -78,10 +78,10 @@ impl TestingLS {
         } else {
             let default_project_dir = self
                 .initialize_params
-                .clone()
                 .workspace_folders
+                .as_ref()
                 .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
-            let default_workspace_uri = default_project_dir[0].uri.clone();
+            let default_workspace_uri = &default_project_dir[0].uri;
             Ok(default_workspace_uri.to_file_path().unwrap())
         }
     }
@@ -271,9 +271,9 @@ impl TestingLS {
         let project_dir = self.project_dir()?;
         self.workspaces_cache = vec![];
         // Nested and multiple loops, but each count is small
-        for adapter_commands in adapter_commands.values() {
-            for adapter in adapter_commands {
-                let &AdapterConfiguration {
+        for adapter_commands in adapter_commands.into_values() {
+            for adapter in adapter_commands.into_iter() {
+                let AdapterConfiguration {
                     path,
                     extra_args,
                     envs,
@@ -313,12 +313,12 @@ impl TestingLS {
                         .into_iter()
                         .flat_map(|kv| kv.1)
                         .collect::<Vec<_>>();
-                    HashMap::from([(workspace_dir.clone(), target_paths)])
+                    HashMap::from([(workspace_dir, target_paths)])
                 } else {
                     workspace
                 };
                 self.workspaces_cache
-                    .push(WorkspaceAnalysis::new(adapter.clone(), workspace))
+                    .push(WorkspaceAnalysis::new(adapter, workspace))
             }
         }
         tracing::info!("workspaces_cache={:#?}", self.workspaces_cache);
@@ -413,8 +413,8 @@ impl TestingLS {
             .map_err(|err| LSError::Adapter(err.to_string()))?;
         let Output { stdout, stderr, .. } = output;
         if !stderr.is_empty() {
-            let message = "Cannot run test command: \n".to_string()
-                + &String::from_utf8(stderr.clone()).unwrap();
+            let message =
+                "Cannot run test command: \n".to_string() + &String::from_utf8(stderr).unwrap();
             let placeholder_diagnostic = Diagnostic {
                 range: Range {
                     start: Position {
@@ -446,9 +446,9 @@ impl TestingLS {
             for target_file in paths {
                 let diagnostics_for_file: Vec<Diagnostic> = res
                     .clone()
-                    .iter()
+                    .into_iter()
                     .filter(|RunFileTestResultItem { path, .. }| path == target_file)
-                    .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics.clone())
+                    .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics)
                     .collect();
                 let uri = Url::from_file_path(target_file.replace("file://", "")).unwrap();
                 diagnostics.push((uri.to_string(), diagnostics_for_file));
