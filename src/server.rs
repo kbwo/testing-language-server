@@ -33,6 +33,15 @@ impl Default for TestingLS {
     }
 }
 
+/// The status of workspace diagnostics
+/// - Skipped: Skip workspace diagnostics (when `enable_workspace_diagnostics` is false)
+/// - Done: Finish workspace diagnostics (when `enable_workspace_diagnostics` is true)
+#[derive(Debug, PartialEq, Eq)]
+pub enum WorkspaceDiagnosticsStatus {
+    Skipped,
+    Done,
+}
+
 impl TestingLS {
     pub fn new() -> Self {
         Self {
@@ -204,8 +213,11 @@ impl TestingLS {
         Ok(())
     }
 
-    pub fn diagnose_workspace(&mut self) -> Result<(), LSError> {
+    pub fn diagnose_workspace(&mut self) -> Result<WorkspaceDiagnosticsStatus, LSError> {
         self.refresh_workspaces_cache()?;
+        if !self.options.enable_workspace_diagnostics.unwrap_or(false) {
+            return Ok(WorkspaceDiagnosticsStatus::Skipped);
+        }
 
         self.workspaces_cache.iter().for_each(
             |WorkspaceAnalysis {
@@ -217,7 +229,7 @@ impl TestingLS {
                 })
             },
         );
-        Ok(())
+        Ok(WorkspaceDiagnosticsStatus::Done)
     }
 
     pub fn refreshing_needed(&self, path: &str) -> bool {
@@ -565,5 +577,22 @@ mod tests {
         let diagnostic = diagnostics.first().unwrap().1.first().unwrap();
         assert_eq!(diagnostic.severity.unwrap(), DiagnosticSeverity::WARNING);
         assert!(diagnostic.message.contains("Cannot run test command:"));
+    }
+
+    #[test]
+    fn skip_workspace_diagnostics() {
+        let mut server = TestingLS {
+            workspace_folders: Some(vec![WorkspaceFolder {
+                uri: Url::from_file_path(current_dir().unwrap()).unwrap(),
+                name: "demo".to_string(),
+            }]),
+            options: InitializedOptions {
+                adapter_command: HashMap::new(),
+                enable_workspace_diagnostics: Some(false),
+            },
+            workspaces_cache: Vec::new(),
+        };
+        let status = server.diagnose_workspace().unwrap();
+        assert_eq!(status, WorkspaceDiagnosticsStatus::Skipped);
     }
 }

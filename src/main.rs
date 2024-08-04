@@ -36,7 +36,7 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
         'read_header: loop {
             let mut buffer = String::new();
             let stdin = io::stdin();
-            let mut handle = stdin.lock(); // We get `StdinLock` here.
+            let mut handle = stdin.lock();
             handle.read_line(&mut buffer)?;
 
             if buffer.is_empty() {
