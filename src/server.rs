@@ -149,35 +149,23 @@ impl TestingLS {
                         self.diagnose_workspace()?;
                     }
                     "textDocument/diagnostic" | "textDocument/didSave" => {
-                        let uri = params["textDocument"]["uri"]
-                            .as_str()
-                            .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
-                        let uri = &format_uri(uri);
-                        self.check_file(uri, false)?;
+                        let uri = self.extract_textdocument_uri(&params["uri"])?;
+                        self.check_file(&uri, false)?;
                     }
                     "textDocument/didOpen" => {
-                        let uri = params["textDocument"]["uri"]
-                            .as_str()
-                            .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
-                        let uri = &format_uri(uri);
-                        if self.refreshing_needed(uri) {
+                        let uri = self.extract_textdocument_uri(&params["uri"])?;
+                        if self.refreshing_needed(&uri) {
                             self.refresh_workspaces_cache()?;
                         }
                     }
                     "$/runFileTest" => {
-                        let uri = params["uri"]
-                            .as_str()
-                            .ok_or(serde_json::Error::custom("`uri` is not set"))?;
-                        let uri = &format_uri(uri);
-                        self.check_file(uri, false)?;
+                        let uri = self.extract_uri(&params["uri"])?;
+                        self.check_file(&uri, false)?;
                     }
                     "$/discoverFileTest" => {
                         let id = value["id"].as_i64().unwrap();
-                        let uri = params["uri"]
-                            .as_str()
-                            .ok_or(serde_json::Error::custom("`uri` is not set"))?;
-                        let uri = &format_uri(uri);
-                        let result = self.discover_file(uri)?;
+                        let uri = self.extract_uri(&params["uri"])?;
+                        let result = self.discover_file(&uri)?;
                         send_stdout(&json!({
                                 "jsonrpc": "2.0",
                                 "id": id,
@@ -188,6 +176,20 @@ impl TestingLS {
                 }
             }
         }
+    }
+
+    fn extract_textdocument_uri(&self, params: &Value) -> Result<String, serde_json::Error> {
+        let uri = params["textDocument"]["uri"]
+            .as_str()
+            .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
+        Ok(format_uri(uri))
+    }
+
+    fn extract_uri(&self, params: &Value) -> Result<String, serde_json::Error> {
+        let uri = params["uri"]
+            .as_str()
+            .ok_or(serde_json::Error::custom("`uri` is not set"))?;
+        Ok(format_uri(uri))
     }
 
     fn adapter_commands(&self) -> HashMap<AdapterId, Vec<AdapterConfiguration>> {
