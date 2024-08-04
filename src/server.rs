@@ -1,45 +1,14 @@
 use crate::error::LSError;
-use crate::spec::AdapterConfiguration;
-use crate::spec::AdapterId;
-use crate::spec::DetectWorkspaceResult;
-use crate::spec::DiscoverResult;
-use crate::spec::RunFileTestResult;
-use crate::spec::RunFileTestResultItem;
-use crate::spec::WorkspaceAnalysis;
-use crate::util::format_uri;
+use crate::spec::*;
 use crate::util::resolve_path;
 use crate::util::send_stdout;
 use glob::Pattern;
-use lsp_types::Diagnostic;
-use lsp_types::DiagnosticOptions;
-use lsp_types::DiagnosticServerCapabilities;
-use lsp_types::DiagnosticSeverity;
-use lsp_types::InitializeParams;
-use lsp_types::InitializeResult;
-use lsp_types::NumberOrString;
-use lsp_types::Position;
-use lsp_types::ProgressParams;
-use lsp_types::ProgressParamsValue;
-use lsp_types::PublishDiagnosticsParams;
-use lsp_types::Range;
-use lsp_types::ServerCapabilities;
-use lsp_types::TextDocumentSyncCapability;
-use lsp_types::TextDocumentSyncKind;
-use lsp_types::Url;
-use lsp_types::WorkDoneProgress;
-use lsp_types::WorkDoneProgressBegin;
-use lsp_types::WorkDoneProgressCreateParams;
-use lsp_types::WorkDoneProgressEnd;
-use lsp_types::WorkDoneProgressOptions;
-use lsp_types::WorkspaceFolder;
-use serde::de::Error;
+use lsp_types::*;
 use serde::Deserialize;
 use serde_json::json;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::env::current_dir;
-use std::io::BufRead;
-use std::io::{self, Read};
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -49,6 +18,7 @@ use std::process::Output;
 #[serde(rename_all = "camelCase")]
 pub struct InitializedOptions {
     adapter_command: HashMap<AdapterId, Vec<AdapterConfiguration>>,
+    enable_workspace_diagnostics: Option<bool>,
 }
 
 pub struct TestingLS {
@@ -86,110 +56,26 @@ impl TestingLS {
         }
     }
 
-    pub fn main_loop(&mut self) -> Result<(), LSError> {
-        loop {
-            let mut size = 0;
-            'read_header: loop {
-                let mut buffer = String::new();
-                let stdin = io::stdin();
-                let mut handle = stdin.lock(); // We get `StdinLock` here.
-                handle.read_line(&mut buffer)?;
+    pub fn initialize(
+        &mut self,
+        id: i64,
+        initialize_params: InitializeParams,
+    ) -> Result<(), LSError> {
+        self.workspace_folders = initialize_params.workspace_folders;
+        self.options = (self
+            .handle_initialization_options(initialize_params.initialization_options.as_ref()))?;
+        let result = InitializeResult {
+            capabilities: self.build_capabilities(),
+            ..InitializeResult::default()
+        };
 
-                if buffer.is_empty() {
-                    tracing::warn!("buffer is empty")
-                }
+        send_stdout(&json!({
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": result,
+        }))?;
 
-                // The end of header section
-                if buffer == "\r\n" {
-                    break 'read_header;
-                }
-
-                let splitted: Vec<&str> = buffer.split(' ').collect();
-
-                if splitted.len() != 2 {
-                    tracing::warn!("unexpected");
-                }
-
-                let header_name = splitted[0].to_lowercase();
-                let header_value = splitted[1].trim();
-
-                match header_name.as_ref() {
-                    "content-length" => {}
-                    "content-type:" => {}
-                    _ => {}
-                }
-
-                size = header_value.parse::<usize>().unwrap();
-            }
-
-            let stdin = io::stdin();
-            let mut handle = stdin.lock();
-            let mut buf = vec![0u8; size];
-            handle.read_exact(&mut buf).unwrap();
-            let message = String::from_utf8(buf).unwrap();
-
-            let value: Value = serde_json::from_str(&message)?;
-            let method = &value["method"].as_str();
-            tracing::info!("method={:#?}", method);
-            let params = &value["params"];
-            tracing::info!("params={:#?}", params);
-
-            if let Some(method) = method {
-                match *method {
-                    "initialize" => {
-                        let initialize_params = InitializeParams::deserialize(params)?;
-                        self.workspace_folders = initialize_params.workspace_folders;
-                        self.options = (self.handle_initialization_options(
-                            initialize_params.initialization_options.as_ref(),
-                        ))?;
-                        let id = value["id"].as_i64().unwrap();
-                        self.initialize(id)?;
-                    }
-                    "workspace/diagnostic" => {
-                        self.diagnose_workspace()?;
-                    }
-                    "textDocument/diagnostic" | "textDocument/didSave" => {
-                        let uri = self.extract_textdocument_uri(&params["uri"])?;
-                        self.check_file(&uri, false)?;
-                    }
-                    "textDocument/didOpen" => {
-                        let uri = self.extract_textdocument_uri(&params["uri"])?;
-                        if self.refreshing_needed(&uri) {
-                            self.refresh_workspaces_cache()?;
-                        }
-                    }
-                    "$/runFileTest" => {
-                        let uri = self.extract_uri(&params["uri"])?;
-                        self.check_file(&uri, false)?;
-                    }
-                    "$/discoverFileTest" => {
-                        let id = value["id"].as_i64().unwrap();
-                        let uri = self.extract_uri(&params["uri"])?;
-                        let result = self.discover_file(&uri)?;
-                        send_stdout(&json!({
-                                "jsonrpc": "2.0",
-                                "id": id,
-                                "result": result,
-                        }))?;
-                    }
-                    _ => {}
-                }
-            }
-        }
-    }
-
-    fn extract_textdocument_uri(&self, params: &Value) -> Result<String, serde_json::Error> {
-        let uri = params["textDocument"]["uri"]
-            .as_str()
-            .ok_or(serde_json::Error::custom("`textDocument.uri` is not set"))?;
-        Ok(format_uri(uri))
-    }
-
-    fn extract_uri(&self, params: &Value) -> Result<String, serde_json::Error> {
-        let uri = params["uri"]
-            .as_str()
-            .ok_or(serde_json::Error::custom("`uri` is not set"))?;
-        Ok(format_uri(uri))
+        Ok(())
     }
 
     fn adapter_commands(&self) -> HashMap<AdapterId, Vec<AdapterConfiguration>> {
@@ -252,21 +138,6 @@ impl TestingLS {
                 "Invalid initialization options"
             )))
         }
-    }
-
-    pub fn initialize(&self, id: i64) -> Result<(), LSError> {
-        let result = InitializeResult {
-            capabilities: self.build_capabilities(),
-            ..InitializeResult::default()
-        };
-
-        send_stdout(&json!({
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": result,
-        }))?;
-
-        Ok(())
     }
 
     pub fn refresh_workspaces_cache(&mut self) -> Result<(), LSError> {
@@ -517,7 +388,7 @@ impl TestingLS {
     }
 
     #[allow(clippy::for_kv_map)]
-    fn discover_file(&self, path: &str) -> Result<DiscoverResult, LSError> {
+    pub fn discover_file(&self, path: &str) -> Result<DiscoverResult, LSError> {
         let target_paths = vec![path.to_string()];
         let mut result: DiscoverResult = vec![];
         for WorkspaceAnalysis {
@@ -588,6 +459,7 @@ mod tests {
             }]),
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![])]),
+                enable_workspace_diagnostics: Some(true),
             },
             workspaces_cache: Vec::new(),
         };
@@ -617,6 +489,7 @@ mod tests {
             }]),
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf])]),
+                enable_workspace_diagnostics: Some(true),
             },
             workspaces_cache: Vec::new(),
         };
@@ -681,6 +554,7 @@ mod tests {
             }]),
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf.clone()])]),
+                enable_workspace_diagnostics: Some(true),
             },
             workspaces_cache: Vec::new(),
         };
