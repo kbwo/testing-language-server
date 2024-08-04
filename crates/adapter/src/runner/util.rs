@@ -133,8 +133,8 @@ pub fn discover_with_treesitter(
     cursor.set_byte_range(tree.root_node().byte_range());
     let source = source_code.as_bytes();
     let matches = cursor.matches(&query, tree.root_node(), source);
+    let mut namespace = "";
     for m in matches {
-        let mut namespace_name = "";
         let mut test_start_position = Point::default();
         let mut test_end_position = Point::default();
         for capture in m.captures {
@@ -144,17 +144,17 @@ pub fn discover_with_treesitter(
             let end_position = capture.node.end_position();
             match capture_name {
                 "namespace.name" => {
-                    namespace_name = value;
+                    namespace = value;
                 }
                 "test.definition" => {
                     test_start_position = start_position;
                     test_end_position = end_position;
                 }
                 "test.name" => {
-                    let test_name = value;
+                    let test_name = [namespace, value].join(":");
                     let test_item = TestItem {
-                        id: format!("{}:{}", namespace_name, test_name),
-                        name: test_name.to_string(),
+                        id: test_name.clone(),
+                        name: test_name,
                         start_position: Range {
                             start: Position {
                                 line: test_start_position.row as u32,
