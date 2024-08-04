@@ -151,7 +151,11 @@ pub fn discover_with_treesitter(
                     test_end_position = end_position;
                 }
                 "test.name" => {
-                    let test_name = [namespace, value].join(":");
+                    let test_name = if namespace.is_empty() {
+                        value.to_string()
+                    } else {
+                        [namespace, value].join(":")
+                    };
                     let test_item = TestItem {
                         id: test_name.clone(),
                         name: test_name,

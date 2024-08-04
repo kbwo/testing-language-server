@@ -213,8 +213,8 @@ mod tests {
             test_items,
             vec![
                 TestItem {
-                    id: String::from(":pass"),
-                    name: String::from("pass"),
+                    id: "describe text:pass".to_string(),
+                    name: "describe text:pass".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 4,
@@ -222,7 +222,7 @@ mod tests {
                         },
                         end: Position {
                             line: 4,
-                            character: MAX_CHAR_LENGTH
+                            character: 10000
                         }
                     },
                     end_position: Range {
@@ -237,8 +237,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: String::from(":fail"),
-                    name: String::from("fail"),
+                    id: "describe text:fail".to_string(),
+                    name: "describe text:fail".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 8,
@@ -246,7 +246,7 @@ mod tests {
                         },
                         end: Position {
                             line: 8,
-                            character: MAX_CHAR_LENGTH
+                            character: 10000
                         }
                     },
                     end_position: Range {

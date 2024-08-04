@@ -255,8 +255,8 @@ mod tests {
         assert_eq!(
             test_items,
             vec![TestItem {
-                id: String::from(":fail"),
-                name: String::from("fail"),
+                id: String::from("index:fail"),
+                name: String::from("index:fail"),
                 start_position: Range {
                     start: Position {
                         line: 1,

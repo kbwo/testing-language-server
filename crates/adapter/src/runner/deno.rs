@@ -253,7 +253,7 @@ mod tests {
             test_items,
             vec![
                 TestItem {
-                    id: String::from(":addTest"),
+                    id: String::from("addTest"),
                     name: String::from("addTest"),
                     start_position: Range {
                         start: Position {
@@ -277,7 +277,7 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: String::from(":fail1"),
+                    id: String::from("fail1"),
                     name: String::from("fail1"),
                     start_position: Range {
                         start: Position {
@@ -301,7 +301,7 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: String::from(":fail1"),
+                    id: String::from("fail1"),
                     name: String::from("fail1"),
                     start_position: Range {
                         start: Position {
