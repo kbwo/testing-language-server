@@ -12,6 +12,7 @@
       }
     ]
   },
+  "testing.enableWorkspaceDiagnostics": true,
   "testing.server.path": "testing-language-server",
   "testing.trace.server": "verbose"
 }
