@@ -31,6 +31,7 @@ use lsp_types::WorkDoneProgressBegin;
 use lsp_types::WorkDoneProgressCreateParams;
 use lsp_types::WorkDoneProgressEnd;
 use lsp_types::WorkDoneProgressOptions;
+use lsp_types::WorkspaceFolder;
 use serde::de::Error;
 use serde::Deserialize;
 use serde_json::json;
@@ -51,7 +52,7 @@ pub struct InitializedOptions {
 }
 
 pub struct TestingLS {
-    pub initialize_params: InitializeParams,
+    pub workspace_folders: Option<Vec<WorkspaceFolder>>,
     pub options: InitializedOptions,
     pub workspaces_cache: Vec<WorkspaceAnalysis>,
 }
@@ -65,7 +66,7 @@ impl Default for TestingLS {
 impl TestingLS {
     pub fn new() -> Self {
         Self {
-            initialize_params: Default::default(),
+            workspace_folders: None,
             options: Default::default(),
             workspaces_cache: Vec::new(),
         }
@@ -77,7 +78,6 @@ impl TestingLS {
             Ok(cwd)
         } else {
             let default_project_dir = self
-                .initialize_params
                 .workspace_folders
                 .as_ref()
                 .ok_or(LSError::Any(anyhow::anyhow!("No workspace folders found")))?;
@@ -137,9 +137,10 @@ impl TestingLS {
             if let Some(method) = method {
                 match *method {
                     "initialize" => {
-                        self.initialize_params = InitializeParams::deserialize(params)?;
+                        let initialize_params = InitializeParams::deserialize(params)?;
+                        self.workspace_folders = initialize_params.workspace_folders;
                         self.options = (self.handle_initialization_options(
-                            self.initialize_params.initialization_options.as_ref(),
+                            initialize_params.initialization_options.as_ref(),
                         ))?;
                         let id = value["id"].as_i64().unwrap();
                         self.initialize(id)?;
@@ -579,13 +580,10 @@ mod tests {
     fn test_check_file() {
         let abs_path_of_demo = std::env::current_dir().unwrap().join("demo/rust");
         let mut server = TestingLS {
-            initialize_params: InitializeParams {
-                workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(&abs_path_of_demo).unwrap(),
-                    name: "demo".to_string(),
-                }]),
-                ..InitializeParams::default()
-            },
+            workspace_folders: Some(vec![WorkspaceFolder {
+                uri: Url::from_file_path(&abs_path_of_demo).unwrap(),
+                name: "demo".to_string(),
+            }]),
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![])]),
             },
@@ -611,13 +609,10 @@ mod tests {
             ..Default::default()
         };
         let mut server = TestingLS {
-            initialize_params: InitializeParams {
-                workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(abs_path_of_demo.clone()).unwrap(),
-                    name: "demo".to_string(),
-                }]),
-                ..InitializeParams::default()
-            },
+            workspace_folders: Some(vec![WorkspaceFolder {
+                uri: Url::from_file_path(&abs_path_of_demo).unwrap(),
+                name: "demo".to_string(),
+            }]),
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf])]),
             },
@@ -678,13 +673,10 @@ mod tests {
             TestingLS::project_files(&abs_path_of_demo.clone(), &["/**/*.rs".to_string()], &[]);
 
         let server = TestingLS {
-            initialize_params: InitializeParams {
-                workspace_folders: Some(vec![WorkspaceFolder {
-                    uri: Url::from_file_path(&abs_path_of_demo).unwrap(),
-                    name: "demo".to_string(),
-                }]),
-                ..InitializeParams::default()
-            },
+            workspace_folders: Some(vec![WorkspaceFolder {
+                uri: Url::from_file_path(&abs_path_of_demo).unwrap(),
+                name: "demo".to_string(),
+            }]),
             options: InitializedOptions {
                 adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf.clone()])]),
             },
