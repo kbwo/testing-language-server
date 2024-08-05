@@ -215,7 +215,7 @@ impl TestingLS {
 
     pub fn diagnose_workspace(&mut self) -> Result<WorkspaceDiagnosticsStatus, LSError> {
         self.refresh_workspaces_cache()?;
-        if !self.options.enable_workspace_diagnostics.unwrap_or(false) {
+        if !self.options.enable_workspace_diagnostics.unwrap_or(true) {
             return Ok(WorkspaceDiagnosticsStatus::Skipped);
         }
 
