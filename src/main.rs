@@ -89,11 +89,11 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     server.diagnose_workspace()?;
                 }
                 "textDocument/diagnostic" | "textDocument/didSave" => {
-                    let uri = extract_textdocument_uri(&params["uri"])?;
+                    let uri = extract_textdocument_uri(params)?;
                     server.check_file(&uri, false)?;
                 }
                 "textDocument/didOpen" => {
-                    let uri = extract_textdocument_uri(&params["uri"])?;
+                    let uri = extract_textdocument_uri(params)?;
                     if server.refreshing_needed(&uri) {
                         server.refresh_workspaces_cache()?;
                     }
