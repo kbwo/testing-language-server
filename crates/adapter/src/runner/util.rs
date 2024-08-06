@@ -52,10 +52,16 @@ pub fn detect_workspaces_from_file_paths(
         let workspace =
             detect_workspace_from_file(PathBuf::from_str(&file_path).unwrap(), file_names);
         if let Some(workspace) = workspace {
-            result_map
-                .entry(workspace)
-                .or_default()
-                .push(file_path.clone());
+            if result_map
+                .get(&workspace)
+                .map(|v| !v.contains(&file_path))
+                .unwrap_or(true)
+            {
+                result_map
+                    .entry(workspace)
+                    .or_default()
+                    .push(file_path.clone());
+            }
         }
     }
     result_map
@@ -151,14 +157,14 @@ pub fn discover_with_treesitter(
                     test_end_position = end_position;
                 }
                 "test.name" => {
-                    let test_name = if namespace.is_empty() {
+                    let test_id = if namespace.is_empty() {
                         value.to_string()
                     } else {
-                        [namespace, value].join(":")
+                        [namespace, value].join("::")
                     };
                     let test_item = TestItem {
-                        id: test_name.clone(),
-                        name: test_name,
+                        id: test_id.clone(),
+                        name: test_id,
                         start_position: Range {
                             start: Position {
                                 line: test_start_position.row as u32,
