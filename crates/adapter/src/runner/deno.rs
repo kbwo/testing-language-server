@@ -301,8 +301,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: String::from("fail1"),
-                    name: String::from("fail1"),
+                    id: String::from("fail2"),
+                    name: String::from("fail2"),
                     start_position: Range {
                         start: Position {
                             line: 15,
