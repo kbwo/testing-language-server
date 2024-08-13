@@ -12,6 +12,7 @@ pub enum AdapterCommands {
     DetectWorkspace(DetectWorkspaceArgs),
 }
 
+/// Arguments for `<adapter command> discover` command
 #[derive(clap::Args, Debug)]
 #[command(version, about, long_about = None)]
 pub struct DiscoverArgs {
@@ -21,6 +22,7 @@ pub struct DiscoverArgs {
     pub extra: Vec<String>,
 }
 
+/// Arguments for `<adapter command> discover` command
 #[derive(clap::Args, Debug)]
 #[command(version, about, long_about = None)]
 pub struct RunFileTestArgs {
@@ -34,6 +36,7 @@ pub struct RunFileTestArgs {
     pub extra: Vec<String>,
 }
 
+/// Arguments for `<adapter command> discover` command
 #[derive(clap::Args, Debug)]
 #[command(version, about, long_about = None)]
 pub struct DetectWorkspaceArgs {
@@ -74,8 +77,10 @@ pub struct AdapterConfiguration {
     pub workspace_dir: Option<String>,
 }
 
+/// Result of `<adapter command> detect-workspace`
 pub type DetectWorkspaceResult = HashMap<WorkspaceFilePath, Vec<FilePath>>;
 
+/// Result of `<adapter command> run-file-test`
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct RunFileTestResultItem {
     pub path: String,
@@ -98,4 +103,5 @@ pub struct DiscoverResultItem {
     pub tests: Vec<TestItem>,
 }
 
+/// Result of `<adapter command> discover`
 pub type DiscoverResult = Vec<DiscoverResultItem>;
