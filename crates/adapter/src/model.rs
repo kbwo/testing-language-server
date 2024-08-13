@@ -21,14 +21,14 @@ pub enum AvailableTestKind {
     GoTest(GoTestRunner),
 }
 impl Runner for AvailableTestKind {
-    fn disover(&self, args: DiscoverArgs) -> Result<(), LSError> {
+    fn discover(&self, args: DiscoverArgs) -> Result<(), LSError> {
         match self {
-            AvailableTestKind::CargoTest(runner) => runner.disover(args),
-            AvailableTestKind::CargoNextest(runner) => runner.disover(args),
-            AvailableTestKind::Jest(runner) => runner.disover(args),
-            AvailableTestKind::Deno(runner) => runner.disover(args),
-            AvailableTestKind::GoTest(runner) => runner.disover(args),
-            AvailableTestKind::Vitest(runner) => runner.disover(args),
+            AvailableTestKind::CargoTest(runner) => runner.discover(args),
+            AvailableTestKind::CargoNextest(runner) => runner.discover(args),
+            AvailableTestKind::Jest(runner) => runner.discover(args),
+            AvailableTestKind::Deno(runner) => runner.discover(args),
+            AvailableTestKind::GoTest(runner) => runner.discover(args),
+            AvailableTestKind::Vitest(runner) => runner.discover(args),
         }
     }
 
@@ -72,7 +72,7 @@ impl FromStr for AvailableTestKind {
 }
 
 pub trait Runner {
-    fn disover(&self, args: DiscoverArgs) -> Result<(), LSError>;
+    fn discover(&self, args: DiscoverArgs) -> Result<(), LSError>;
     fn run_file_test(&self, args: RunFileTestArgs) -> Result<(), LSError>;
     fn detect_workspaces(&self, args: DetectWorkspaceArgs) -> Result<(), LSError>;
 }

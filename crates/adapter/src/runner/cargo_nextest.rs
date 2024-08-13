@@ -31,7 +31,7 @@ fn detect_workspaces(file_paths: &[String]) -> DetectWorkspaceResult {
 pub struct CargoNextestRunner;
 
 impl Runner for CargoNextestRunner {
-    fn disover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
+    fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = vec![];
 

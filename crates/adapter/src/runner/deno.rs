@@ -157,7 +157,7 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
 pub struct DenoRunner;
 
 impl Runner for DenoRunner {
-    fn disover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
+    fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = vec![];
         for file_path in file_paths {

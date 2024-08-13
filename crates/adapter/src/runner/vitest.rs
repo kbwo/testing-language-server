@@ -132,7 +132,7 @@ fn parse_diagnostics(
 }
 
 impl Runner for VitestRunner {
-    fn disover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
+    fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = vec![];
 

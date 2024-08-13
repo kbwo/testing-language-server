@@ -33,7 +33,7 @@ fn handle(commands: AdapterCommands) -> Result<(), LSError> {
     match commands {
         AdapterCommands::Discover(mut commands) => {
             let (extra, test_kind) = pick_test_from_extra(&mut commands.extra).unwrap();
-            test_kind.disover(DiscoverArgs { extra, ..commands })?;
+            test_kind.discover(DiscoverArgs { extra, ..commands })?;
             Ok(())
         }
         AdapterCommands::RunFileTest(mut commands) => {

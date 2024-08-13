@@ -225,7 +225,7 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
 #[derive(Eq, PartialEq, Hash, Debug)]
 pub struct GoTestRunner;
 impl Runner for GoTestRunner {
-    fn disover(
+    fn discover(
         &self,
         args: testing_language_server::spec::DiscoverArgs,
     ) -> Result<(), testing_language_server::error::LSError> {
