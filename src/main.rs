@@ -48,14 +48,14 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                 break 'read_header;
             }
 
-            let splitted: Vec<&str> = buffer.split(' ').collect();
+            let split: Vec<&str> = buffer.split(' ').collect();
 
-            if splitted.len() != 2 {
+            if split.len() != 2 {
                 tracing::warn!("unexpected");
             }
 
-            let header_name = splitted[0].to_lowercase();
-            let header_value = splitted[1].trim();
+            let header_name = split[0].to_lowercase();
+            let header_value = split[1].trim();
 
             match header_name.as_ref() {
                 "content-length" => {}
@@ -105,9 +105,7 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                 "$/discoverFileTest" => {
                     let id = value["id"].as_i64().unwrap();
                     let uri = extract_uri(&params)?;
-                    tracing::info!("DEBUGPRINT[2]: main.rs:107: uri={:#?}", uri);
                     let result = server.discover_file(&uri)?;
-                    tracing::info!("DEBUGPRINT[1]: main.rs:108: result={:#?}", result);
                     send_stdout(&json!({
                             "jsonrpc": "2.0",
                             "id": id,
