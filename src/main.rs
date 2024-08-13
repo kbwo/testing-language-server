@@ -99,13 +99,15 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     }
                 }
                 "$/runFileTest" => {
-                    let uri = extract_uri(&params["uri"])?;
+                    let uri = extract_uri(&params)?;
                     server.check_file(&uri, false)?;
                 }
                 "$/discoverFileTest" => {
                     let id = value["id"].as_i64().unwrap();
-                    let uri = extract_uri(&params["uri"])?;
+                    let uri = extract_uri(&params)?;
+                    tracing::info!("DEBUGPRINT[2]: main.rs:107: uri={:#?}", uri);
                     let result = server.discover_file(&uri)?;
+                    tracing::info!("DEBUGPRINT[1]: main.rs:108: result={:#?}", result);
                     send_stdout(&json!({
                             "jsonrpc": "2.0",
                             "id": id,
