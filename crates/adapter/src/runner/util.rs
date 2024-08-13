@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
@@ -140,6 +140,7 @@ pub fn discover_with_treesitter(
     let source = source_code.as_bytes();
     let matches = cursor.matches(&query, tree.root_node(), source);
     let mut namespace = "";
+    let mut test_id_set = HashSet::new();
     for m in matches {
         let mut test_start_position = Point::default();
         let mut test_end_position = Point::default();
@@ -162,6 +163,11 @@ pub fn discover_with_treesitter(
                     } else {
                         [namespace, value].join("::")
                     };
+                    if test_id_set.contains(&test_id) {
+                        continue;
+                    } else {
+                        test_id_set.insert(test_id.clone());
+                    }
                     let test_item = TestItem {
                         id: test_id.clone(),
                         name: test_id,
