@@ -22,7 +22,7 @@ pub struct DiscoverArgs {
     pub extra: Vec<String>,
 }
 
-/// Arguments for `<adapter command> discover` command
+/// Arguments for `<adapter command> run-file-test` command
 #[derive(clap::Args, Debug)]
 #[command(version, about, long_about = None)]
 pub struct RunFileTestArgs {
@@ -36,7 +36,7 @@ pub struct RunFileTestArgs {
     pub extra: Vec<String>,
 }
 
-/// Arguments for `<adapter command> discover` command
+/// Arguments for `<adapter command> detect-workspace` command
 #[derive(clap::Args, Debug)]
 #[command(version, about, long_about = None)]
 pub struct DetectWorkspaceArgs {
