@@ -85,8 +85,6 @@ pub type DetectWorkspaceResult = HashMap<WorkspaceFilePath, Vec<FilePath>>;
 pub struct RunFileTestResultItem {
     pub path: String,
     pub diagnostics: Vec<Diagnostic>,
-    pub performed_test_ids: Vec<String>,
-    pub failed_test_ids: Vec<String>,
 }
 
 pub type RunFileTestResult = Vec<RunFileTestResultItem>;
