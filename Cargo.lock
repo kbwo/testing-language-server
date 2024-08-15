@@ -627,7 +627,7 @@ dependencies = [
 
 [[package]]
 name = "testing-language-server"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "anyhow",
  "clap",
@@ -648,7 +648,7 @@ dependencies = [
 
 [[package]]
 name = "testing-ls-adapter"
-version = "0.0.3"
+version = "0.0.5"
 dependencies = [
  "anyhow",
  "clap",
