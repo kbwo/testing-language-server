@@ -99,12 +99,15 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     }
                 }
                 "$/runFileTest" => {
-                    let uri = extract_uri(&params)?;
+                    let uri = extract_uri(params)?;
                     server.check_file(&uri, false)?;
+                }
+                "$/runWorkspaceTest" => {
+                    server.diagnose_workspace()?;
                 }
                 "$/discoverFileTest" => {
                     let id = value["id"].as_i64().unwrap();
-                    let uri = extract_uri(&params)?;
+                    let uri = extract_uri(params)?;
                     let result = server.discover_file(&uri)?;
                     send_stdout(&json!({
                             "jsonrpc": "2.0",
