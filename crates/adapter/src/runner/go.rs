@@ -20,6 +20,7 @@ use testing_language_server::spec::TestItem;
 
 use super::util::detect_workspaces_from_file_paths;
 use super::util::discover_with_treesitter;
+use super::util::write_result_log;
 use super::util::MAX_CHAR_LENGTH;
 
 #[derive(Deserialize, Eq, PartialEq)]
@@ -262,6 +263,7 @@ impl Runner for GoTestRunner {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stdout)?;
+        write_result_log("go.log", &test_result)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace).unwrap(),

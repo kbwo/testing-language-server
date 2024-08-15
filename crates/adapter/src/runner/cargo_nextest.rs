@@ -14,6 +14,7 @@ use crate::model::Runner;
 use super::util::detect_workspaces_from_file_paths;
 use super::util::discover_rust_tests;
 use super::util::parse_cargo_diagnostics;
+use super::util::write_result_log;
 
 fn parse_diagnostics(
     contents: &str,
@@ -87,6 +88,7 @@ impl Runner for CargoNextestRunner {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stderr)?;
+        write_result_log("cargo_nextest.log", &test_result)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace_root).unwrap(),

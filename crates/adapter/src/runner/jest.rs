@@ -4,7 +4,6 @@ use lsp_types::DiagnosticSeverity;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs;
-use tempfile::tempdir;
 use testing_language_server::error::LSError;
 
 use testing_language_server::spec::DetectWorkspaceResult;
@@ -19,6 +18,7 @@ use crate::model::Runner;
 use super::util::clean_ansi;
 use super::util::detect_workspaces_from_file_paths;
 use super::util::discover_with_treesitter;
+use super::util::LOG_LOCATION;
 use super::util::MAX_CHAR_LENGTH;
 
 fn parse_diagnostics(
@@ -175,9 +175,7 @@ impl Runner for JestRunner {
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let workspace_root = args.workspace;
-        let tempdir = tempdir().unwrap();
-        let tempdir_path = tempdir.path();
-        let tempfile_path = tempdir_path.join("jest.json");
+        let log_path = LOG_LOCATION.join("jest.json");
         std::process::Command::new("jest")
             .current_dir(&workspace_root)
             .args([
@@ -187,11 +185,11 @@ impl Runner for JestRunner {
                 "--verbose",
                 "--json",
                 "--outputFile",
-                tempfile_path.to_str().unwrap(),
+                log_path.to_str().unwrap(),
             ])
             .output()
             .unwrap();
-        let test_result = fs::read_to_string(tempfile_path)?;
+        let test_result = fs::read_to_string(log_path)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(&test_result, file_paths)?;
         send_stdout(&diagnostics)?;
         Ok(())

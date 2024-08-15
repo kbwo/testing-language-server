@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
+use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 use regex::Regex;
@@ -8,6 +10,11 @@ use serde::Serialize;
 use testing_language_server::spec::{RunFileTestResultItem, TestItem};
 use testing_language_server::{error::LSError, spec::RunFileTestResult};
 use tree_sitter::{Language, Point, Query, QueryCursor};
+
+pub static LOG_LOCATION: LazyLock<PathBuf> = LazyLock::new(|| {
+    let home_dir = dirs::home_dir().unwrap();
+    home_dir.join(".config/testing_language_server/adapter/")
+});
 
 // If the character value is greater than the line length it defaults back to the line length.
 pub const MAX_CHAR_LENGTH: u32 = 10000;
@@ -283,4 +290,10 @@ pub fn resolve_path(base_dir: &Path, relative_path: &str) -> PathBuf {
     }
 
     PathBuf::from_iter(components)
+}
+
+pub fn write_result_log(file_name: &str, content: &str) -> io::Result<()> {
+    let log_path = LOG_LOCATION.join(file_name);
+    std::fs::write(&log_path, content)?;
+    Ok(())
 }

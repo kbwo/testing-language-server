@@ -1,11 +1,10 @@
 use std::{
     collections::HashMap,
-    fs::{self, File},
+    fs::{self},
 };
 
 use lsp_types::{Diagnostic, DiagnosticSeverity};
 use serde_json::Value;
-use tempfile::tempdir;
 use testing_language_server::{
     error::LSError,
     spec::{
@@ -17,7 +16,7 @@ use crate::model::Runner;
 
 use super::util::{
     clean_ansi, detect_workspaces_from_file_paths, discover_with_treesitter, send_stdout,
-    MAX_CHAR_LENGTH,
+    LOG_LOCATION, MAX_CHAR_LENGTH,
 };
 
 #[derive(Eq, PartialEq, Hash, Debug)]
@@ -153,26 +152,21 @@ impl Runner for VitestRunner {
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let workspace_root = args.workspace;
-        let tempdir = tempdir().unwrap();
-        let tempdir_path = tempdir.path();
-        let tempfile_path = tempdir_path.join("vitest.json");
-        let tempfile = File::create(&tempfile_path)?;
-        let tempfile_path = tempfile_path.to_str().unwrap();
+        let log_path = LOG_LOCATION.join("vitest.json");
+        let log_path = log_path.to_str().unwrap();
         std::process::Command::new("vitest")
             .current_dir(&workspace_root)
             .args([
                 "--watch=false",
                 "--reporter=json",
                 "--outputFile=",
-                tempfile_path,
+                log_path,
             ])
             .output()
             .unwrap();
-        let test_result = fs::read_to_string(tempfile_path)?;
+        let test_result = fs::read_to_string(log_path)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(&test_result, file_paths)?;
         send_stdout(&diagnostics)?;
-        drop(tempfile);
-        let _ = tempdir.close();
         Ok(())
     }
 

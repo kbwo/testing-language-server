@@ -23,6 +23,7 @@ use crate::model::Runner;
 use super::util::clean_ansi;
 use super::util::detect_workspaces_from_file_paths;
 use super::util::discover_with_treesitter;
+use super::util::write_result_log;
 use super::util::MAX_CHAR_LENGTH;
 
 fn get_position_from_output(line: &str) -> Option<(String, u32, u32)> {
@@ -187,6 +188,7 @@ impl Runner for DenoRunner {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stdout)?;
+        write_result_log("deno.log", &test_result)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace).unwrap(),
