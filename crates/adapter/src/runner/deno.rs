@@ -183,12 +183,12 @@ impl Runner for DenoRunner {
             .args(&file_paths)
             .output()
             .unwrap();
+        write_result_log("deno.log", &output)?;
         let Output { stdout, stderr, .. } = output;
         if stdout.is_empty() {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stdout)?;
-        write_result_log("deno.log", &test_result)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace).unwrap(),

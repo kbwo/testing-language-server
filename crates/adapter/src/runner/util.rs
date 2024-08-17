@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::io;
 use std::path::{Path, PathBuf};
+use std::process::Output;
 use std::str::FromStr;
 use std::sync::LazyLock;
 
@@ -292,7 +293,10 @@ pub fn resolve_path(base_dir: &Path, relative_path: &str) -> PathBuf {
     PathBuf::from_iter(components)
 }
 
-pub fn write_result_log(file_name: &str, content: &str) -> io::Result<()> {
+pub fn write_result_log(file_name: &str, output: &Output) -> io::Result<()> {
+    let stdout = String::from_utf8(output.stdout.clone()).unwrap();
+    let stderr = String::from_utf8(output.stderr.clone()).unwrap();
+    let content = format!("stdout:\n{}\nstderr:\n{}", stdout, stderr);
     let log_path = LOG_LOCATION.join(file_name);
     std::fs::write(&log_path, content)?;
     Ok(())

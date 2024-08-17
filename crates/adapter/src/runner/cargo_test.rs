@@ -74,12 +74,13 @@ impl Runner for CargoTestRunner {
             .args(tests)
             .output()
             .unwrap();
-        let Output { stdout, stderr, .. } = test_result;
+        let output = test_result;
+        write_result_log("cargo_test.log", &output)?;
+        let Output { stdout, stderr, .. } = output;
         if stdout.is_empty() && !stderr.is_empty() {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stdout)?;
-        write_result_log("cargo_test.log", &test_result)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace_root).unwrap(),

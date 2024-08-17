@@ -251,19 +251,19 @@ impl Runner for GoTestRunner {
         let file_paths = args.file_paths;
         let default_args = ["-v", "-json", "", "-count=1", "-timeout=60s"];
         let workspace = args.workspace;
-        let test_result = std::process::Command::new("go")
+        let output = std::process::Command::new("go")
             .current_dir(&workspace)
             .arg("test")
             .args(default_args)
             .args(args.extra)
             .output()
             .unwrap();
-        let Output { stdout, stderr, .. } = test_result;
+        write_result_log("go.log", &output)?;
+        let Output { stdout, stderr, .. } = output;
         if stdout.is_empty() && !stderr.is_empty() {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stdout)?;
-        write_result_log("go.log", &test_result)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace).unwrap(),

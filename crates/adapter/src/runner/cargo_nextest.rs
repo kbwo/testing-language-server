@@ -77,18 +77,18 @@ impl Runner for CargoNextestRunner {
             .args(tests)
             .output()
             .unwrap();
+        let output = test_result;
+        write_result_log("cargo_nextest.log", &output)?;
         let Output {
             stdout,
             stderr,
             status,
-            ..
-        } = test_result;
+        } = output;
         let unexpected_status_code = status.code().map(|code| code != 100);
         if stdout.is_empty() && !stderr.is_empty() && unexpected_status_code.unwrap_or(false) {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stderr)?;
-        write_result_log("cargo_nextest.log", &test_result)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace_root).unwrap(),
