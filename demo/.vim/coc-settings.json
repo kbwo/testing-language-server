@@ -3,17 +3,17 @@
     "testing": {
       "command": "testing-language-server",
       "trace.server": "verbose",
-      "filetypes": ["rust", "javascript", "go", "typescript"],
+      "filetypes": ["rust", "javascript", "go", "typescript", "php"],
       "initializationOptions": {
         "adapterCommand": {
-          // "cargo-test": [
-          //   {
-          //     "path": "testing-ls-adapter",
-          //     "extra_args": ["--test-kind=cargo-test"],
-          //     "include_patterns": ["/**/src/**/*.rs"],
-          //     "exclude_patterns": ["/**/target/**"]
-          //   }
-          // ],
+          "cargo-test": [
+            {
+              "path": "testing-ls-adapter",
+              "extra_args": ["--test-kind=cargo-test"],
+              "include_patterns": ["/**/src/**/*.rs"],
+              "exclude_patterns": ["/**/target/**"]
+            }
+          ],
           "cargo-nextest": [
             {
               "path": "testing-ls-adapter",
@@ -55,6 +55,14 @@
               "extra_args": ["--test-kind=go-test"],
               "include_patterns": ["/**/*.go"],
               "exclude_patterns": []
+            }
+          ],
+          "phpunit": [
+            {
+              "path": "testing-ls-adapter",
+              "extra_args": ["--test-kind=phpunit"],
+              "include_patterns": ["/**/*Test.php"],
+              "exclude_patterns": ["/phpunit/vendor/**/*.php"]
             }
           ]
         }

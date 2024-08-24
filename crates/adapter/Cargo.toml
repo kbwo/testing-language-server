@@ -20,7 +20,9 @@ anyhow = { workspace = true }
 tempfile = "3.10.1"
 tree-sitter-javascript = "0.21.0"
 tree-sitter-go = "0.21.0"
+tree-sitter-php = "0.22.5"
 tracing-appender = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, default-features = false }
 dirs = "5.0.1"
+xml-rs = "0.8.21"

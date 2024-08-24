@@ -2,6 +2,7 @@ use crate::runner::cargo_nextest::CargoNextestRunner;
 use crate::runner::cargo_test::CargoTestRunner;
 use crate::runner::deno::DenoRunner;
 use crate::runner::go::GoTestRunner;
+use crate::runner::phpunit::PhpunitRunner;
 use crate::runner::vitest::VitestRunner;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
@@ -19,6 +20,7 @@ pub enum AvailableTestKind {
     Vitest(VitestRunner),
     Deno(DenoRunner),
     GoTest(GoTestRunner),
+    Phpunit(PhpunitRunner),
 }
 impl Runner for AvailableTestKind {
     fn discover(&self, args: DiscoverArgs) -> Result<(), LSError> {
@@ -29,6 +31,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::Deno(runner) => runner.discover(args),
             AvailableTestKind::GoTest(runner) => runner.discover(args),
             AvailableTestKind::Vitest(runner) => runner.discover(args),
+            AvailableTestKind::Phpunit(runner) => runner.discover(args),
         }
     }
 
@@ -40,6 +43,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::Deno(runner) => runner.run_file_test(args),
             AvailableTestKind::GoTest(runner) => runner.run_file_test(args),
             AvailableTestKind::Vitest(runner) => runner.run_file_test(args),
+            AvailableTestKind::Phpunit(runner) => runner.run_file_test(args),
         }
     }
 
@@ -51,6 +55,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::Deno(runner) => runner.detect_workspaces(args),
             AvailableTestKind::GoTest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::Vitest(runner) => runner.detect_workspaces(args),
+            AvailableTestKind::Phpunit(runner) => runner.detect_workspaces(args),
         }
     }
 }
@@ -66,6 +71,7 @@ impl FromStr for AvailableTestKind {
             "go-test" => Ok(AvailableTestKind::GoTest(GoTestRunner)),
             "vitest" => Ok(AvailableTestKind::Vitest(VitestRunner)),
             "deno" => Ok(AvailableTestKind::Deno(DenoRunner)),
+            "phpunit" => Ok(AvailableTestKind::Phpunit(PhpunitRunner)),
             _ => Err(anyhow::anyhow!("Unknown test kind: {}", s)),
         }
     }
