@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="3" assertions="3" errors="0" failures="1" skipped="0" time="0.002791">
+    <testsuite name="Tests\CalculatorTest" file="/home/kbwo/testing-language-server/demo/phpunit/src/CalculatorTest.php" tests="3" assertions="3" errors="0" failures="1" skipped="0" time="0.002791">
+      <testcase name="testAdd" file="/home/kbwo/testing-language-server/demo/phpunit/src/CalculatorTest.php" line="10" class="Tests\CalculatorTest" classname="Tests.CalculatorTest" assertions="1" time="0.000695"/>
+      <testcase name="testSubtract" file="/home/kbwo/testing-language-server/demo/phpunit/src/CalculatorTest.php" line="17" class="Tests\CalculatorTest" classname="Tests.CalculatorTest" assertions="1" time="0.000046"/>
+      <testcase name="testFail1" file="/home/kbwo/testing-language-server/demo/phpunit/src/CalculatorTest.php" line="24" class="Tests\CalculatorTest" classname="Tests.CalculatorTest" assertions="1" time="0.002051">
+        <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\CalculatorTest::testFail1
+Failed asserting that 8 matches expected 1.
+
+/home/kbwo/testing-language-server/demo/phpunit/src/CalculatorTest.php:28</failure>
+      </testcase>
+    </testsuite>
+  </testsuite>
+</testsuites>

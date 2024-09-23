@@ -328,16 +328,21 @@ impl TestingLS {
 
         let adapter_result =
             String::from_utf8(stdout).map_err(|err| LSError::Adapter(err.to_string()))?;
-        if let Ok(res) = serde_json::from_str::<RunFileTestResult>(&adapter_result) {
-            for target_file in paths {
-                let diagnostics_for_file: Vec<Diagnostic> = res
-                    .clone()
-                    .into_iter()
-                    .filter(|RunFileTestResultItem { path, .. }| path == target_file)
-                    .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics)
-                    .collect();
-                let uri = Url::from_file_path(target_file.replace("file://", "")).unwrap();
-                diagnostics.push((uri.to_string(), diagnostics_for_file));
+        match serde_json::from_str::<RunFileTestResult>(&adapter_result) {
+            Ok(res) => {
+                for target_file in paths {
+                    let diagnostics_for_file: Vec<Diagnostic> = res
+                        .clone()
+                        .into_iter()
+                        .filter(|RunFileTestResultItem { path, .. }| path == target_file)
+                        .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics)
+                        .collect();
+                    let uri = Url::from_file_path(target_file.replace("file://", "")).unwrap();
+                    diagnostics.push((uri.to_string(), diagnostics_for_file));
+                }
+            }
+            Err(err) => {
+                tracing::error!("Failed to parse adapter result: {:?}", err);
             }
         }
         Ok(diagnostics)
