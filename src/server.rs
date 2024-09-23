@@ -452,6 +452,15 @@ impl TestingLS {
         }))?;
         Ok(())
     }
+
+    pub fn shutdown(&self, id: i64) -> Result<(), LSError> {
+        send_stdout(&json!({
+            "jsonrpc": "2.0",
+            "id": id,
+            "method": json!(null),
+        }))?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

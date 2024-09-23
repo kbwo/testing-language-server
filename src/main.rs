@@ -85,6 +85,13 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     let id = value["id"].as_i64().unwrap();
                     server.initialize(id, initialize_params)?;
                 }
+                "shutdown" => {
+                    let id = value["id"].as_i64().unwrap();
+                    server.shutdown(id)?;
+                }
+                "exit" => {
+                    std::process::exit(0);
+                }
                 "workspace/diagnostic" => {
                     server.diagnose_workspace()?;
                 }
