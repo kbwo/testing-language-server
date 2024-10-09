@@ -213,6 +213,11 @@ impl TestingLS {
         Ok(())
     }
 
+    /// Diagnoses the entire workspace for diagnostics.
+    /// This function will refresh the workspace cache, check if workspace diagnostics are enabled,
+    /// and then iterate through all workspaces to diagnose them.
+    /// It will trigger the publication of diagnostics for all files in the workspace
+    /// through the Language Server Protocol.
     pub fn diagnose_workspace(&mut self) -> Result<WorkspaceDiagnosticsStatus, LSError> {
         self.refresh_workspaces_cache()?;
         if !self.options.enable_workspace_diagnostics.unwrap_or(true) {
@@ -249,12 +254,18 @@ impl TestingLS {
                 Self::project_files(&base_dir, include_patterns, exclude_patterns)
                     .contains(&path.to_owned())
             }),
-            Err(_) => false,
+            Err(e) => {
+                tracing::error!("Error: {:?}", e);
+                false
+            }
         }
     }
 
+    /// Checks a specific file for diagnostics, optionally refreshing the workspace cache.
+    /// This function will trigger the publication of diagnostics for the specified file
+    /// through the Language Server Protocol.
     pub fn check_file(&mut self, path: &str, refresh_needed: bool) -> Result<(), LSError> {
-        if refresh_needed {
+        if refresh_needed || self.workspaces_cache.is_empty() {
             self.refresh_workspaces_cache()?;
         }
         self.workspaces_cache.iter().for_each(
