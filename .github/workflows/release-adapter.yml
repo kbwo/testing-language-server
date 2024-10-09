@@ -1,31 +1,60 @@
-name: Release
+name: Release Adapter
 
 on:
   push:
-    tags:
-      - 'adapter-v*.*.*'
+    branches:
+      - main
+    paths:
+      - crates/adapter/Cargo.toml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.check_version.outputs.version_changed }}
+      new_version: ${{ steps.check_version.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Check if version changed
+        id: check_version
+        run: |
+          PACKAGE_NAME=$(grep '^name' crates/adapter/Cargo.toml | sed 's/name = "\(.*\)"/\1/')
+          RELEASED_VERSION=$(cargo search $PACKAGE_NAME --limit 1 | grep -oP '(?<=").*(?=")')
+          if [ $? -ne 0 ]; then
+            echo "Failed to fetch released version"
+            exit 1
+          fi
+          NEW_VERSION=$(grep '^version' crates/adapter/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          
+          if [ "$RELEASED_VERSION" != "$NEW_VERSION" ]; then
+            echo "Version changed from $RELEASED_VERSION to $NEW_VERSION"
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "No version change"
+          fi
+
+  publish:
+    needs: check-version
+    if: needs.check-version.outputs.version_changed == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: crates/adapter
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
-
-    - name: Build project
-      run: cargo build --release
-
-    - name: Publish to crates.io
-      env:
-        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      run: cargo publish --token $CARGO_REGISTRY_TOKEN
+      - uses: actions/checkout@v3
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --token $CARGO_REGISTRY_TOKEN
