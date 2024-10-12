@@ -10,59 +10,56 @@
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=cargo-test"],
-              "include_patterns": ["/**/src/**/*.rs"],
-              "exclude_patterns": ["/**/target/**"]
+              "include": ["/**/src/**/*.rs"],
+              "exclude": ["/**/target/**"]
             }
           ],
           "cargo-nextest": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=cargo-nextest"],
-              "include_patterns": ["/**/src/**/*.rs"],
-              "exclude_patterns": ["/**/target/**"]
+              "include": ["/**/src/**/*.rs"],
+              "exclude": ["/**/target/**"]
             }
           ],
           "jest": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=jest"],
-              "include_patterns": ["/jest/*.js"],
-              "exclude_patterns": ["/jest/**/node_modules/**/*"]
+              "include": ["/jest/*.js"],
+              "exclude": ["/jest/**/node_modules/**/*"]
             }
           ],
           "vitest": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=vitest"],
-              "include_patterns": [
-                "/vitest/*.test.ts",
-                "/vitest/config/**/*.test.ts"
-              ],
-              "exclude_patterns": ["/vitest/**/node_modules/**/*"]
+              "include": ["/vitest/*.test.ts", "/vitest/config/**/*.test.ts"],
+              "exclude": ["/vitest/**/node_modules/**/*"]
             }
           ],
           "deno": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=deno"],
-              "include_patterns": ["/deno/*.ts"],
-              "exclude_patterns": []
+              "include": ["/deno/*.ts"],
+              "exclude": []
             }
           ],
           "go": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=go-test"],
-              "include_patterns": ["/**/*.go"],
-              "exclude_patterns": []
+              "include": ["/**/*.go"],
+              "exclude": []
             }
           ],
           "phpunit": [
             {
               "path": "testing-ls-adapter",
               "extra_args": ["--test-kind=phpunit"],
-              "include_patterns": ["/**/*Test.php"],
-              "exclude_patterns": ["/phpunit/vendor/**/*.php"]
+              "include": ["/**/*Test.php"],
+              "exclude": ["/phpunit/vendor/**/*.php"]
             }
           ]
         }

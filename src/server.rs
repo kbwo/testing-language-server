@@ -91,21 +91,17 @@ impl TestingLS {
         self.options.adapter_command.clone()
     }
 
-    fn project_files(
-        base_dir: &Path,
-        include_patterns: &[String],
-        exclude_patterns: &[String],
-    ) -> Vec<String> {
+    fn project_files(base_dir: &Path, include: &[String], exclude: &[String]) -> Vec<String> {
         let mut result: Vec<String> = vec![];
 
-        let exclude_pattern = exclude_patterns
+        let exclude_pattern = exclude
             .iter()
             .filter_map(|exclude_pattern| {
                 Pattern::new(base_dir.join(exclude_pattern).to_str().unwrap()).ok()
             })
             .collect::<Vec<Pattern>>();
         let base_dir = base_dir.to_str().unwrap();
-        let entries = globwalk::GlobWalkerBuilder::from_patterns(base_dir, include_patterns)
+        let entries = globwalk::GlobWalkerBuilder::from_patterns(base_dir, include)
             .follow_links(true)
             .build()
             .unwrap()
@@ -159,14 +155,13 @@ impl TestingLS {
                 let AdapterConfiguration {
                     path,
                     extra_args,
-                    envs,
-                    include_patterns,
-                    exclude_patterns,
+                    env,
+                    include,
+                    exclude,
                     workspace_dir,
                     ..
                 } = &adapter;
-                let file_paths =
-                    Self::project_files(&project_dir, include_patterns, exclude_patterns);
+                let file_paths = Self::project_files(&project_dir, include, exclude);
                 if file_paths.is_empty() {
                     continue;
                 }
@@ -181,7 +176,7 @@ impl TestingLS {
                     .args(args_file_path)
                     .arg("--")
                     .args(extra_args)
-                    .envs(envs)
+                    .envs(env)
                     .output()
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let adapter_result = String::from_utf8(output.stdout)
@@ -241,8 +236,8 @@ impl TestingLS {
         let base_dir = self.project_dir();
         match base_dir {
             Ok(base_dir) => self.workspaces_cache.iter().any(|cache| {
-                let include_patterns = &cache.adapter_config.include_patterns;
-                let exclude_patterns = &cache.adapter_config.exclude_patterns;
+                let include = &cache.adapter_config.include;
+                let exclude = &cache.adapter_config.exclude;
                 if cache
                     .workspaces
                     .iter()
@@ -251,8 +246,7 @@ impl TestingLS {
                     return false;
                 }
 
-                Self::project_files(&base_dir, include_patterns, exclude_patterns)
-                    .contains(&path.to_owned())
+                Self::project_files(&base_dir, include, exclude).contains(&path.to_owned())
             }),
             Err(e) => {
                 tracing::error!("Error: {:?}", e);
@@ -305,7 +299,7 @@ impl TestingLS {
             .args(args)
             .arg("--")
             .args(&adapter.extra_args)
-            .envs(&adapter.envs)
+            .envs(&adapter.env)
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
         let Output { stdout, stderr, .. } = output;
@@ -450,7 +444,7 @@ impl TestingLS {
             .args(args)
             .arg("--")
             .args(&adapter.extra_args)
-            .envs(&adapter.envs)
+            .envs(&adapter.env)
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
 

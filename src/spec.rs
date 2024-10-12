@@ -71,9 +71,9 @@ pub struct AdapterConfiguration {
     #[serde(default)]
     pub extra_args: Vec<String>,
     #[serde(default)]
-    pub envs: HashMap<String, String>,
-    pub include_patterns: Vec<String>,
-    pub exclude_patterns: Vec<String>,
+    pub env: HashMap<String, String>,
+    pub include: Vec<String>,
+    pub exclude: Vec<String>,
     pub workspace_dir: Option<String>,
 }
 
