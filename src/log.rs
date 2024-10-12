@@ -19,8 +19,8 @@ impl Log {
         clean_old_logs(
             log_dir_path.to_str().unwrap(),
             30,
-            "prefix.log.*",
-            "prefix.log.",
+            &format!("{prefix}.*"),
+            &format!("{prefix}."),
         )
         .unwrap();
         tracing_subscriber::fmt().with_writer(non_blocking).init();
