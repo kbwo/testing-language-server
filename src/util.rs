@@ -138,6 +138,7 @@ mod tests {
     fn test_clean_old_logs() {
         let home_dir = dirs::home_dir().unwrap();
         let log_dir = home_dir.join(".config/testing_language_server/logs");
+        std::fs::create_dir_all(&log_dir).unwrap();
 
         // Create test log files
         let old_file = log_dir.join("prefix.log.2023-01-01");
