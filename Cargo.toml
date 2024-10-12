@@ -1,6 +1,6 @@
 [package]
 name = "testing-language-server"
-version = "0.0.10"
+version = "0.0.11"
 edition = "2021"
 description = "LSP server for testing"
 license = "MIT"
