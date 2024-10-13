@@ -154,7 +154,7 @@ impl TestingLS {
             for adapter in adapter_commands.into_iter() {
                 let AdapterConfiguration {
                     path,
-                    extra_args,
+                    extra_arg,
                     env,
                     include,
                     exclude,
@@ -175,7 +175,7 @@ impl TestingLS {
                     .arg("detect-workspace")
                     .args(args_file_path)
                     .arg("--")
-                    .args(extra_args)
+                    .args(extra_arg)
                     .envs(env)
                     .output()
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
@@ -298,7 +298,7 @@ impl TestingLS {
             .arg("run-file-test")
             .args(args)
             .arg("--")
-            .args(&adapter.extra_args)
+            .args(&adapter.extra_arg)
             .envs(&adapter.env)
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
@@ -443,7 +443,7 @@ impl TestingLS {
             .arg("discover")
             .args(args)
             .arg("--")
-            .args(&adapter.extra_args)
+            .args(&adapter.extra_arg)
             .envs(&adapter.env)
             .output()
             .map_err(|err| LSError::Adapter(err.to_string()))?;
@@ -510,7 +510,7 @@ mod tests {
             .unwrap();
         let adapter_conf = AdapterConfiguration {
             path: abs_path_of_rust_adapter,
-            extra_args: vec!["--test-kind=cargo-test".to_string()],
+            extra_arg: vec!["--test-kind=cargo-test".to_string()],
             ..Default::default()
         };
         let mut server = TestingLS {
@@ -571,7 +571,7 @@ mod tests {
                 .to_str()
                 .unwrap()
                 .to_string(),
-            extra_args: vec!["--invalid-arg".to_string()],
+            extra_arg: vec!["--invalid-arg".to_string()],
             ..Default::default()
         };
         let abs_path_of_demo = std::env::current_dir().unwrap().join("demo/rust");

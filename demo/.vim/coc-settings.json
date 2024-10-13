@@ -9,7 +9,7 @@
           "cargo-test": [
             {
               "path": "testing-ls-adapter",
-              "extra_args": ["--test-kind=cargo-test"],
+              "extra_arg": ["--test-kind=cargo-test"],
               "include": ["/**/src/**/*.rs"],
               "exclude": ["/**/target/**"]
             }
@@ -17,7 +17,7 @@
           "cargo-nextest": [
             {
               "path": "testing-ls-adapter",
-              "extra_args": ["--test-kind=cargo-nextest"],
+              "extra_arg": ["--test-kind=cargo-nextest"],
               "include": ["/**/src/**/*.rs"],
               "exclude": ["/**/target/**"]
             }
@@ -25,7 +25,7 @@
           "jest": [
             {
               "path": "testing-ls-adapter",
-              "extra_args": ["--test-kind=jest"],
+              "extra_arg": ["--test-kind=jest"],
               "include": ["/jest/*.js"],
               "exclude": ["/jest/**/node_modules/**/*"]
             }
@@ -33,7 +33,7 @@
           "vitest": [
             {
               "path": "testing-ls-adapter",
-              "extra_args": ["--test-kind=vitest"],
+              "extra_arg": ["--test-kind=vitest"],
               "include": ["/vitest/*.test.ts", "/vitest/config/**/*.test.ts"],
               "exclude": ["/vitest/**/node_modules/**/*"]
             }
@@ -41,7 +41,7 @@
           "deno": [
             {
               "path": "testing-ls-adapter",
-              "extra_args": ["--test-kind=deno"],
+              "extra_arg": ["--test-kind=deno"],
               "include": ["/deno/*.ts"],
               "exclude": []
             }
@@ -49,7 +49,7 @@
           "go": [
             {
               "path": "testing-ls-adapter",
-              "extra_args": ["--test-kind=go-test"],
+              "extra_arg": ["--test-kind=go-test"],
               "include": ["/**/*.go"],
               "exclude": []
             }
@@ -57,7 +57,7 @@
           "phpunit": [
             {
               "path": "testing-ls-adapter",
-              "extra_args": ["--test-kind=phpunit"],
+              "extra_arg": ["--test-kind=phpunit"],
               "include": ["/**/*Test.php"],
               "exclude": ["/phpunit/vendor/**/*.php"]
             }

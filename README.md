@@ -50,17 +50,17 @@ language server config:
           "cargo test": [
             {
               "path": "<adapter path>/testing-ls-adapter",
-              "extra_args": ["--test-kind=cargo-test"],
-              "include_pattern": ["**/*.rs"],
-              "exclude_pattern": ["**/target/**"]
+              "extra_arg": ["--test-kind=cargo-test"],
+              "include": ["**/*.rs"],
+              "exclude": ["**/target/**"]
             }
           ],
           "jest": [
             {
               "path": "<adapter path>/testing-ls-adapter",
-              "extra_args": ["--test-kind=jest"],
-              "include_patterns": ["/**/*.js"],
-              "exclude_patterns": ["/node_modules/**/*"]
+              "extra_arg": ["--test-kind=jest"],
+              "include": ["/**/*.js"],
+              "exclude": ["/node_modules/**/*"]
             }
           ]
         }
@@ -69,6 +69,8 @@ language server config:
   }
 }
 ```
+
+[See more example](./demo/.vim/coc-settings.json)
 
 ## Adapter
 - [x] `cargo test`

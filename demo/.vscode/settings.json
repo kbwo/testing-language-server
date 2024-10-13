@@ -5,7 +5,7 @@
     "cargo-nextest": [
       {
         "path": "testing-ls-adapter",
-        "extra_args": ["--test-kind=cargo-nextest"],
+        "extra_arg": ["--test-kind=cargo-nextest"],
         "include_patterns": ["/**/src/**/*.rs"],
         "exclude_patterns": ["/**/target/**"]
       }
@@ -13,7 +13,7 @@
     "jest": [
       {
         "path": "testing-ls-adapter",
-        "extra_args": ["--test-kind=jest"],
+        "extra_arg": ["--test-kind=jest"],
         "include_patterns": ["/jest/*.js"],
         "exclude_patterns": ["/jest/**/node_modules/**/*"]
       }
@@ -21,7 +21,7 @@
     "vitest": [
       {
         "path": "testing-ls-adapter",
-        "extra_args": ["--test-kind=vitest"],
+        "extra_arg": ["--test-kind=vitest"],
         "include_patterns": [
           "/vitest/*.test.ts",
           "/vitest/config/**/*.test.ts"
@@ -32,7 +32,7 @@
     "deno": [
       {
         "path": "testing-ls-adapter",
-        "extra_args": ["--test-kind=deno"],
+        "extra_arg": ["--test-kind=deno"],
         "include_patterns": ["/deno/*.ts"],
         "exclude_patterns": []
       }
@@ -40,7 +40,7 @@
     "go": [
       {
         "path": "testing-ls-adapter",
-        "extra_args": ["--test-kind=go-test"],
+        "extra_arg": ["--test-kind=go-test"],
         "include_patterns": ["/**/*.go"],
         "exclude_patterns": []
       }
@@ -48,7 +48,7 @@
     "phpunit": [
       {
         "path": "testing-ls-adapter",
-        "extra_args": ["--test-kind=phpunit"],
+        "extra_arg": ["--test-kind=phpunit"],
         "include_patterns": ["/**/*Test.php"],
         "exclude_patterns": ["/phpunit/vendor/**/*.php"]
       }

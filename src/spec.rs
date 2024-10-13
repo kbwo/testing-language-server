@@ -69,7 +69,7 @@ impl WorkspaceAnalysis {
 pub struct AdapterConfiguration {
     pub path: String,
     #[serde(default)]
-    pub extra_args: Vec<String>,
+    pub extra_arg: Vec<String>,
     #[serde(default)]
     pub env: HashMap<String, String>,
     pub include: Vec<String>,
