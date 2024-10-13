@@ -21,7 +21,7 @@ pub static LOG_LOCATION: LazyLock<PathBuf> = LazyLock::new(|| {
 pub const MAX_CHAR_LENGTH: u32 = 10000;
 
 /// determine if a particular file is the root of workspace based on whether it is in the same directory
-pub fn detect_workspace_from_file(file_path: PathBuf, file_names: &[String]) -> Option<String> {
+fn detect_workspace_from_file(file_path: PathBuf, file_names: &[String]) -> Option<String> {
     let parent = file_path.parent();
     if let Some(parent) = parent {
         if file_names
@@ -37,7 +37,7 @@ pub fn detect_workspace_from_file(file_path: PathBuf, file_names: &[String]) -> 
     }
 }
 
-pub fn detect_workspaces_from_file_paths(
+pub fn detect_workspaces_from_file_list(
     target_file_paths: &[String],
     file_names: &[String],
 ) -> HashMap<String, Vec<String>> {
@@ -54,9 +54,9 @@ pub fn detect_workspaces_from_file_paths(
                 .or_default()
                 .push(file_path.clone());
         }
-        // Push the file path to the found workspace even if the existing_workspace becomes Some.
-        // In some cases, the simple method of finding a workspace, such as the relationship
-        // between the project root and the adapter crate in this repository, does not work.
+        // Push the file path to the found workspace even if existing_workspace becomes Some.
+        // In some cases, a simple way to find a workspace,
+        // such as the relationship between the project root and the adapter crate in this repository, may not work.
         let workspace =
             detect_workspace_from_file(PathBuf::from_str(&file_path).unwrap(), file_names);
         if let Some(workspace) = workspace {

@@ -11,7 +11,7 @@ use testing_language_server::spec::DiscoverResultItem;
 
 use crate::model::Runner;
 
-use super::util::detect_workspaces_from_file_paths;
+use super::util::detect_workspaces_from_file_list;
 use super::util::discover_rust_tests;
 use super::util::parse_cargo_diagnostics;
 use super::util::write_result_log;
@@ -25,13 +25,14 @@ fn parse_diagnostics(
 }
 
 fn detect_workspaces(file_paths: &[String]) -> DetectWorkspaceResult {
-    detect_workspaces_from_file_paths(file_paths, &["Cargo.toml".to_string()])
+    detect_workspaces_from_file_list(file_paths, &["Cargo.toml".to_string()])
 }
 
 #[derive(Eq, PartialEq, Hash, Debug)]
 pub struct CargoNextestRunner;
 
 impl Runner for CargoNextestRunner {
+    #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = vec![];
@@ -47,6 +48,7 @@ impl Runner for CargoNextestRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn run_file_test(
         &self,
         args: testing_language_server::spec::RunFileTestArgs,
@@ -98,6 +100,7 @@ impl Runner for CargoNextestRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn detect_workspaces(
         &self,
         args: testing_language_server::spec::DetectWorkspaceArgs,

@@ -15,7 +15,7 @@ use testing_language_server::{
 use crate::model::Runner;
 
 use super::util::{
-    clean_ansi, detect_workspaces_from_file_paths, discover_with_treesitter, send_stdout,
+    clean_ansi, detect_workspaces_from_file_list, discover_with_treesitter, send_stdout,
     LOG_LOCATION, MAX_CHAR_LENGTH,
 };
 
@@ -131,6 +131,7 @@ fn parse_diagnostics(
 }
 
 impl Runner for VitestRunner {
+    #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = vec![];
@@ -146,6 +147,7 @@ impl Runner for VitestRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn run_file_test(
         &self,
         args: testing_language_server::spec::RunFileTestArgs,
@@ -170,11 +172,12 @@ impl Runner for VitestRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn detect_workspaces(
         &self,
         args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), LSError> {
-        send_stdout(&detect_workspaces_from_file_paths(
+        send_stdout(&detect_workspaces_from_file_list(
             &args.file_paths,
             &[
                 "package.json".to_string(),

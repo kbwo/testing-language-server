@@ -12,7 +12,7 @@ use xml::reader::{ParserConfig, XmlEvent};
 use crate::model::Runner;
 
 use super::util::{
-    detect_workspaces_from_file_paths, discover_with_treesitter, send_stdout, LOG_LOCATION,
+    detect_workspaces_from_file_list, discover_with_treesitter, send_stdout, LOG_LOCATION,
     MAX_CHAR_LENGTH,
 };
 
@@ -47,7 +47,7 @@ impl Into<RunFileTestResultItem> for ResultFromXml {
 }
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
-    detect_workspaces_from_file_paths(&file_paths, &["composer.json".to_string()])
+    detect_workspaces_from_file_list(&file_paths, &["composer.json".to_string()])
 }
 
 fn get_result_from_characters(characters: &str) -> Result<ResultFromXml, anyhow::Error> {
@@ -152,6 +152,7 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
 pub struct PhpunitRunner;
 
 impl Runner for PhpunitRunner {
+    #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = vec![];
@@ -165,6 +166,7 @@ impl Runner for PhpunitRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn run_file_test(
         &self,
         args: testing_language_server::spec::RunFileTestArgs,
@@ -216,6 +218,7 @@ impl Runner for PhpunitRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn detect_workspaces(
         &self,
         args: testing_language_server::spec::DetectWorkspaceArgs,

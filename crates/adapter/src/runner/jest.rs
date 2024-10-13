@@ -16,7 +16,7 @@ use testing_language_server::spec::TestItem;
 use crate::model::Runner;
 
 use super::util::clean_ansi;
-use super::util::detect_workspaces_from_file_paths;
+use super::util::detect_workspaces_from_file_list;
 use super::util::discover_with_treesitter;
 use super::util::LOG_LOCATION;
 use super::util::MAX_CHAR_LENGTH;
@@ -74,7 +74,7 @@ fn parse_diagnostics(
 }
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
-    detect_workspaces_from_file_paths(&file_paths, &["package.json".to_string()])
+    detect_workspaces_from_file_list(&file_paths, &["package.json".to_string()])
 }
 
 fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
@@ -156,6 +156,7 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
 pub struct JestRunner;
 
 impl Runner for JestRunner {
+    #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = vec![];
@@ -169,6 +170,7 @@ impl Runner for JestRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn run_file_test(
         &self,
         args: testing_language_server::spec::RunFileTestArgs,
@@ -195,6 +197,7 @@ impl Runner for JestRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn detect_workspaces(
         &self,
         args: testing_language_server::spec::DetectWorkspaceArgs,

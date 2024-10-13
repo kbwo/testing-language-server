@@ -18,7 +18,7 @@ use testing_language_server::spec::RunFileTestResult;
 use testing_language_server::spec::RunFileTestResultItem;
 use testing_language_server::spec::TestItem;
 
-use super::util::detect_workspaces_from_file_paths;
+use super::util::detect_workspaces_from_file_list;
 use super::util::discover_with_treesitter;
 use super::util::write_result_log;
 use super::util::MAX_CHAR_LENGTH;
@@ -226,6 +226,7 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
 #[derive(Eq, PartialEq, Hash, Debug)]
 pub struct GoTestRunner;
 impl Runner for GoTestRunner {
+    #[tracing::instrument(skip(self))]
     fn discover(
         &self,
         args: testing_language_server::spec::DiscoverArgs,
@@ -244,6 +245,7 @@ impl Runner for GoTestRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn run_file_test(
         &self,
         args: testing_language_server::spec::RunFileTestArgs,
@@ -273,11 +275,12 @@ impl Runner for GoTestRunner {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self))]
     fn detect_workspaces(
         &self,
         args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), testing_language_server::error::LSError> {
-        send_stdout(&detect_workspaces_from_file_paths(
+        send_stdout(&detect_workspaces_from_file_list(
             &args.file_paths,
             &["go.mod".to_string()],
         ))?;
