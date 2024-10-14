@@ -467,7 +467,7 @@ impl TestingLS {
         send_stdout(&json!({
             "jsonrpc": "2.0",
             "id": id,
-            "method": json!(null),
+            "result": null
         }))?;
         Ok(())
     }
