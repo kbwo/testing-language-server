@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="synchronous passing test" time="0.000709" classname="test" failure="assert is not defined">
+		<failure type="testCodeFailure" message="assert is not defined">
+[Error [ERR_TEST_FAILURE]: assert is not defined] {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:6:3)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.start (node:internal/test_runner/test:542:17)
+      at startSubtest (node:internal/test_runner/harness:214:17),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testcase name="synchronous failing test" time="0.000069" classname="test" failure="assert is not defined">
+		<failure type="testCodeFailure" message="assert is not defined">
+[Error [ERR_TEST_FAILURE]: assert is not defined] {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:11:3)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19)
+      at Test.run (node:internal/test_runner/test:673:12)
+      at async startSubtest (node:internal/test_runner/harness:214:3),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testcase name="asynchronous passing test" time="0.000199" classname="test" failure="assert is not defined">
+		<failure type="testCodeFailure" message="assert is not defined">
+[Error [ERR_TEST_FAILURE]: assert is not defined] {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:17:3)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19)
+      at Test.run (node:internal/test_runner/test:673:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:374:7),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testcase name="asynchronous failing test" time="0.000082" classname="test" failure="assert is not defined">
+		<failure type="testCodeFailure" message="assert is not defined">
+[Error [ERR_TEST_FAILURE]: assert is not defined] {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:23:3)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19)
+      at Test.run (node:internal/test_runner/test:673:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:374:7),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testcase name="failing test using Promises" time="0.005495" classname="test" failure="this will cause the test to fail">
+		<failure type="testCodeFailure" message="this will cause the test to fail">
+[Error [ERR_TEST_FAILURE]: this will cause the test to fail] {
+  failureType: 'testCodeFailure',
+  cause: Error: this will cause the test to fail
+      at Immediate.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:30:14)
+      at process.processImmediate (node:internal/timers:476:21),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testcase name="callback passing test" time="0.000422" classname="test"/>
+	<testcase name="callback failing test" time="0.000314" classname="test" failure="callback failure">
+		<failure type="testCodeFailure" message="callback failure">
+[Error [ERR_TEST_FAILURE]: callback failure] {
+  failureType: 'testCodeFailure',
+  cause: Error: callback failure
+      at Immediate.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:45:10)
+      at process.processImmediate (node:internal/timers:476:21),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testsuite name="top level test" time="0.000546" disabled="0" errors="0" tests="2" failures="2" skipped="0" hostname="test-user-xxx">
+		<testcase name="subtest 1" time="0.000082" classname="test" failure="assert is not defined">
+			<failure type="testCodeFailure" message="assert is not defined">
+Error [ERR_TEST_FAILURE]: assert is not defined
+    at async TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:51:3) {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:52:5)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.start (node:internal/test_runner/test:542:17)
+      at TestContext.test (node:internal/test_runner/test:167:20)
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:51:11)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19),
+  code: 'ERR_TEST_FAILURE'
+}
+			</failure>
+		</testcase>
+		<testcase name="subtest 2" time="0.000112" classname="test" failure="assert is not defined">
+			<failure type="testCodeFailure" message="assert is not defined">
+Error [ERR_TEST_FAILURE]: assert is not defined
+    at async TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:55:3) {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:56:5)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.start (node:internal/test_runner/test:542:17)
+      at TestContext.test (node:internal/test_runner/test:167:20)
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:55:11)
+      at async Test.run (node:internal/test_runner/test:632:9)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:374:7),
+  code: 'ERR_TEST_FAILURE'
+}
+			</failure>
+		</testcase>
+	</testsuite>
+	<testcase name="skip option" time="0.000047" classname="test">
+		<skipped type="skipped" message="true"/>
+	</testcase>
+	<testcase name="skip option with message" time="0.000034" classname="test">
+		<skipped type="skipped" message="this is skipped"/>
+	</testcase>
+	<testcase name="skip() method" time="0.000052" classname="test">
+		<skipped type="skipped" message="true"/>
+	</testcase>
+	<testcase name="skip() method with message" time="0.000082" classname="test">
+		<skipped type="skipped" message="this is skipped"/>
+	</testcase>
+	<testcase name="todo option" time="0.000052" classname="test" failure="this does not fail the test">
+		<skipped type="todo" message="true"/>
+		<failure type="testCodeFailure" message="this does not fail the test">
+[Error [ERR_TEST_FAILURE]: this does not fail the test] {
+  failureType: 'testCodeFailure',
+  cause: Error: this does not fail the test
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:85:9)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19)
+      at Test.run (node:internal/test_runner/test:673:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:374:7),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testcase name="todo option with message" time="0.000093" classname="test">
+		<skipped type="todo" message="this is a todo test"/>
+	</testcase>
+	<testcase name="todo() method" time="0.000090" classname="test">
+		<skipped type="todo" message="true"/>
+	</testcase>
+	<testcase name="todo() method with message" time="0.000054" classname="test" failure="this does not fail the test">
+		<skipped type="todo" message="this is a todo test and is not treated as a failure"/>
+		<failure type="testCodeFailure" message="this does not fail the test">
+[Error [ERR_TEST_FAILURE]: this does not fail the test] {
+  failureType: 'testCodeFailure',
+  cause: Error: this does not fail the test
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:99:9)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19)
+      at Test.run (node:internal/test_runner/test:673:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:374:7),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testsuite name="A thing" time="0.000522" disabled="0" errors="0" tests="3" failures="3" skipped="1" hostname="test-user-xxx">
+		<testcase name="should work" time="0.000110" classname="test" failure="assert is not defined">
+			<failure type="testCodeFailure" message="assert is not defined">
+Error [ERR_TEST_FAILURE]: assert is not defined
+    at async Promise.all (index 0) {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:105:5)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.start (node:internal/test_runner/test:542:17)
+      at node:internal/test_runner/test:946:71
+      at node:internal/per_context/primordials:487:82
+      at new Promise (&lt;anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:455:29)
+      at node:internal/per_context/primordials:487:9
+      at Array.map (&lt;anonymous>),
+  code: 'ERR_TEST_FAILURE'
+}
+			</failure>
+		</testcase>
+		<testcase name="should be ok" time="0.000053" classname="test" failure="assert is not defined">
+			<failure type="testCodeFailure" message="assert is not defined">
+[Error [ERR_TEST_FAILURE]: assert is not defined] {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:109:5)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19)
+      at Test.run (node:internal/test_runner/test:673:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:948:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:374:7),
+  code: 'ERR_TEST_FAILURE'
+}
+			</failure>
+		</testcase>
+		<testsuite name="a nested thing" time="0.000125" disabled="0" errors="0" tests="1" failures="1" skipped="0" hostname="test-user-xxx">
+			<testcase name="should work" time="0.000054" classname="test" failure="assert is not defined">
+				<failure type="testCodeFailure" message="assert is not defined">
+Error [ERR_TEST_FAILURE]: assert is not defined
+    at async Promise.all (index 0) {
+  failureType: 'testCodeFailure',
+  cause: ReferenceError [Error]: assert is not defined
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:114:7)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.start (node:internal/test_runner/test:542:17)
+      at node:internal/test_runner/test:946:71
+      at node:internal/per_context/primordials:487:82
+      at new Promise (&lt;anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:455:29)
+      at node:internal/per_context/primordials:487:9
+      at Array.map (&lt;anonymous>),
+  code: 'ERR_TEST_FAILURE'
+}
+				</failure>
+			</testcase>
+		</testsuite>
+	</testsuite>
+	<testsuite name="this test is run" time="0.000471" disabled="0" errors="0" tests="6" failures="0" skipped="1" hostname="test-user-xxx">
+		<testcase name="running subtest" time="0.000043" classname="test"/>
+		<testcase name="this subtest is now skipped" time="0.000063" classname="test"/>
+		<!-- 'only' and 'runOnly' require the &#45;&#45;test-only command-line option. -->
+		<testcase name="this subtest is run" time="0.000026" classname="test"/>
+		<!-- 'only' and 'runOnly' require the &#45;&#45;test-only command-line option. -->
+		<testcase name="this subtest is now run" time="0.000019" classname="test"/>
+		<testcase name="skipped subtest 3" time="0.000018" classname="test"/>
+		<!-- 'only' and 'runOnly' require the &#45;&#45;test-only command-line option. -->
+		<testcase name="skipped subtest 4" time="0.000017" classname="test">
+			<skipped type="skipped" message="true"/>
+		</testcase>
+	</testsuite>
+	<!-- 'only' and 'runOnly' require the &#45;&#45;test-only command-line option. -->
+	<testcase name="this test is not run" time="0.000048" classname="test" failure="fail">
+		<failure type="testCodeFailure" message="fail">
+[Error [ERR_TEST_FAILURE]: fail] {
+  failureType: 'testCodeFailure',
+  cause: Error: fail
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:143:9)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19)
+      at Test.run (node:internal/test_runner/test:673:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:374:7),
+  code: 'ERR_TEST_FAILURE'
+}
+		</failure>
+	</testcase>
+	<testsuite name="a suite" time="0.000180" disabled="0" errors="0" tests="2" failures="1" skipped="0" hostname="test-user-xxx">
+		<testcase name="this test is run" time="0.000038" classname="test"/>
+		<!-- 'only' and 'runOnly' require the &#45;&#45;test-only command-line option. -->
+		<testcase name="this test is not run" time="0.000033" classname="test" failure="fail">
+			<failure type="testCodeFailure" message="fail">
+[Error [ERR_TEST_FAILURE]: fail] {
+  failureType: 'testCodeFailure',
+  cause: Error: fail
+      at TestContext.&lt;anonymous> (/home/test-user/projects/testing-language-server/demo/node-test/index.test.js:154:11)
+      at Test.runInAsyncScope (node:async_hooks:203:9)
+      at Test.run (node:internal/test_runner/test:631:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:374:18)
+      at Test.postRun (node:internal/test_runner/test:715:19)
+      at Test.run (node:internal/test_runner/test:673:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:948:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:374:7),
+  code: 'ERR_TEST_FAILURE'
+}
+			</failure>
+		</testcase>
+	</testsuite>
+	<testsuite name="a suite" time="0.000118" disabled="0" errors="0" tests="2" failures="0" skipped="0" hostname="test-user-xxx">
+		<testcase name="this test is run" time="0.000038" classname="test"/>
+		<testcase name="this test is run" time="0.000023" classname="test"/>
+	</testsuite>
+	<!-- 'only' and 'runOnly' require the &#45;&#45;test-only command-line option. -->
+	<!-- tests 33 -->
+	<!-- suites 4 -->
+	<!-- pass 10 -->
+	<!-- fail 14 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 5 -->
+	<!-- todo 4 -->
+	<!-- duration_ms 57.894356 -->
+</testsuites>
