@@ -84,4 +84,4 @@ language server config:
 ### Writing custom adapter
 ⚠ The specification of adapter CLI is not stabilized yet.
 
-See [SPEC.md](./doc/SPEC.md) and [spec.rs](./src/spec.rs).
+See [ADAPTER_SPEC.md](./doc/ADAPTER_SPEC.md) and [spec.rs](./src/spec.rs).
