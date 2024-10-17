@@ -20,6 +20,37 @@ pub static LOG_LOCATION: LazyLock<PathBuf> = LazyLock::new(|| {
 // If the character value is greater than the line length it defaults back to the line length.
 pub const MAX_CHAR_LENGTH: u32 = 10000;
 
+#[derive(Debug)]
+pub struct ResultFromXml {
+    pub message: String,
+    pub path: String,
+    pub line: u32,
+    pub col: u32,
+}
+
+impl Into<RunFileTestResultItem> for ResultFromXml {
+    fn into(self) -> RunFileTestResultItem {
+        RunFileTestResultItem {
+            path: self.path,
+            diagnostics: vec![Diagnostic {
+                message: self.message,
+                range: Range {
+                    start: Position {
+                        line: self.line - 1,
+                        character: self.col - 1,
+                    },
+                    end: Position {
+                        line: self.line - 1,
+                        character: MAX_CHAR_LENGTH,
+                    },
+                },
+                severity: Some(DiagnosticSeverity::ERROR),
+                ..Default::default()
+            }],
+        }
+    }
+}
+
 /// determine if a particular file is the root of workspace based on whether it is in the same directory
 fn detect_workspace_from_file(file_path: PathBuf, file_names: &[String]) -> Option<String> {
     let parent = file_path.parent();

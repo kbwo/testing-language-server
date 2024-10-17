@@ -1,5 +1,7 @@
 const test = require("node:test");
 const { describe, it } = require("node:test");
+const assert = require("node:assert");
+const { throwError } = require("./util.js");
 // # Basic example
 test("synchronous passing test", (t) => {
   // This test passes because it does not throw an exception.
@@ -164,4 +166,8 @@ describe.only("a suite", () => {
   it("this test is run", () => {
     // This code is run.
   });
+});
+
+test("import from external file. this must be fail", () => {
+  throwError();
 });

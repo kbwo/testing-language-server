@@ -1,4 +1,3 @@
-use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 use std::fs::File;
 use std::io::BufReader;
 use std::process::Output;
@@ -12,39 +11,9 @@ use xml::reader::{ParserConfig, XmlEvent};
 use crate::model::Runner;
 
 use super::util::{
-    detect_workspaces_from_file_list, discover_with_treesitter, send_stdout, LOG_LOCATION,
-    MAX_CHAR_LENGTH,
+    detect_workspaces_from_file_list, discover_with_treesitter, send_stdout, ResultFromXml,
+    LOG_LOCATION,
 };
-
-#[derive(Debug)]
-pub struct ResultFromXml {
-    pub message: String,
-    pub path: String,
-    pub line: u32,
-}
-
-impl Into<RunFileTestResultItem> for ResultFromXml {
-    fn into(self) -> RunFileTestResultItem {
-        RunFileTestResultItem {
-            path: self.path,
-            diagnostics: vec![Diagnostic {
-                message: self.message,
-                range: Range {
-                    start: Position {
-                        line: self.line - 1,
-                        character: 0,
-                    },
-                    end: Position {
-                        line: self.line - 1,
-                        character: MAX_CHAR_LENGTH,
-                    },
-                },
-                severity: Some(DiagnosticSeverity::ERROR),
-                ..Default::default()
-            }],
-        }
-    }
-}
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
     detect_workspaces_from_file_list(&file_paths, &["composer.json".to_string()])
@@ -69,6 +38,7 @@ fn get_result_from_characters(characters: &str) -> Result<ResultFromXml, anyhow:
         message,
         path,
         line,
+        col: 1,
     })
 }
 
