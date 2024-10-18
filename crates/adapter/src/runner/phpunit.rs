@@ -17,7 +17,7 @@ use super::util::{
 };
 
 #[derive(Debug)]
-pub struct ResultFromXml {
+struct ResultFromXml {
     pub message: String,
     pub path: String,
     pub line: u32,
