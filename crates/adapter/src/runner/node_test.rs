@@ -259,7 +259,7 @@ mod tests {
     fn test_discover() {
         let file_path = "../../demo/node-test/index.test.js";
         let test_items = discover(file_path).unwrap();
-        assert_eq!(test_items.len(), 27);
+        assert_eq!(test_items.len(), 26);
         assert_eq!(
             test_items,
             [
@@ -672,8 +672,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "should be ok".to_string(),
-                    name: "should be ok".to_string(),
+                    id: "A thing::should be ok".to_string(),
+                    name: "A thing::should be ok".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 109,
@@ -696,8 +696,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "a nested thing::should work".to_string(),
-                    name: "a nested thing::should work".to_string(),
+                    id: "A thing::a nested thing::should work".to_string(),
+                    name: "A thing::a nested thing::should work".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 114,
@@ -720,8 +720,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "this test is run".to_string(),
-                    name: "this test is run".to_string(),
+                    id: "only: this test is run".to_string(),
+                    name: "only: this test is run".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 123,
@@ -744,8 +744,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "this test is not run".to_string(),
-                    name: "this test is not run".to_string(),
+                    id: "only: this test is not run".to_string(),
+                    name: "only: this test is not run".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 142,
@@ -792,32 +792,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "this test is run A ".to_string(),
-                    name: "this test is run A ".to_string(),
-                    start_position: Range {
-                        start: Position {
-                            line: 149,
-                            character: 2
-                        },
-                        end: Position {
-                            line: 149,
-                            character: 10000
-                        }
-                    },
-                    end_position: Range {
-                        start: Position {
-                            line: 151,
-                            character: 0
-                        },
-                        end: Position {
-                            line: 151,
-                            character: 4
-                        }
-                    }
-                },
-                TestItem {
-                    id: "this test is not run B".to_string(),
-                    name: "this test is not run B".to_string(),
+                    id: "A suite::this test is not run B".to_string(),
+                    name: "A suite::this test is not run B".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 153,
@@ -840,8 +816,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "B suite::this test is run A".to_string(),
-                    name: "B suite::this test is run A".to_string(),
+                    id: "this test is run C".to_string(),
+                    name: "this test is run C".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 161,
@@ -864,8 +840,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "this test is run B".to_string(),
-                    name: "this test is run B".to_string(),
+                    id: "this test is run D".to_string(),
+                    name: "this test is run D".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 165,

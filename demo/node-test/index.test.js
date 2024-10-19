@@ -121,7 +121,7 @@ describe("A thing", () => {
 // # only tests
 // Assume Node.js is run with the --test-only command-line option.
 // The suite's 'only' option is set, so these tests are run.
-test("this test is run", { only: true }, async (t) => {
+test("only: this test is run", { only: true }, async (t) => {
   // Within this test, all subtests are run by default.
   await t.test("running subtest");
 
@@ -140,7 +140,7 @@ test("this test is run", { only: true }, async (t) => {
 });
 
 // The 'only' option is not set, so this test is skipped.
-test("this test is not run", () => {
+test("only: this test is not run", () => {
   // This code is not run.
   throw new Error("fail");
 });
@@ -159,11 +159,11 @@ describe("A suite", () => {
 
 describe.only("B suite", () => {
   // The 'only' option is set, so this test is run.
-  it("this test is run A", () => {
+  it("this test is run C", () => {
     // This code is run.
   });
 
-  it("this test is run B", () => {
+  it("this test is run D", () => {
     // This code is run.
   });
 });

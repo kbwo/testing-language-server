@@ -208,7 +208,7 @@ mod tests {
         assert_eq!(test_items.len(), 2);
         assert_eq!(
             test_items,
-            vec![
+            [
                 TestItem {
                     id: "describe text::pass".to_string(),
                     name: "describe text::pass".to_string(),
