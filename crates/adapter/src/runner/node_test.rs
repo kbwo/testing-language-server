@@ -25,29 +25,27 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
     // license: https://github.com/nvim-neotest/neotest-jest/blob/514fd4eae7da15fd409133086bb8e029b65ac43f/LICENSE.md
     let query = r#"
     ; -- Namespaces --
-    ; Matches: `describe("A thing", () => {})`
+    ; Matches: `describe('context', () => {})`
     ((call_expression
       function: (identifier) @func_name (#eq? @func_name "describe")
       arguments: (arguments (string (string_fragment) @namespace.name) (arrow_function))
     )) @namespace.definition
-    ; Matches: `describe("A thing", function() {})`
+    ; Matches: `describe('context', function() {})`
     ((call_expression
       function: (identifier) @func_name (#eq? @func_name "describe")
       arguments: (arguments (string (string_fragment) @namespace.name) (function_expression))
     )) @namespace.definition
-    ; Matches: `describe.only("A thing", () => {})`
+    ; Matches: `describe.only('context', () => {})`
     ((call_expression
       function: (member_expression
-        object: (identifier) @func_name (#eq? @func_name "describe")
-        property: (property_identifier) @only_property (#eq? @only_property "only")
+        object: (identifier) @func_name (#any-of? @func_name "describe")
       )
       arguments: (arguments (string (string_fragment) @namespace.name) (arrow_function))
     )) @namespace.definition
-    ; Matches: `describe.only("A thing", function() {})`
+    ; Matches: `describe.only('context', function() {})`
     ((call_expression
       function: (member_expression
-        object: (identifier) @func_name (#eq? @func_name "describe")
-        property: (property_identifier) @only_property (#eq? @only_property "only")
+        object: (identifier) @func_name (#any-of? @func_name "describe")
       )
       arguments: (arguments (string (string_fragment) @namespace.name) (function_expression))
     )) @namespace.definition
@@ -261,7 +259,7 @@ mod tests {
     fn test_discover() {
         let file_path = "../../demo/node-test/index.test.js";
         let test_items = discover(file_path).unwrap();
-        assert_eq!(test_items.len(), 24);
+        assert_eq!(test_items.len(), 27);
         assert_eq!(
             test_items,
             [
@@ -674,8 +672,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "A thing::should be ok".to_string(),
-                    name: "A thing::should be ok".to_string(),
+                    id: "should be ok".to_string(),
+                    name: "should be ok".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 109,
@@ -722,8 +720,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "a nested thing::this test is run".to_string(),
-                    name: "a nested thing::this test is run".to_string(),
+                    id: "this test is run".to_string(),
+                    name: "this test is run".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 123,
@@ -746,8 +744,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "a nested thing::this test is not run".to_string(),
-                    name: "a nested thing::this test is not run".to_string(),
+                    id: "this test is not run".to_string(),
+                    name: "this test is not run".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 142,
@@ -770,8 +768,8 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "a suite::this test is run".to_string(),
-                    name: "a suite::this test is run".to_string(),
+                    id: "A suite::this test is run A ".to_string(),
+                    name: "A suite::this test is run A ".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 149,
@@ -794,8 +792,32 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "a suite::this test is not run".to_string(),
-                    name: "a suite::this test is not run".to_string(),
+                    id: "this test is run A ".to_string(),
+                    name: "this test is run A ".to_string(),
+                    start_position: Range {
+                        start: Position {
+                            line: 149,
+                            character: 2
+                        },
+                        end: Position {
+                            line: 149,
+                            character: 10000
+                        }
+                    },
+                    end_position: Range {
+                        start: Position {
+                            line: 151,
+                            character: 0
+                        },
+                        end: Position {
+                            line: 151,
+                            character: 4
+                        }
+                    }
+                },
+                TestItem {
+                    id: "this test is not run B".to_string(),
+                    name: "this test is not run B".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 153,
@@ -818,8 +840,56 @@ mod tests {
                     }
                 },
                 TestItem {
-                    id: "a suite::must be fail".to_string(),
-                    name: "a suite::must be fail".to_string(),
+                    id: "B suite::this test is run A".to_string(),
+                    name: "B suite::this test is run A".to_string(),
+                    start_position: Range {
+                        start: Position {
+                            line: 161,
+                            character: 2
+                        },
+                        end: Position {
+                            line: 161,
+                            character: 10000
+                        }
+                    },
+                    end_position: Range {
+                        start: Position {
+                            line: 163,
+                            character: 0
+                        },
+                        end: Position {
+                            line: 163,
+                            character: 4
+                        }
+                    }
+                },
+                TestItem {
+                    id: "this test is run B".to_string(),
+                    name: "this test is run B".to_string(),
+                    start_position: Range {
+                        start: Position {
+                            line: 165,
+                            character: 2
+                        },
+                        end: Position {
+                            line: 165,
+                            character: 10000
+                        }
+                    },
+                    end_position: Range {
+                        start: Position {
+                            line: 167,
+                            character: 0
+                        },
+                        end: Position {
+                            line: 167,
+                            character: 4
+                        }
+                    }
+                },
+                TestItem {
+                    id: "import from external file. this must be fail".to_string(),
+                    name: "import from external file. this must be fail".to_string(),
                     start_position: Range {
                         start: Position {
                             line: 170,

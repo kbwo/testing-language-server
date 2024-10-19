@@ -234,6 +234,7 @@ pub fn discover_with_treesitter(
                     test_items.push(test_item);
                     test_start_position = Point::default();
                     test_end_position = Point::default();
+                    namespace = "";
                 }
                 _ => {}
             }

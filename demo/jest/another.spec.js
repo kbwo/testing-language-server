@@ -7,3 +7,7 @@ describe("another", () => {
     expect(1).toBe(1);
   });
 });
+
+test("toplevel test", () => {
+  expect(1).toBe(2);
+});

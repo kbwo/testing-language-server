@@ -145,25 +145,25 @@ test("this test is not run", () => {
   throw new Error("fail");
 });
 
-describe("a suite", () => {
+describe("A suite", () => {
   // The 'only' option is set, so this test is run.
-  it("this test is run", { only: true }, () => {
+  it("this test is run A ", { only: true }, () => {
     // This code is run.
   });
 
-  it("this test is not run", () => {
+  it("this test is not run B", () => {
     // This code is not run.
     throw new Error("fail");
   });
 });
 
-describe.only("a suite", () => {
+describe.only("B suite", () => {
   // The 'only' option is set, so this test is run.
-  it("this test is run", () => {
+  it("this test is run A", () => {
     // This code is run.
   });
 
-  it("this test is run", () => {
+  it("this test is run B", () => {
     // This code is run.
   });
 });
