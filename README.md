@@ -80,6 +80,7 @@ language server config:
 - [x] `go test`
 - [x] `phpunit`
 - [x] `vitest`
+- [x] `node --test` (Node Test Runner)
 
 ### Writing custom adapter
 ⚠ The specification of adapter CLI is not stabilized yet.
