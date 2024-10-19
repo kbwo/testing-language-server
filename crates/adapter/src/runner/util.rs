@@ -12,6 +12,8 @@ use testing_language_server::spec::{RunFileTestResultItem, TestItem};
 use testing_language_server::{error::LSError, spec::RunFileTestResult};
 use tree_sitter::{Language, Point, Query, QueryCursor};
 
+pub struct DiscoverWithTSOption {}
+
 pub static LOG_LOCATION: LazyLock<PathBuf> = LazyLock::new(|| {
     let home_dir = dirs::home_dir().unwrap();
     home_dir.join(".config/testing_language_server/adapter/")
@@ -19,6 +21,37 @@ pub static LOG_LOCATION: LazyLock<PathBuf> = LazyLock::new(|| {
 
 // If the character value is greater than the line length it defaults back to the line length.
 pub const MAX_CHAR_LENGTH: u32 = 10000;
+
+#[derive(Debug)]
+pub struct ResultFromXml {
+    pub message: String,
+    pub path: String,
+    pub line: u32,
+    pub col: u32,
+}
+
+impl Into<RunFileTestResultItem> for ResultFromXml {
+    fn into(self) -> RunFileTestResultItem {
+        RunFileTestResultItem {
+            path: self.path,
+            diagnostics: vec![Diagnostic {
+                message: self.message,
+                range: Range {
+                    start: Position {
+                        line: self.line - 1,
+                        character: self.col - 1,
+                    },
+                    end: Position {
+                        line: self.line - 1,
+                        character: MAX_CHAR_LENGTH,
+                    },
+                },
+                severity: Some(DiagnosticSeverity::ERROR),
+                ..Default::default()
+            }],
+        }
+    }
+}
 
 /// determine if a particular file is the root of workspace based on whether it is in the same directory
 fn detect_workspace_from_file(file_path: PathBuf, file_names: &[String]) -> Option<String> {
@@ -147,7 +180,9 @@ pub fn discover_with_treesitter(
     cursor.set_byte_range(tree.root_node().byte_range());
     let source = source_code.as_bytes();
     let matches = cursor.matches(&query, tree.root_node(), source);
-    let mut namespace = "";
+
+    let mut namespace_name = String::new();
+    let mut namespace_position_stack: Vec<(Point, Point)> = vec![];
     let mut test_id_set = HashSet::new();
     for m in matches {
         let mut test_start_position = Point::default();
@@ -157,25 +192,50 @@ pub fn discover_with_treesitter(
             let value = capture.node.utf8_text(source)?;
             let start_position = capture.node.start_position();
             let end_position = capture.node.end_position();
+
             match capture_name {
+                "namespace.definition" => {
+                    namespace_position_stack.push((start_position, end_position));
+                }
                 "namespace.name" => {
-                    namespace = value;
+                    let current_namespace = namespace_position_stack.first();
+                    if let Some((ns_start, ns_end)) = current_namespace {
+                        // In namespace definition
+                        if start_position.row >= ns_start.row
+                            && end_position.row <= ns_end.row
+                            && !namespace_name.is_empty()
+                        {
+                            namespace_name = format!("{}::{}", namespace_name, value);
+                        } else {
+                            namespace_name = value.to_string();
+                        }
+                    } else {
+                        namespace_name = value.to_string();
+                    }
                 }
                 "test.definition" => {
+                    if let Some((ns_start, ns_end)) = namespace_position_stack.first() {
+                        if start_position.row < ns_start.row || end_position.row > ns_end.row {
+                            namespace_position_stack.remove(0);
+                            namespace_name = String::new();
+                        }
+                    }
                     test_start_position = start_position;
                     test_end_position = end_position;
                 }
                 "test.name" => {
-                    let test_id = if namespace.is_empty() {
+                    let test_id = if namespace_name.is_empty() {
                         value.to_string()
                     } else {
-                        [namespace, value].join("::")
+                        format!("{}::{}", namespace_name, value)
                     };
+
                     if test_id_set.contains(&test_id) {
                         continue;
                     } else {
                         test_id_set.insert(test_id.clone());
                     }
+
                     let test_item = TestItem {
                         id: test_id.clone(),
                         name: test_id,

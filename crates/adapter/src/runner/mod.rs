@@ -1,5 +1,6 @@
 pub mod cargo_nextest;
 pub mod cargo_test;
+pub mod node_test;
 pub mod deno;
 pub mod go;
 pub mod jest;
