@@ -181,7 +181,15 @@ impl TestingLS {
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
                 let adapter_result = String::from_utf8(output.stdout)
                     .map_err(|err| LSError::Adapter(err.to_string()))?;
-                let workspace: DetectWorkspaceResult = serde_json::from_str(&adapter_result)?;
+                let workspace: DetectWorkspaceResult = match serde_json::from_str(&adapter_result) {
+                    Ok(result) => result,
+                    Err(err) => {
+                        let stderr = String::from_utf8(output.stderr);
+                        tracing::error!("Failed to parse adapter result: {:?}", err);
+                        tracing::error!("Error: {:?}", stderr);
+                        return Err(LSError::Adapter(err.to_string()));
+                    }
+                };
                 let workspace = if let Some(workspace_dir) = workspace_dir {
                     let workspace_dir = resolve_path(&project_dir, workspace_dir)
                         .to_str()
