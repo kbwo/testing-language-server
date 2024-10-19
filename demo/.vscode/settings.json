@@ -1,6 +1,6 @@
 {
   "testing.enable": true,
-  "testing.fileTypes": ["rust"],
+  "filetypes": ["rust", "javascript", "go", "typescript", "php"],
   "testing.adapterCommand": {
     "cargo-nextest": [
       {
@@ -39,6 +39,14 @@
         "path": "testing-ls-adapter",
         "extra_arg": ["--test-kind=go-test"],
         "include": ["/**/*.go"],
+        "exclude": []
+      }
+    ],
+    "node-test": [
+      {
+        "path": "testing-ls-adapter",
+        "extra_arg": ["--test-kind=node-test"],
+        "include": ["/node-test/*.test.js"],
         "exclude": []
       }
     ],
