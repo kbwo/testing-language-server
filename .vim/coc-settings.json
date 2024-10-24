@@ -2,15 +2,13 @@
   "testing.enable": true,
   "testing.fileTypes": ["rust"],
   "testing.adapterCommand": {
-    "rust": [
-      {
-        "path": "testing-ls-adapter",
-        "extra_arg": ["--test-kind=cargo-test", "--workspace"],
-        "include": ["/**/*.rs"],
-        "exclude": ["/demo/**/*"],
-        "workspace_dir": "."
-      }
-    ]
+    "rust": {
+      "path": "testing-ls-adapter",
+      "extra_arg": ["--test-kind=cargo-test", "--workspace"],
+      "include": ["/**/*.rs"],
+      "exclude": ["/demo/**/*"],
+      "workspace_dir": "."
+    }
   },
   "testing.enableWorkspaceDiagnostics": true,
   "testing.server.path": "testing-language-server",
