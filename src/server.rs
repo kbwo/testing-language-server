@@ -17,7 +17,7 @@ use std::process::Output;
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct InitializedOptions {
-    adapter_command: HashMap<AdapterId, Vec<AdapterConfiguration>>,
+    adapter_command: HashMap<AdapterId, AdapterConfiguration>,
     enable_workspace_diagnostics: Option<bool>,
 }
 
@@ -87,7 +87,7 @@ impl TestingLS {
         Ok(())
     }
 
-    fn adapter_commands(&self) -> HashMap<AdapterId, Vec<AdapterConfiguration>> {
+    fn adapter_commands(&self) -> HashMap<AdapterId, AdapterConfiguration> {
         self.options.adapter_command.clone()
     }
 
@@ -150,62 +150,60 @@ impl TestingLS {
         let project_dir = self.project_dir()?;
         self.workspaces_cache = vec![];
         // Nested and multiple loops, but each count is small
-        for adapter_commands in adapter_commands.into_values() {
-            for adapter in adapter_commands.into_iter() {
-                let AdapterConfiguration {
-                    path,
-                    extra_arg,
-                    env,
-                    include,
-                    exclude,
-                    workspace_dir,
-                    ..
-                } = &adapter;
-                let file_paths = Self::project_files(&project_dir, include, exclude);
-                if file_paths.is_empty() {
-                    continue;
-                }
-                let mut adapter_command = Command::new(path);
-                let mut args_file_path: Vec<&str> = vec![];
-                file_paths.iter().for_each(|file_path| {
-                    args_file_path.push("--file-paths");
-                    args_file_path.push(file_path);
-                });
-                let output = adapter_command
-                    .arg("detect-workspace")
-                    .args(args_file_path)
-                    .arg("--")
-                    .args(extra_arg)
-                    .envs(env)
-                    .output()
-                    .map_err(|err| LSError::Adapter(err.to_string()))?;
-                let adapter_result = String::from_utf8(output.stdout)
-                    .map_err(|err| LSError::Adapter(err.to_string()))?;
-                let workspace: DetectWorkspaceResult = match serde_json::from_str(&adapter_result) {
-                    Ok(result) => result,
-                    Err(err) => {
-                        let stderr = String::from_utf8(output.stderr);
-                        tracing::error!("Failed to parse adapter result: {:?}", err);
-                        tracing::error!("Error: {:?}", stderr);
-                        return Err(LSError::Adapter(err.to_string()));
-                    }
-                };
-                let workspace = if let Some(workspace_dir) = workspace_dir {
-                    let workspace_dir = resolve_path(&project_dir, workspace_dir)
-                        .to_str()
-                        .unwrap()
-                        .to_string();
-                    let target_paths = workspace
-                        .into_iter()
-                        .flat_map(|kv| kv.1)
-                        .collect::<Vec<_>>();
-                    HashMap::from([(workspace_dir, target_paths)])
-                } else {
-                    workspace
-                };
-                self.workspaces_cache
-                    .push(WorkspaceAnalysis::new(adapter, workspace))
+        for adapter in adapter_commands.into_values() {
+            let AdapterConfiguration {
+                path,
+                extra_arg,
+                env,
+                include,
+                exclude,
+                workspace_dir,
+                ..
+            } = &adapter;
+            let file_paths = Self::project_files(&project_dir, include, exclude);
+            if file_paths.is_empty() {
+                continue;
             }
+            let mut adapter_command = Command::new(path);
+            let mut args_file_path: Vec<&str> = vec![];
+            file_paths.iter().for_each(|file_path| {
+                args_file_path.push("--file-paths");
+                args_file_path.push(file_path);
+            });
+            let output = adapter_command
+                .arg("detect-workspace")
+                .args(args_file_path)
+                .arg("--")
+                .args(extra_arg)
+                .envs(env)
+                .output()
+                .map_err(|err| LSError::Adapter(err.to_string()))?;
+            let adapter_result = String::from_utf8(output.stdout)
+                .map_err(|err| LSError::Adapter(err.to_string()))?;
+            let workspace: DetectWorkspaceResult = match serde_json::from_str(&adapter_result) {
+                Ok(result) => result,
+                Err(err) => {
+                    let stderr = String::from_utf8(output.stderr);
+                    tracing::error!("Failed to parse adapter result: {:?}", err);
+                    tracing::error!("Error: {:?}", stderr);
+                    return Err(LSError::Adapter(err.to_string()));
+                }
+            };
+            let workspace = if let Some(workspace_dir) = workspace_dir {
+                let workspace_dir = resolve_path(&project_dir, workspace_dir)
+                    .to_str()
+                    .unwrap()
+                    .to_string();
+                let target_paths = workspace
+                    .into_iter()
+                    .flat_map(|kv| kv.1)
+                    .collect::<Vec<_>>();
+                HashMap::from([(workspace_dir, target_paths)])
+            } else {
+                workspace
+            };
+            self.workspaces_cache
+                .push(WorkspaceAnalysis::new(adapter, workspace))
         }
         tracing::info!("workspaces_cache={:#?}", self.workspaces_cache);
         send_stdout(&json!({
@@ -497,7 +495,7 @@ mod tests {
                 name: "demo".to_string(),
             }]),
             options: InitializedOptions {
-                adapter_command: HashMap::from([(String::from(".rs"), vec![])]),
+                adapter_command: HashMap::new(),
                 enable_workspace_diagnostics: Some(true),
             },
             workspaces_cache: Vec::new(),
@@ -527,7 +525,7 @@ mod tests {
                 name: "demo".to_string(),
             }]),
             options: InitializedOptions {
-                adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf])]),
+                adapter_command: HashMap::from([(String::from(".rs"), adapter_conf)]),
                 enable_workspace_diagnostics: Some(true),
             },
             workspaces_cache: Vec::new(),
@@ -592,7 +590,7 @@ mod tests {
                 name: "demo".to_string(),
             }]),
             options: InitializedOptions {
-                adapter_command: HashMap::from([(String::from(".rs"), vec![adapter_conf.clone()])]),
+                adapter_command: HashMap::from([(String::from(".rs"), adapter_conf.clone())]),
                 enable_workspace_diagnostics: Some(true),
             },
             workspaces_cache: Vec::new(),
