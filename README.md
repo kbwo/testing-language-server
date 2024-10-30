@@ -88,6 +88,9 @@ configs.testing_ls = {
 lspconfig.testing_ls.setup{}
 ```
 
+### Helix
+See [language.toml](./demo/.helix/language.toml).
+
 
 ## ⚠️ Breaking Changes (2024-10-25)
 
