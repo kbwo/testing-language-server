@@ -26,51 +26,98 @@ cargo install testing-ls-adapter
 
 - [x] Realtime testing diagnostics
 - [x] [VSCode extension](https://github.com/kbwo/vscode-testing-ls)
-- [x] [Coc.nvim extension](https://github.com/kbwo/coc-testing-ls)
+- [x] [coc.nvim extension](https://github.com/kbwo/coc-testing-ls)
 - [x] For Neovim builtin LSP, see [demo/README.md](./demo/README.md)
 - [ ] More efficient checking of diagnostics
 - [ ] Useful commands in each extension
 
 ## Configuration
 
-language server config:
+### VSCode
 
-```
-"languageserver": {
-  "testing": {
-    "command": "<server path>/testing-language-server",
-    "trace.server": "verbose",
-    "filetypes": [
-      "rust",
-      "javascript"
-    ],
-    "initializationOptions": {
-      "initializationOptions": {
-        "adapterCommand": {
-          "cargo test": [
-            {
-              "path": "<adapter path>/testing-ls-adapter",
-              "extra_arg": ["--test-kind=cargo-test"],
-              "include": ["**/*.rs"],
-              "exclude": ["**/target/**"]
-            }
-          ],
-          "jest": [
-            {
-              "path": "<adapter path>/testing-ls-adapter",
-              "extra_arg": ["--test-kind=jest"],
-              "include": ["/**/*.js"],
-              "exclude": ["/node_modules/**/*"]
-            }
-          ]
+Install from [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=kbwo.testing-language-server).
+You should set `adapterCommand` in `initializationOptions` for each project.
+You can see the example in [settings.json](./demo/.vscode/settings.json).
+
+
+### coc.nvim
+Install from `:CocInstall coc-testing-ls`.
+You should set `adapterCommand` in `initializationOptions` for each project.
+You can see the example in [See more example](./demo/.vim/coc-settings.json)
+
+### Neovim (nvim-lspconfig)
+
+```lua
+local lspconfig = require('lspconfig')
+local configs = require('lspconfig.configs')
+local util = require "lspconfig/util"
+
+configs.testing_ls = {
+  default_config = {
+    cmd = { "testing-language-server" },
+    filetypes = { "rust" },
+    root_dir = util.root_pattern(".git", "Cargo.toml"),
+      init_options = {
+        enable = true,
+        fileTypes = {"rust"},
+        adapterCommand = {
+        -- See test execution settings for each project
+        -- This configuration assumes a Rust project
+          rust = {
+            path = "testing-ls-adapter",
+            extra_arg = { "--test-kind=cargo-test", "--workspace" },
+            include = { "/demo/**/src/**/*.rs"},
+            exclude = { "/**/target/**"},
+          }
+        },
+        enableWorkspaceDiagnostics = true,
+        trace = {
+          server = "verbose"
         }
       }
+  },
+  docs = {
+    description = [[
+      https://github.com/kbwo/testing-language-server
+
+      Language Server for real-time testing.
+    ]],
+  },
+}
+
+lspconfig.testing_ls.setup{}
+```
+
+
+## ⚠️ Breaking Changes (2024-10-25)
+
+The configuration structure for adapter commands has been changed:
+
+**Before:**
+```json
+"adapterCommand": {
+  "rust": [
+    {
+      "path": "testing-ls-adapter",
+      "extra_arg": ["--test-kind=cargo-test"]
+      // ...
     }
+  ]
+}
+```
+
+**After:**
+```json
+"adapterCommand": {
+  "rust": {
+    "path": "testing-ls-adapter",
+    "extra_arg": ["--test-kind=cargo-test"]
+    // ...
   }
 }
 ```
 
-[See more example](./demo/.vim/coc-settings.json)
+The array wrapper has been removed to simplify the configuration structure. Please update your settings accordingly.
 
 ## Adapter
 - [x] `cargo test`
