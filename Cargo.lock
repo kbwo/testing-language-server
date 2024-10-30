@@ -717,7 +717,7 @@ dependencies = [
 
 [[package]]
 name = "testing-language-server"
-version = "0.0.15"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
