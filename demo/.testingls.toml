@@ -1,0 +1,49 @@
+enableWorkspaceDiagnostics = true
+
+[adapterCommand.cargo-test]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=cargo-test"]
+include = ["/**/src/**/*.rs"]
+exclude = ["/**/target/**"]
+
+[adapterCommand.cargo-nextest]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=cargo-nextest"]
+include = ["/**/src/**/*.rs"]
+exclude = ["/**/target/**"]
+
+[adapterCommand.jest]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=jest"]
+include = ["/jest/*.js"]
+exclude = ["/jest/**/node_modules/**/*"]
+
+[adapterCommand.vitest]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=vitest"]
+include = ["/vitest/*.test.ts", "/vitest/config/**/*.test.ts"]
+exclude = ["/vitest/**/node_modules/**/*"]
+
+[adapterCommand.deno]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=deno"]
+include = ["/deno/*.ts"]
+exclude = []
+
+[adapterCommand.go]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=go-test"]
+include = ["/**/*.go"]
+exclude = []
+
+[adapterCommand.node-test]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=node-test"]
+include = ["/node-test/*.test.js"]
+exclude = []
+
+[adapterCommand.phpunit]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=phpunit"]
+include = ["/**/*Test.php"]
+exclude = ["/phpunit/vendor/**/*.php"]

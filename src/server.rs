@@ -136,12 +136,20 @@ impl TestingLS {
         &self,
         options: Option<&Value>,
     ) -> Result<InitializedOptions, LSError> {
-        if let Some(options) = options {
-            Ok(serde_json::from_value(options.clone())?)
-        } else {
-            Err(LSError::Any(anyhow::anyhow!(
-                "Invalid initialization options"
-            )))
+        let project_dir = self.project_dir()?;
+        let toml_path = project_dir.join(".testingls.toml");
+        let toml_content = std::fs::read_to_string(toml_path);
+        match toml_content {
+            Ok(toml_content) => Ok(toml::from_str::<InitializedOptions>(&toml_content).unwrap()),
+            Err(_) => {
+                if let Some(options) = options {
+                    Ok(serde_json::from_value(options.clone())?)
+                } else {
+                    Err(LSError::Any(anyhow::anyhow!(
+                        "Invalid initialization options"
+                    )))
+                }
+            }
         }
     }
 
