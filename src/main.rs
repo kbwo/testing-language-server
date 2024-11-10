@@ -31,6 +31,7 @@ fn extract_uri(params: &Value) -> Result<String, serde_json::Error> {
 }
 
 fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
+    let mut is_workspace_checked = false;
     loop {
         let mut size = 0;
         'read_header: loop {
@@ -93,6 +94,7 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     std::process::exit(0);
                 }
                 "workspace/diagnostic" => {
+                    is_workspace_checked = true;
                     server.diagnose_workspace()?;
                 }
                 "textDocument/diagnostic" | "textDocument/didSave" => {
@@ -100,6 +102,10 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     server.check_file(&uri, false)?;
                 }
                 "textDocument/didOpen" => {
+                    if !is_workspace_checked {
+                        is_workspace_checked = true;
+                        server.diagnose_workspace()?;
+                    }
                     let uri = extract_textdocument_uri(params)?;
                     if server.refreshing_needed(&uri) {
                         server.refresh_workspaces_cache()?;

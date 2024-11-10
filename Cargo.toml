@@ -48,3 +48,4 @@ glob = { workspace = true }
 globwalk = "0.9.1"
 tree-sitter-php = "0.22.8"
 chrono = "0.4.38"
+toml = "0.8.19"
