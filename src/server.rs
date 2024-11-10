@@ -14,6 +14,8 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::process::Output;
 
+const TOML_FILE_NAME: &str = ".testingls.toml";
+
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct InitializedOptions {
@@ -137,7 +139,7 @@ impl TestingLS {
         options: Option<&Value>,
     ) -> Result<InitializedOptions, LSError> {
         let project_dir = self.project_dir()?;
-        let toml_path = project_dir.join(".testingls.toml");
+        let toml_path = project_dir.join(TOML_FILE_NAME);
         let toml_content = std::fs::read_to_string(toml_path);
         match toml_content {
             Ok(toml_content) => Ok(toml::from_str::<InitializedOptions>(&toml_content).unwrap()),
