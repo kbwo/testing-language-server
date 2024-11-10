@@ -2,32 +2,6 @@
 command = "testing-language-server"
 args = []
 
-[language-server.testing-ls.config.adapterCommand]
-cargo-test = [
-  { path = "testing-ls-adapter", extra_arg = ["--test-kind=cargo-test"], include = ["/**/src/**/*.rs"], exclude = ["/**/target/**"] }
-]
-cargo-nextest = [
-  { path = "testing-ls-adapter", extra_arg = ["--test-kind=cargo-nextest"], include = ["/**/src/**/*.rs"], exclude = ["/**/target/**"] }
-]
-jest = [
-  { path = "testing-ls-adapter", extra_arg = ["--test-kind=jest"], include = ["/jest/*.js"], exclude = ["/jest/**/node_modules/**/*"] }
-]
-vitest = [
-  { path = "testing-ls-adapter", extra_arg = ["--test-kind=vitest"], include = ["/vitest/*.test.ts", "/vitest/config/**/*.test.ts"], exclude = ["/vitest/**/node_modules/**/*"] }
-]
-deno = [
-  { path = "testing-ls-adapter", extra_arg = ["--test-kind=deno"], include = ["/deno/*.ts"], exclude = [] }
-]
-go = [
-  { path = "testing-ls-adapter", extra_arg = ["--test-kind=go-test"], include = ["/**/*.go"], exclude = [] }
-]
-node-test = [
-  { path = "testing-ls-adapter", extra_arg = ["--test-kind=node-test"], include = ["/node-test/*.test.js"], exclude = [] }
-]
-phpunit = [
-  { path = "testing-ls-adapter", extra_arg = ["--test-kind=phpunit"], include = ["/**/*Test.php"], exclude = ["/phpunit/vendor/**/*.php"] }
-]
-
 [[language]]
 name = "rust"
 language-servers = [ { name = "testing-ls", only-features = [ "diagnostics" ] }, "rust-analyzer" ]

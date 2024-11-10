@@ -33,17 +33,69 @@ cargo install testing-ls-adapter
 
 ## Configuration
 
+### Required settings for all editors
+You need to prepare .testingls.toml. See [this](./demo/.testingls.toml) for an example of the configuration.
+
+```.testingls.toml
+enableWorkspaceDiagnostics = true
+
+[adapterCommand.cargo-test]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=cargo-test"]
+include = ["/**/src/**/*.rs"]
+exclude = ["/**/target/**"]
+
+[adapterCommand.cargo-nextest]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=cargo-nextest"]
+include = ["/**/src/**/*.rs"]
+exclude = ["/**/target/**"]
+
+[adapterCommand.jest]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=jest"]
+include = ["/jest/*.js"]
+exclude = ["/jest/**/node_modules/**/*"]
+
+[adapterCommand.vitest]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=vitest"]
+include = ["/vitest/*.test.ts", "/vitest/config/**/*.test.ts"]
+exclude = ["/vitest/**/node_modules/**/*"]
+
+[adapterCommand.deno]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=deno"]
+include = ["/deno/*.ts"]
+exclude = []
+
+[adapterCommand.go]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=go-test"]
+include = ["/**/*.go"]
+exclude = []
+
+[adapterCommand.node-test]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=node-test"]
+include = ["/node-test/*.test.js"]
+exclude = []
+
+[adapterCommand.phpunit]
+path = "testing-ls-adapter"
+extra_arg = ["--test-kind=phpunit"]
+include = ["/**/*Test.php"]
+exclude = ["/phpunit/vendor/**/*.php"]
+```
+
 ### VSCode
 
 Install from [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=kbwo.testing-language-server).
-You should set `adapterCommand` in `initializationOptions` for each project.
 You can see the example in [settings.json](./demo/.vscode/settings.json).
-
 
 ### coc.nvim
 Install from `:CocInstall coc-testing-ls`.
-You should set `adapterCommand` in `initializationOptions` for each project.
-You can see the example in [See more example](./demo/.vim/coc-settings.json)
+You can see the example in [See more example](./.vim/coc-settings.json)
 
 ### Neovim (nvim-lspconfig)
 
@@ -55,26 +107,8 @@ local util = require "lspconfig/util"
 configs.testing_ls = {
   default_config = {
     cmd = { "testing-language-server" },
-    filetypes = { "rust" },
-    root_dir = util.root_pattern(".git", "Cargo.toml"),
-      init_options = {
-        enable = true,
-        fileTypes = {"rust"},
-        adapterCommand = {
-        -- See test execution settings for each project
-        -- This configuration assumes a Rust project
-          rust = {
-            path = "testing-ls-adapter",
-            extra_arg = { "--test-kind=cargo-test", "--workspace" },
-            include = { "/demo/**/src/**/*.rs"},
-            exclude = { "/**/target/**"},
-          }
-        },
-        enableWorkspaceDiagnostics = true,
-        trace = {
-          server = "verbose"
-        }
-      }
+    filetypes = {},
+    root_dir = util.root_pattern(".testingls.toml", ".git" ),
   },
   docs = {
     description = [[
@@ -90,35 +124,6 @@ lspconfig.testing_ls.setup{}
 
 ### Helix
 See [language.toml](./demo/.helix/language.toml).
-
-
-## ⚠️ Breaking Changes (2024-10-25)
-
-The configuration structure for adapter commands has been changed:
-
-**Before:**
-```json
-"adapterCommand": {
-  "rust": [
-    {
-      "path": "testing-ls-adapter",
-      "extra_arg": ["--test-kind=cargo-test"]
-      // ...
-    }
-  ]
-}
-```
-
-**After:**
-```json
-"adapterCommand": {
-  "rust": {
-    "path": "testing-ls-adapter",
-    "extra_arg": ["--test-kind=cargo-test"]
-    // ...
-  }
-}
-```
 
 The array wrapper has been removed to simplify the configuration structure. Please update your settings accordingly.
 
