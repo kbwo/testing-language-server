@@ -1,7 +1,11 @@
 use crate::error::LSError;
 use chrono::NaiveDate;
 use chrono::Utc;
+use serde::Deserialize;
 use serde::Serialize;
+use serde_json::json;
+use serde_json::Number;
+use serde_json::Value;
 use std::fs;
 use std::io::stdout;
 use std::io::Write;
@@ -18,6 +22,31 @@ where
     write!(stdout, "Content-Length: {}\r\n\r\n{}", msg.len(), msg)?;
     stdout.flush()?;
     Ok(())
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ErrorMessage {
+    jsonrpc: String,
+    id: Option<Number>,
+    pub error: Value,
+}
+
+impl ErrorMessage {
+    #[allow(dead_code)]
+    pub fn new<N: Into<Number>>(id: Option<N>, error: Value) -> Self {
+        Self {
+            jsonrpc: "2.0".into(),
+            id: id.map(|i| i.into()),
+            error,
+        }
+    }
+}
+
+pub fn send_error<S: Into<String>>(id: Option<i64>, code: i64, msg: S) -> Result<(), LSError> {
+    send_stdout(&ErrorMessage::new(
+        id,
+        json!({ "code": code, "message": msg.into() }),
+    ))
 }
 
 pub fn format_uri(uri: &str) -> String {

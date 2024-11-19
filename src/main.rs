@@ -15,6 +15,7 @@ use util::{format_uri, send_stdout};
 
 use crate::log::Log;
 use crate::server::TestingLS;
+use crate::util::send_error;
 
 fn extract_textdocument_uri(params: &Value) -> Result<String, serde_json::Error> {
     let uri = params["textDocument"]["uri"]
@@ -81,6 +82,7 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
 
         if let Some(method) = method {
             match *method {
+                "initialized" | "$/cancelRequest" => {}
                 "initialize" => {
                     let initialize_params = InitializeParams::deserialize(params)?;
                     let id = value["id"].as_i64().unwrap();
@@ -130,7 +132,15 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                             "result": result,
                     }))?;
                 }
-                _ => {}
+                _ => {
+                    // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
+                    let id = value["id"].as_i64();
+                    send_error(
+                        id,
+                        -32601, // Method not found
+                        format!("method not found: {}", method),
+                    )?;
+                }
             }
         }
     }
