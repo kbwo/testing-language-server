@@ -97,7 +97,7 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     is_workspace_checked = true;
                     server.diagnose_workspace()?;
                 }
-                "textDocument/diagnostic" | "textDocument/didSave" => {
+                "textDocument/didSave" => {
                     let uri = extract_textdocument_uri(params)?;
                     server.check_file(&uri, false)?;
                 }
