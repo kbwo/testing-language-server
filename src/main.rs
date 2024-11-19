@@ -85,6 +85,8 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     let initialize_params = InitializeParams::deserialize(params)?;
                     let id = value["id"].as_i64().unwrap();
                     server.initialize(id, initialize_params)?;
+                    is_workspace_checked = true;
+                    server.diagnose_workspace()?;
                 }
                 "shutdown" => {
                     let id = value["id"].as_i64().unwrap();
