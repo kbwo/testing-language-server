@@ -82,13 +82,15 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
 
         if let Some(method) = method {
             match *method {
-                "initialized" | "$/cancelRequest" => {}
+                "$/cancelRequest" => {}
+                "initialized" => {
+                    is_workspace_checked = true;
+                    server.diagnose_workspace()?;
+                }
                 "initialize" => {
                     let initialize_params = InitializeParams::deserialize(params)?;
                     let id = value["id"].as_i64().unwrap();
                     server.initialize(id, initialize_params)?;
-                    is_workspace_checked = true;
-                    server.diagnose_workspace()?;
                 }
                 "shutdown" => {
                     let id = value["id"].as_i64().unwrap();
@@ -135,11 +137,13 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                 _ => {
                     // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
                     let id = value["id"].as_i64();
-                    send_error(
-                        id,
-                        -32601, // Method not found
-                        format!("method not found: {}", method),
-                    )?;
+                    if id.is_some() {
+                        send_error(
+                            id,
+                            -32601, // Method not found
+                            format!("method not found: {}", method),
+                        )?;
+                    }
                 }
             }
         }
