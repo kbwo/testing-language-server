@@ -79,10 +79,12 @@ impl Runner for CargoTestRunner {
         let output = test_result;
         write_result_log("cargo_test.log", &output)?;
         let Output { stdout, stderr, .. } = output;
-        if stdout.is_empty() && !stderr.is_empty() {
+        if stdout.is_empty() {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
-        let test_result = String::from_utf8(stdout)?;
+        // When `--nocapture` option is set, stderr has some important information
+        // to parse test result
+        let test_result = String::from_utf8(stderr)? + &String::from_utf8(stdout)?;
         let diagnostics: RunFileTestResult = parse_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace_root).unwrap(),
