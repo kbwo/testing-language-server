@@ -5,17 +5,50 @@ mod spec;
 mod util;
 
 use std::io::{self, BufRead, Read};
+use std::sync::{Arc, Mutex};
 
 use error::LSError;
-use lsp_types::InitializeParams;
 use serde::de::Error;
-use serde::Deserialize;
 use serde_json::{json, Value};
+use tower_lsp::lsp_types::{InitializeResult, InitializedParams, MessageType};
+use tower_lsp::{Client, LanguageServer};
 use util::{format_uri, send_stdout};
 
 use crate::log::Log;
 use crate::server::TestingLS;
 use crate::util::send_error;
+
+#[derive(Debug)]
+struct Backend {
+    client: Client,
+    server: Arc<Mutex<TestingLS>>,
+}
+impl Into<tower_lsp::jsonrpc::Error> for LSError {
+    fn into(self) -> tower_lsp::jsonrpc::Error {
+        todo!()
+    }
+}
+
+#[tower_lsp::async_trait]
+impl LanguageServer for Backend {
+    async fn initialize(
+        &self,
+        params: tower_lsp::lsp_types::InitializeParams,
+    ) -> tower_lsp::jsonrpc::Result<InitializeResult> {
+        self.server
+            .lock()
+            .unwrap()
+            .initialize(params)
+            .map_err(|err| err.into())
+    }
+
+    async fn initialized(&self, _: InitializedParams) {
+        let _ = self.server.lock().unwrap().diagnose_workspace();
+    }
+    async fn shutdown(&self) -> tower_lsp::jsonrpc::Result<()> {
+        Ok(())
+    }
+}
 
 fn extract_textdocument_uri(params: &Value) -> Result<String, serde_json::Error> {
     let uri = params["textDocument"]["uri"]
@@ -87,11 +120,11 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     is_workspace_checked = true;
                     server.diagnose_workspace()?;
                 }
-                "initialize" => {
-                    let initialize_params = InitializeParams::deserialize(params)?;
-                    let id = value["id"].as_i64().unwrap();
-                    server.initialize(id, initialize_params)?;
-                }
+                // "initialize" => {
+                //     let initialize_params = InitializeParams::deserialize(params)?;
+                //     let id = value["id"].as_i64().unwrap();
+                //     server.initialize(id, initialize_params)?;
+                // }
                 "shutdown" => {
                     let id = value["id"].as_i64().unwrap();
                     server.shutdown(id)?;

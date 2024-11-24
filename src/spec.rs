@@ -1,9 +1,9 @@
 use clap::Parser;
-use lsp_types::Diagnostic;
-use lsp_types::Range;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
+use tower_lsp::lsp_types::Diagnostic;
+use tower_lsp::lsp_types::Range;
 
 #[derive(Parser, Debug)]
 pub enum AdapterCommands {

@@ -3,7 +3,6 @@ use crate::spec::*;
 use crate::util::resolve_path;
 use crate::util::send_stdout;
 use glob::Pattern;
-use lsp_types::*;
 use serde::Deserialize;
 use serde_json::json;
 use serde_json::Value;
@@ -13,16 +12,18 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Output;
+use tower_lsp::lsp_types::*;
 
 const TOML_FILE_NAME: &str = ".testingls.toml";
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct InitializedOptions {
     adapter_command: HashMap<AdapterId, AdapterConfiguration>,
     enable_workspace_diagnostics: Option<bool>,
 }
 
+#[derive(Debug)]
 pub struct TestingLS {
     pub workspace_folders: Option<Vec<WorkspaceFolder>>,
     pub options: InitializedOptions,
@@ -69,9 +70,8 @@ impl TestingLS {
 
     pub fn initialize(
         &mut self,
-        id: i64,
         initialize_params: InitializeParams,
-    ) -> Result<(), LSError> {
+    ) -> Result<InitializeResult, LSError> {
         self.workspace_folders = initialize_params.workspace_folders;
         self.options = (self
             .handle_initialization_options(initialize_params.initialization_options.as_ref()))?;
@@ -80,13 +80,7 @@ impl TestingLS {
             ..InitializeResult::default()
         };
 
-        send_stdout(&json!({
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": result,
-        }))?;
-
-        Ok(())
+        Ok(result)
     }
 
     fn adapter_commands(&self) -> HashMap<AdapterId, AdapterConfiguration> {
@@ -488,8 +482,8 @@ impl TestingLS {
 
 #[cfg(test)]
 mod tests {
-    use lsp_types::{Url, WorkspaceFolder};
     use std::collections::HashMap;
+    use tower_lsp::lsp_types::{Url, WorkspaceFolder};
 
     use super::*;
 
