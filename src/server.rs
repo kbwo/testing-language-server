@@ -319,29 +319,17 @@ impl TestingLS {
         if !stderr.is_empty() {
             let message =
                 "Cannot run test command: \n".to_string() + &String::from_utf8(stderr).unwrap();
-            let placeholder_diagnostic = Diagnostic {
-                range: Range {
-                    start: Position {
-                        line: 0,
-                        character: 0,
-                    },
-                    end: Position {
-                        line: 0,
-                        character: 0,
-                    },
-                },
+            let message_type = MessageType::ERROR;
+            let params: ShowMessageParams = ShowMessageParams {
+                typ: message_type,
                 message,
-                severity: Some(DiagnosticSeverity::WARNING),
-                code_description: None,
-                code: None,
-                source: None,
-                tags: None,
-                related_information: None,
-                data: None,
             };
-            for path in paths {
-                diagnostics.push((path.to_string(), vec![placeholder_diagnostic.clone()]));
-            }
+            send_stdout(&json!({
+                "jsonrpc": "2.0",
+                "method": "window/showMessage",
+                "params": params,
+            }))
+            .unwrap();
         }
 
         let adapter_result =
@@ -573,42 +561,6 @@ mod tests {
         );
         let test_file = absolute_path_of_demo.join("jest/index.spec.js");
         assert_eq!(files, vec![test_file.to_str().unwrap()]);
-    }
-
-    #[test]
-    fn bubble_adapter_error() {
-        let adapter_conf: AdapterConfiguration = AdapterConfiguration {
-            path: std::env::current_dir()
-                .unwrap()
-                .join("target/debug/testing-ls-adapter")
-                .to_str()
-                .unwrap()
-                .to_string(),
-            extra_arg: vec!["--invalid-arg".to_string()],
-            ..Default::default()
-        };
-        let abs_path_of_demo = std::env::current_dir().unwrap().join("demo/rust");
-        let files =
-            TestingLS::project_files(&abs_path_of_demo.clone(), &["/**/*.rs".to_string()], &[]);
-
-        let server = TestingLS {
-            workspace_folders: Some(vec![WorkspaceFolder {
-                uri: Url::from_file_path(&abs_path_of_demo).unwrap(),
-                name: "demo".to_string(),
-            }]),
-            options: InitializedOptions {
-                adapter_command: HashMap::from([(String::from(".rs"), adapter_conf.clone())]),
-                enable_workspace_diagnostics: Some(true),
-            },
-            workspaces_cache: Vec::new(),
-        };
-        let diagnostics = server
-            .get_diagnostics(&adapter_conf, abs_path_of_demo.to_str().unwrap(), &files)
-            .unwrap();
-        assert_eq!(diagnostics.len(), 1);
-        let diagnostic = diagnostics.first().unwrap().1.first().unwrap();
-        assert_eq!(diagnostic.severity.unwrap(), DiagnosticSeverity::WARNING);
-        assert!(diagnostic.message.contains("Cannot run test command:"));
     }
 
     #[test]
