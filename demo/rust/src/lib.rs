@@ -53,4 +53,13 @@ mod tests {
             }
         }
     }
+
+    fn p() {
+        panic!("test failed");
+    }
+
+    #[test]
+    fn test_panic() {
+        p();
+    }
 }

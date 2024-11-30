@@ -1,6 +1,6 @@
 [package]
 name = "testing-ls-adapter"
-version = "0.0.10"
+version = "0.0.11"
 edition = "2021"
 description = "testing-language-server adapter"
 license = "MIT"
@@ -8,7 +8,7 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-testing-language-server = "0.0.11"
+testing-language-server = "0.1.7"
 lsp-types = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }

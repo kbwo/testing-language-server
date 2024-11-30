@@ -276,19 +276,35 @@ pub fn parse_cargo_diagnostics(
     contents: &str,
     workspace_root: PathBuf,
     file_paths: &[String],
+    test_items: &[TestItem],
 ) -> RunFileTestResult {
     let contents = contents.replace("\r\n", "\n");
     let lines = contents.lines();
     let mut result_map: HashMap<String, Vec<Diagnostic>> = HashMap::new();
     for (i, line) in lines.clone().enumerate() {
+        // Example:
+        // thread 'server::tests::test_panic' panicked at src/server.rs:584:9:
         let re = Regex::new(r"thread '([^']+)' panicked at ([^:]+):(\d+):(\d+):").unwrap();
         if let Some(m) = re.captures(line) {
             let mut message = String::new();
-            let file = m.get(2).unwrap().as_str().to_string();
-            if let Some(file_path) = file_paths
-                .iter()
-                .find(|path| path.contains(workspace_root.join(&file).to_str().unwrap()))
-            {
+            // <filename>::<id>
+            let id_with_file = m.get(1).unwrap().as_str().to_string();
+
+            // relaive path
+            let relative_file_path = m.get(2).unwrap().as_str().to_string();
+            // name of the file without extension
+            let file_stem = Path::new(&relative_file_path)
+                .file_stem()
+                .unwrap()
+                .to_str()
+                .unwrap();
+            let executed_test_id = id_with_file.replace(&(file_stem.to_string() + "::"), "");
+
+            if let Some(file_path) = file_paths.iter().find(|path| {
+                path.contains(workspace_root.join(&relative_file_path).to_str().unwrap())
+            }) {
+                let matched_test_item = test_items.iter().find(|item| item.id == executed_test_id);
+
                 let lnum = m.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
                 let col = m.get(4).unwrap().as_str().parse::<u32>().unwrap() - 1;
                 let mut next_i = i + 1;
@@ -309,10 +325,42 @@ pub fn parse_cargo_diagnostics(
                             character: MAX_CHAR_LENGTH,
                         },
                     },
-                    message,
+                    message: message.clone(),
                     severity: Some(DiagnosticSeverity::ERROR),
                     ..Diagnostic::default()
                 };
+
+                // if the test item is matched,
+                // add a diagnostic to the beginning of the test item
+                // in order to show which test failed.
+                // If this code does not exist, only panicked positions are shown
+                if let Some(test_item) = matched_test_item {
+                    let message = format!(
+                        "`{}` failed at {relative_file_path}:{lnum}:{col}\nMessage:\n{message}",
+                        test_item.name
+                    );
+                    let lnum = test_item.start_position.start.line;
+                    let col = test_item.start_position.start.character;
+                    let diagnostic = Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: lnum,
+                                character: col,
+                            },
+                            end: Position {
+                                line: lnum,
+                                character: MAX_CHAR_LENGTH,
+                            },
+                        },
+                        message,
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        ..Diagnostic::default()
+                    };
+                    result_map
+                        .entry(file_path.to_string())
+                        .or_default()
+                        .push(diagnostic);
+                }
                 result_map
                     .entry(file_path.to_string())
                     .or_default()

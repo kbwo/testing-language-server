@@ -8,6 +8,7 @@ use testing_language_server::spec::RunFileTestResult;
 
 use testing_language_server::spec::DiscoverResult;
 use testing_language_server::spec::DiscoverResultItem;
+use testing_language_server::spec::TestItem;
 
 use crate::model::Runner;
 
@@ -15,14 +16,6 @@ use super::util::detect_workspaces_from_file_list;
 use super::util::discover_rust_tests;
 use super::util::parse_cargo_diagnostics;
 use super::util::write_result_log;
-
-fn parse_diagnostics(
-    contents: &str,
-    workspace_root: PathBuf,
-    file_paths: &[String],
-) -> RunFileTestResult {
-    parse_cargo_diagnostics(contents, workspace_root, file_paths)
-}
 
 fn detect_workspaces(file_paths: &[String]) -> DetectWorkspaceResult {
     detect_workspaces_from_file_list(file_paths, &["Cargo.toml".to_string()])
@@ -54,19 +47,16 @@ impl Runner for CargoNextestRunner {
         args: testing_language_server::spec::RunFileTestArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let tests = file_paths
+        let discovered_tests: Vec<TestItem> = file_paths
             .iter()
-            .map(|path| {
-                discover_rust_tests(path).map(|test_items| {
-                    test_items
-                        .into_iter()
-                        .map(|item| item.id)
-                        .collect::<Vec<String>>()
-                })
-            })
+            .map(|path| discover_rust_tests(path))
             .filter_map(Result::ok)
             .flatten()
             .collect::<Vec<_>>();
+        let test_ids = discovered_tests
+            .iter()
+            .map(|item| item.id.clone())
+            .collect::<Vec<String>>();
         let workspace_root = args.workspace;
         let test_result = std::process::Command::new("cargo")
             .current_dir(&workspace_root)
@@ -76,7 +66,7 @@ impl Runner for CargoNextestRunner {
             .arg("--no-fail-fast")
             .args(args.extra)
             .arg("--")
-            .args(tests)
+            .args(&test_ids)
             .output()
             .unwrap();
         let output = test_result;
@@ -91,10 +81,11 @@ impl Runner for CargoNextestRunner {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let test_result = String::from_utf8(stderr)?;
-        let diagnostics: RunFileTestResult = parse_diagnostics(
+        let diagnostics: RunFileTestResult = parse_cargo_diagnostics(
             &test_result,
             PathBuf::from_str(&workspace_root).unwrap(),
             &file_paths,
+            &discovered_tests,
         );
         send_stdout(&diagnostics)?;
         Ok(())
@@ -115,7 +106,7 @@ impl Runner for CargoNextestRunner {
 #[cfg(test)]
 mod tests {
     use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
-    use testing_language_server::spec::RunFileTestResultItem;
+    use testing_language_server::spec::{RunFileTestResultItem, TestItem};
 
     use crate::runner::util::MAX_CHAR_LENGTH;
 
@@ -142,10 +133,35 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
             "#;
         let file_paths =
             vec!["/home/example/projects/rocks-lib/src/rocks/dependency.rs".to_string()];
-        let diagnostics: RunFileTestResult = parse_diagnostics(
+        let test_items: Vec<TestItem> = vec![TestItem {
+            id: "rocks::dependency::tests::parse_dependency".to_string(),
+            name: "rocks::dependency::tests::parse_dependency".to_string(),
+            start_position: Range {
+                start: Position {
+                    line: 85,
+                    character: 63,
+                },
+                end: Position {
+                    line: 85,
+                    character: MAX_CHAR_LENGTH,
+                },
+            },
+            end_position: Range {
+                start: Position {
+                    line: 85,
+                    character: 63,
+                },
+                end: Position {
+                    line: 85,
+                    character: MAX_CHAR_LENGTH,
+                },
+            },
+        }];
+        let diagnostics: RunFileTestResult = parse_cargo_diagnostics(
             fixture,
             PathBuf::from_str("/home/example/projects").unwrap(),
             &file_paths,
+            &test_items,
         );
         let message = r#"called `Result::unwrap()` on an `Err` value: unexpected end of input while parsing min or version number
 Location:

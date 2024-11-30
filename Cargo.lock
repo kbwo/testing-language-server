@@ -723,31 +723,6 @@ dependencies = [
 
 [[package]]
 name = "testing-language-server"
-version = "0.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c1a48aec4305834e4f80ad28dfe5bea8c98c0bb215a092eb2af15c4ac86efb7"
-dependencies = [
- "anyhow",
- "chrono",
- "clap",
- "dirs",
- "glob",
- "globwalk",
- "lsp-types",
- "once_cell",
- "regex",
- "serde",
- "serde_json",
- "strum",
- "thiserror",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "tree-sitter-php",
-]
-
-[[package]]
-name = "testing-language-server"
 version = "0.1.7"
 dependencies = [
  "anyhow",
@@ -771,8 +746,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "testing-language-server"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fae6ce9cb290e80814d1796e4207a0a0dc21c216807136d48b68c0f27be29b9"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "clap",
+ "dirs",
+ "glob",
+ "globwalk",
+ "lsp-types",
+ "once_cell",
+ "regex",
+ "serde",
+ "serde_json",
+ "strum",
+ "thiserror",
+ "toml",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "tree-sitter-php",
+]
+
+[[package]]
 name = "testing-ls-adapter"
-version = "0.0.10"
+version = "0.0.11"
 dependencies = [
  "anyhow",
  "clap",
@@ -782,7 +783,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tempfile",
- "testing-language-server 0.0.11",
+ "testing-language-server 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
