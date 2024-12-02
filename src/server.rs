@@ -317,8 +317,7 @@ impl TestingLS {
             .map_err(|err| LSError::Adapter(err.to_string()))?;
         let Output { stdout, stderr, .. } = output;
         if !stderr.is_empty() {
-            let message =
-                "Cannot run test command: \n".to_string() + &String::from_utf8(stderr).unwrap();
+            let message = "Error occurred when running test via adapter.\nCheck adapter log or run tests manually".to_string();
             let message_type = MessageType::ERROR;
             let params: ShowMessageParams = ShowMessageParams {
                 typ: message_type,
