@@ -110,4 +110,7 @@ pub struct DiscoverResultItem {
 }
 
 /// Result of `<adapter command> discover`
-pub type DiscoverResult = Vec<DiscoverResultItem>;
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+pub struct DiscoverResult {
+    pub data: Vec<DiscoverResultItem>,
+}

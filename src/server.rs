@@ -13,6 +13,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Output;
+use testing_language_server::spec::DiscoverResult;
 
 const TOML_FILE_NAME: &str = ".testingls.toml";
 
@@ -413,7 +414,7 @@ impl TestingLS {
     #[allow(clippy::for_kv_map)]
     pub fn discover_file(&self, path: &str) -> Result<DiscoverResult, LSError> {
         let target_paths = vec![path.to_string()];
-        let mut result: DiscoverResult = vec![];
+        let mut result: DiscoverResult = DiscoverResult { data: vec![] };
         for WorkspaceAnalysis {
             adapter_config: adapter,
             workspaces,
@@ -423,7 +424,9 @@ impl TestingLS {
                 if !paths.contains(&path.to_string()) {
                     continue;
                 }
-                result.extend(self.discover(adapter, &target_paths)?);
+                result
+                    .data
+                    .extend(self.discover(adapter, &target_paths)?.data);
             }
         }
         Ok(result)
