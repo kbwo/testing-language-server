@@ -1,5 +1,8 @@
 # testing-language-server
 
+⚠️ **IMPORTANT NOTICE**
+This project is under active development and may introduce breaking changes. If you encounter any issues, please make sure to update to the latest version before reporting bugs.
+
 General purpose LSP server that integrate with testing.
 The language server is characterized by portability and extensibility.
 
