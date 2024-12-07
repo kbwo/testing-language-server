@@ -372,10 +372,6 @@ pub fn parse_cargo_diagnostics(
         }
     }
 
-    let no_diagnostic = result_map
-        .values()
-        .all(|diagnostics| !diagnostics.is_empty());
-
     let data = result_map
         .into_iter()
         .map(|(path, diagnostics)| FileDiagnostics { path, diagnostics })
