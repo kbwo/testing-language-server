@@ -9,8 +9,8 @@ use testing_language_server::error::LSError;
 use testing_language_server::spec::DetectWorkspaceResult;
 use testing_language_server::spec::DiscoverResult;
 use testing_language_server::spec::DiscoverResultItem;
+use testing_language_server::spec::FileDiagnostics;
 use testing_language_server::spec::RunFileTestResult;
-use testing_language_server::spec::RunFileTestResultItem;
 use testing_language_server::spec::TestItem;
 
 use crate::model::Runner;
@@ -67,10 +67,13 @@ fn parse_diagnostics(
             })
         }
     }
-    Ok(result_map
-        .into_iter()
-        .map(|(path, diagnostics)| RunFileTestResultItem { path, diagnostics })
-        .collect())
+    Ok(RunFileTestResult {
+        data: result_map
+            .into_iter()
+            .map(|(path, diagnostics)| FileDiagnostics { path, diagnostics })
+            .collect(),
+        messages: vec![],
+    })
 }
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
@@ -229,7 +232,7 @@ mod tests {
             ],
         )
         .unwrap();
-        assert_eq!(diagnostics.len(), 2);
+        assert_eq!(diagnostics.data.len(), 2);
     }
 
     #[test]

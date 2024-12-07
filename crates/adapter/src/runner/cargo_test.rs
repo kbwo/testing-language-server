@@ -101,7 +101,7 @@ impl Runner for CargoTestRunner {
 #[cfg(test)]
 mod tests {
     use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
-    use testing_language_server::spec::RunFileTestResultItem;
+    use testing_language_server::spec::FileDiagnostics;
 
     use crate::runner::util::MAX_CHAR_LENGTH;
 
@@ -166,24 +166,27 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
         assert_eq!(
             diagnostics,
-            vec![RunFileTestResultItem {
-                path: file_paths.first().unwrap().to_owned(),
-                diagnostics: vec![Diagnostic {
-                    range: Range {
-                        start: Position {
-                            line: 85,
-                            character: 63
+            RunFileTestResult {
+                data: vec![FileDiagnostics {
+                    path: file_paths.first().unwrap().to_owned(),
+                    diagnostics: vec![Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 85,
+                                character: 63
+                            },
+                            end: Position {
+                                line: 85,
+                                character: MAX_CHAR_LENGTH
+                            }
                         },
-                        end: Position {
-                            line: 85,
-                            character: MAX_CHAR_LENGTH
-                        }
-                    },
-                    message: message.to_string(),
-                    severity: Some(DiagnosticSeverity::ERROR),
-                    ..Diagnostic::default()
-                }]
-            }]
+                        message: message.to_string(),
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        ..Diagnostic::default()
+                    }]
+                }],
+                messages: vec![]
+            }
         )
     }
 
