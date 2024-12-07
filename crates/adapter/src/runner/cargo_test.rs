@@ -7,7 +7,7 @@ use testing_language_server::spec::DetectWorkspaceResult;
 use testing_language_server::spec::RunFileTestResult;
 
 use testing_language_server::spec::DiscoverResult;
-use testing_language_server::spec::DiscoverResultItem;
+use testing_language_server::spec::FoundFileTests;
 use testing_language_server::spec::TestItem;
 
 use crate::model::Runner;
@@ -18,7 +18,9 @@ use super::util::parse_cargo_diagnostics;
 use super::util::write_result_log;
 
 fn detect_workspaces(file_paths: &[String]) -> DetectWorkspaceResult {
-    detect_workspaces_from_file_list(file_paths, &["Cargo.toml".to_string()])
+    DetectWorkspaceResult {
+        data: detect_workspaces_from_file_list(file_paths, &["Cargo.toml".to_string()]),
+    }
 }
 
 #[derive(Eq, PartialEq, Hash, Debug)]
@@ -28,11 +30,11 @@ impl Runner for CargoTestRunner {
     #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let mut discover_results: DiscoverResult = vec![];
+        let mut discover_results: DiscoverResult = DiscoverResult { data: vec![] };
 
         for file_path in file_paths {
             let tests = discover_rust_tests(&file_path)?;
-            discover_results.push(DiscoverResultItem {
+            discover_results.data.push(FoundFileTests {
                 tests,
                 path: file_path,
             });
@@ -101,7 +103,7 @@ impl Runner for CargoTestRunner {
 #[cfg(test)]
 mod tests {
     use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
-    use testing_language_server::spec::RunFileTestResultItem;
+    use testing_language_server::spec::FileDiagnostics;
 
     use crate::runner::util::MAX_CHAR_LENGTH;
 
@@ -166,24 +168,27 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
         assert_eq!(
             diagnostics,
-            vec![RunFileTestResultItem {
-                path: file_paths.first().unwrap().to_owned(),
-                diagnostics: vec![Diagnostic {
-                    range: Range {
-                        start: Position {
-                            line: 85,
-                            character: 63
+            RunFileTestResult {
+                data: vec![FileDiagnostics {
+                    path: file_paths.first().unwrap().to_owned(),
+                    diagnostics: vec![Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 85,
+                                character: 63
+                            },
+                            end: Position {
+                                line: 85,
+                                character: MAX_CHAR_LENGTH
+                            }
                         },
-                        end: Position {
-                            line: 85,
-                            character: MAX_CHAR_LENGTH
-                        }
-                    },
-                    message: message.to_string(),
-                    severity: Some(DiagnosticSeverity::ERROR),
-                    ..Diagnostic::default()
-                }]
-            }]
+                        message: message.to_string(),
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        ..Diagnostic::default()
+                    }]
+                }],
+                messages: vec![]
+            }
         )
     }
 
@@ -206,8 +211,10 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
             .collect();
 
         let workspaces = detect_workspaces(&file_paths);
-        assert_eq!(workspaces.len(), 2);
-        assert!(workspaces.contains_key(absolute_path_of_demo.to_str().unwrap()));
-        assert!(workspaces.contains_key(current_dir.to_str().unwrap()));
+        assert_eq!(workspaces.data.len(), 2);
+        assert!(workspaces
+            .data
+            .contains_key(absolute_path_of_demo.to_str().unwrap()));
+        assert!(workspaces.data.contains_key(current_dir.to_str().unwrap()));
     }
 }

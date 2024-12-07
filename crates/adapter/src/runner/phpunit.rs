@@ -3,8 +3,8 @@ use std::io::BufReader;
 use std::process::Output;
 use testing_language_server::error::LSError;
 use testing_language_server::spec::{
-    DetectWorkspaceResult, DiscoverResult, DiscoverResultItem, RunFileTestResult,
-    RunFileTestResultItem, TestItem,
+    DetectWorkspaceResult, DiscoverResult, FileDiagnostics, FoundFileTests, RunFileTestResult,
+    TestItem,
 };
 use xml::reader::{ParserConfig, XmlEvent};
 
@@ -16,7 +16,9 @@ use super::util::{
 };
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
-    detect_workspaces_from_file_list(&file_paths, &["composer.json".to_string()])
+    DetectWorkspaceResult {
+        data: detect_workspaces_from_file_list(&file_paths, &["composer.json".to_string()]),
+    }
 }
 
 fn get_result_from_characters(characters: &str) -> Result<ResultFromXml, anyhow::Error> {
@@ -125,9 +127,9 @@ impl Runner for PhpunitRunner {
     #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let mut discover_results: DiscoverResult = vec![];
+        let mut discover_results: DiscoverResult = DiscoverResult { data: vec![] };
         for file_path in file_paths {
-            discover_results.push(DiscoverResultItem {
+            discover_results.data.push(FoundFileTests {
                 tests: discover(&file_path)?,
                 path: file_path,
             })
@@ -177,14 +179,18 @@ impl Runner for PhpunitRunner {
             return Err(LSError::Adapter(String::from_utf8(stderr).unwrap()));
         }
         let result_from_xml = get_result_from_xml(log_path.to_str().unwrap())?;
-        let diagnostics: RunFileTestResult = result_from_xml
+        let result_item: Vec<FileDiagnostics> = result_from_xml
             .into_iter()
             .map(|result_from_xml| {
-                let result_item: RunFileTestResultItem = result_from_xml.into();
+                let result_item: FileDiagnostics = result_from_xml.into();
                 result_item
             })
             .collect();
-        send_stdout(&diagnostics)?;
+        let result = RunFileTestResult {
+            data: result_item,
+            messages: vec![],
+        };
+        send_stdout(&result)?;
         Ok(())
     }
 

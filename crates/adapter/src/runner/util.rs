@@ -8,7 +8,7 @@ use std::sync::LazyLock;
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 use regex::Regex;
 use serde::Serialize;
-use testing_language_server::spec::{RunFileTestResultItem, TestItem};
+use testing_language_server::spec::{FileDiagnostics, TestItem};
 use testing_language_server::{error::LSError, spec::RunFileTestResult};
 use tree_sitter::{Language, Point, Query, QueryCursor};
 
@@ -30,9 +30,10 @@ pub struct ResultFromXml {
     pub col: u32,
 }
 
-impl Into<RunFileTestResultItem> for ResultFromXml {
-    fn into(self) -> RunFileTestResultItem {
-        RunFileTestResultItem {
+#[allow(clippy::from_over_into)]
+impl Into<FileDiagnostics> for ResultFromXml {
+    fn into(self) -> FileDiagnostics {
+        FileDiagnostics {
             path: self.path,
             diagnostics: vec![Diagnostic {
                 message: self.message,
@@ -371,10 +372,15 @@ pub fn parse_cargo_diagnostics(
         }
     }
 
-    result_map
+    let data = result_map
         .into_iter()
-        .map(|(path, diagnostics)| RunFileTestResultItem { path, diagnostics })
-        .collect()
+        .map(|(path, diagnostics)| FileDiagnostics { path, diagnostics })
+        .collect();
+
+    RunFileTestResult {
+        data,
+        messages: vec![],
+    }
 }
 
 /// remove this function because duplicate implementation

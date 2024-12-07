@@ -13,9 +13,9 @@ use testing_language_server::error::LSError;
 
 use testing_language_server::spec::DetectWorkspaceResult;
 use testing_language_server::spec::DiscoverResult;
-use testing_language_server::spec::DiscoverResultItem;
+use testing_language_server::spec::FileDiagnostics;
+use testing_language_server::spec::FoundFileTests;
 use testing_language_server::spec::RunFileTestResult;
-use testing_language_server::spec::RunFileTestResultItem;
 use testing_language_server::spec::TestItem;
 
 use crate::model::Runner;
@@ -89,14 +89,19 @@ fn parse_diagnostics(
             message += line;
         }
     }
-    Ok(result_map
-        .into_iter()
-        .map(|(path, diagnostics)| RunFileTestResultItem { path, diagnostics })
-        .collect())
+    Ok(RunFileTestResult {
+        data: result_map
+            .into_iter()
+            .map(|(path, diagnostics)| FileDiagnostics { path, diagnostics })
+            .collect(),
+        messages: vec![],
+    })
 }
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
-    detect_workspaces_from_file_list(&file_paths, &["deno.json".to_string()])
+    DetectWorkspaceResult {
+        data: detect_workspaces_from_file_list(&file_paths, &["deno.json".to_string()]),
+    }
 }
 
 fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
@@ -161,9 +166,9 @@ impl Runner for DenoRunner {
     #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let mut discover_results: DiscoverResult = vec![];
+        let mut discover_results: DiscoverResult = DiscoverResult { data: vec![] };
         for file_path in file_paths {
-            discover_results.push(DiscoverResultItem {
+            discover_results.data.push(FoundFileTests {
                 tests: discover(&file_path)?,
                 path: file_path,
             })
@@ -229,7 +234,7 @@ mod tests {
         let target_file_path = "/home/demo/test/dneo/main_test.ts";
         let diagnostics =
             parse_diagnostics(&test_result, workspace, &[target_file_path.to_string()]).unwrap();
-        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(diagnostics.data.len(), 1);
     }
 
     #[test]
@@ -242,8 +247,8 @@ mod tests {
             .map(|file_path| file_path.to_str().unwrap().to_string())
             .collect();
         let detect_result = detect_workspaces(file_paths);
-        assert_eq!(detect_result.len(), 1);
-        detect_result.iter().for_each(|(workspace, _)| {
+        assert_eq!(detect_result.data.len(), 1);
+        detect_result.data.iter().for_each(|(workspace, _)| {
             assert_eq!(workspace, absolute_path_of_demo.to_str().unwrap());
         });
     }
