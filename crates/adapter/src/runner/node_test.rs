@@ -4,8 +4,8 @@ use regex::Regex;
 use testing_language_server::{
     error::LSError,
     spec::{
-        DetectWorkspaceResult, DiscoverResult, DiscoverResultItem, RunFileTestResult,
-        RunFileTestResultItem, TestItem,
+        DetectWorkspaceResult, DiscoverResult, DiscoverResultItem, FileDiagnostics,
+        RunFileTestResult, TestItem,
     },
 };
 use xml::{reader::XmlEvent, ParserConfig};
@@ -194,14 +194,18 @@ impl Runner for NodeTestRunner {
         }
         let stdout = String::from_utf8(stdout).unwrap();
         let result_from_xml = get_result_from_xml(&stdout, &file_paths)?;
-        let diagnostics: RunFileTestResult = result_from_xml
+        let result_item: Vec<FileDiagnostics> = result_from_xml
             .into_iter()
             .map(|result_from_xml| {
-                let result_item: RunFileTestResultItem = result_from_xml.into();
+                let result_item: FileDiagnostics = result_from_xml.into();
                 result_item
             })
             .collect();
-        send_stdout(&diagnostics)?;
+        let result = RunFileTestResult {
+            data: result_item,
+            messages: vec![],
+        };
+        send_stdout(&result)?;
         Ok(())
     }
 

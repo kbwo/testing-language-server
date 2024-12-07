@@ -14,8 +14,8 @@ use std::str::FromStr;
 use testing_language_server::error::LSError;
 use testing_language_server::spec::DiscoverResult;
 use testing_language_server::spec::DiscoverResultItem;
+use testing_language_server::spec::FileDiagnostics;
 use testing_language_server::spec::RunFileTestResult;
-use testing_language_server::spec::RunFileTestResultItem;
 use testing_language_server::spec::TestItem;
 
 use super::util::detect_workspaces_from_file_list;
@@ -130,10 +130,13 @@ fn parse_diagnostics(
         }
     }
 
-    Ok(result_map
-        .into_iter()
-        .map(|(path, diagnostics)| RunFileTestResultItem { path, diagnostics })
-        .collect())
+    Ok(RunFileTestResult {
+        data: result_map
+            .into_iter()
+            .map(|(path, diagnostics)| FileDiagnostics { path, diagnostics })
+            .collect(),
+        messages: vec![],
+    })
 }
 
 fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
@@ -305,7 +308,7 @@ mod tests {
         let target_file_path = "/home/demo/test/go/src/test/cases_test.go";
         let result =
             parse_diagnostics(&contents, workspace, &[target_file_path.to_string()]).unwrap();
-        let result = result.first().unwrap();
+        let result = result.data.first().unwrap();
         assert_eq!(result.path, target_file_path);
         let diagnostic = result.diagnostics.first().unwrap();
         assert_eq!(diagnostic.range.start.line, 30);

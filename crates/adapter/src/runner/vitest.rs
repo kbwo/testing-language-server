@@ -7,9 +7,7 @@ use lsp_types::{Diagnostic, DiagnosticSeverity};
 use serde_json::Value;
 use testing_language_server::{
     error::LSError,
-    spec::{
-        DiscoverResult, DiscoverResultItem, RunFileTestResult, RunFileTestResultItem, TestItem,
-    },
+    spec::{DiscoverResult, DiscoverResultItem, FileDiagnostics, RunFileTestResult, TestItem},
 };
 
 use crate::model::Runner;
@@ -124,10 +122,13 @@ fn parse_diagnostics(
             })
         }
     }
-    Ok(result_map
-        .into_iter()
-        .map(|(path, diagnostics)| RunFileTestResultItem { path, diagnostics })
-        .collect())
+    Ok(RunFileTestResult {
+        data: result_map
+            .into_iter()
+            .map(|(path, diagnostics)| FileDiagnostics { path, diagnostics })
+            .collect(),
+        messages: vec![],
+    })
 }
 
 impl Runner for VitestRunner {
