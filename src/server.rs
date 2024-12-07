@@ -13,6 +13,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Output;
+use testing_language_server::spec::DiscoverResult;
 
 const TOML_FILE_NAME: &str = ".testingls.toml";
 
@@ -202,15 +203,18 @@ impl TestingLS {
                     .unwrap()
                     .to_string();
                 let target_paths = workspace
+                    .data
                     .into_iter()
                     .flat_map(|kv| kv.1)
                     .collect::<Vec<_>>();
                 HashMap::from([(workspace_dir, target_paths)])
             } else {
-                workspace
+                workspace.data
             };
-            self.workspaces_cache
-                .push(WorkspaceAnalysis::new(adapter, workspace))
+            self.workspaces_cache.push(WorkspaceAnalysis::new(
+                adapter,
+                DetectWorkspaceResult { data: workspace },
+            ))
         }
         tracing::info!("workspaces_cache={:#?}", self.workspaces_cache);
         send_stdout(&json!({
@@ -237,7 +241,7 @@ impl TestingLS {
                  adapter_config: adapter,
                  workspaces,
              }| {
-                workspaces.iter().for_each(|(workspace, paths)| {
+                workspaces.data.iter().for_each(|(workspace, paths)| {
                     let _ = self.diagnose(adapter, workspace, paths);
                 })
             },
@@ -253,6 +257,7 @@ impl TestingLS {
                 let exclude = &cache.adapter_config.exclude;
                 if cache
                     .workspaces
+                    .data
                     .iter()
                     .any(|(_, workspace)| workspace.contains(&path.to_string()))
                 {
@@ -280,7 +285,7 @@ impl TestingLS {
                  adapter_config: adapter,
                  workspaces,
              }| {
-                for (workspace, paths) in workspaces.iter() {
+                for (workspace, paths) in workspaces.data.iter() {
                     if !paths.contains(&path.to_string()) {
                         continue;
                     }
@@ -337,10 +342,11 @@ impl TestingLS {
             Ok(res) => {
                 for target_file in paths {
                     let diagnostics_for_file: Vec<Diagnostic> = res
+                        .data
                         .clone()
                         .into_iter()
-                        .filter(|RunFileTestResultItem { path, .. }| path == target_file)
-                        .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics)
+                        .filter(|FileDiagnostics { path, .. }| path == target_file)
+                        .flat_map(|FileDiagnostics { diagnostics, .. }| diagnostics)
                         .collect();
                     let uri = Url::from_file_path(target_file.replace("file://", "")).unwrap();
                     diagnostics.push((uri.to_string(), diagnostics_for_file));
@@ -412,17 +418,19 @@ impl TestingLS {
     #[allow(clippy::for_kv_map)]
     pub fn discover_file(&self, path: &str) -> Result<DiscoverResult, LSError> {
         let target_paths = vec![path.to_string()];
-        let mut result: DiscoverResult = vec![];
+        let mut result: DiscoverResult = DiscoverResult { data: vec![] };
         for WorkspaceAnalysis {
             adapter_config: adapter,
             workspaces,
         } in &self.workspaces_cache
         {
-            for (_, paths) in workspaces.iter() {
+            for (_, paths) in workspaces.data.iter() {
                 if !paths.contains(&path.to_string()) {
                     continue;
                 }
-                result.extend(self.discover(adapter, &target_paths)?);
+                result
+                    .data
+                    .extend(self.discover(adapter, &target_paths)?.data);
             }
         }
         Ok(result)
@@ -533,6 +541,7 @@ mod tests {
                 assert!(adapter_command_path.contains("target/debug/testing-ls-adapter"));
                 workspace_analysis
                     .workspaces
+                    .data
                     .iter()
                     .for_each(|(workspace, paths)| {
                         assert_eq!(workspace, abs_path_of_demo.to_str().unwrap());
