@@ -8,8 +8,8 @@ use testing_language_server::error::LSError;
 
 use testing_language_server::spec::DetectWorkspaceResult;
 use testing_language_server::spec::DiscoverResult;
-use testing_language_server::spec::DiscoverResultItem;
 use testing_language_server::spec::FileDiagnostics;
+use testing_language_server::spec::FoundFileTests;
 use testing_language_server::spec::RunFileTestResult;
 use testing_language_server::spec::TestItem;
 
@@ -77,7 +77,9 @@ fn parse_diagnostics(
 }
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
-    detect_workspaces_from_file_list(&file_paths, &["package.json".to_string()])
+    DetectWorkspaceResult {
+        data: detect_workspaces_from_file_list(&file_paths, &["package.json".to_string()]),
+    }
 }
 
 fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
@@ -164,7 +166,7 @@ impl Runner for JestRunner {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = DiscoverResult { data: vec![] };
         for file_path in file_paths {
-            discover_results.data.push(DiscoverResultItem {
+            discover_results.data.push(FoundFileTests {
                 tests: discover(&file_path)?,
                 path: file_path,
             })
@@ -245,8 +247,8 @@ mod tests {
             .map(|file_path| file_path.to_str().unwrap().to_string())
             .collect();
         let detect_result = detect_workspaces(file_paths);
-        assert_eq!(detect_result.len(), 1);
-        detect_result.iter().for_each(|(workspace, _)| {
+        assert_eq!(detect_result.data.len(), 1);
+        detect_result.data.iter().for_each(|(workspace, _)| {
             assert_eq!(workspace, absolute_path_of_demo.to_str().unwrap());
         });
     }

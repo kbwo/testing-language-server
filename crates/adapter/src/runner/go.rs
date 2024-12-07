@@ -13,8 +13,8 @@ use std::process::Output;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
 use testing_language_server::spec::DiscoverResult;
-use testing_language_server::spec::DiscoverResultItem;
 use testing_language_server::spec::FileDiagnostics;
+use testing_language_server::spec::FoundFileTests;
 use testing_language_server::spec::RunFileTestResult;
 use testing_language_server::spec::TestItem;
 
@@ -239,7 +239,7 @@ impl Runner for GoTestRunner {
 
         for file_path in file_paths {
             let tests = discover(&file_path)?;
-            discover_results.data.push(DiscoverResultItem {
+            discover_results.data.push(FoundFileTests {
                 tests,
                 path: file_path,
             });

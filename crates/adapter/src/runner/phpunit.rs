@@ -3,7 +3,7 @@ use std::io::BufReader;
 use std::process::Output;
 use testing_language_server::error::LSError;
 use testing_language_server::spec::{
-    DetectWorkspaceResult, DiscoverResult, DiscoverResultItem, FileDiagnostics, RunFileTestResult,
+    DetectWorkspaceResult, DiscoverResult, FileDiagnostics, FoundFileTests, RunFileTestResult,
     TestItem,
 };
 use xml::reader::{ParserConfig, XmlEvent};
@@ -16,7 +16,9 @@ use super::util::{
 };
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
-    detect_workspaces_from_file_list(&file_paths, &["composer.json".to_string()])
+    DetectWorkspaceResult {
+        data: detect_workspaces_from_file_list(&file_paths, &["composer.json".to_string()]),
+    }
 }
 
 fn get_result_from_characters(characters: &str) -> Result<ResultFromXml, anyhow::Error> {
@@ -127,7 +129,7 @@ impl Runner for PhpunitRunner {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = DiscoverResult { data: vec![] };
         for file_path in file_paths {
-            discover_results.data.push(DiscoverResultItem {
+            discover_results.data.push(FoundFileTests {
                 tests: discover(&file_path)?,
                 path: file_path,
             })
