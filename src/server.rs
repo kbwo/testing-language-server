@@ -337,10 +337,11 @@ impl TestingLS {
             Ok(res) => {
                 for target_file in paths {
                     let diagnostics_for_file: Vec<Diagnostic> = res
+                        .data
                         .clone()
                         .into_iter()
-                        .filter(|RunFileTestResultItem { path, .. }| path == target_file)
-                        .flat_map(|RunFileTestResultItem { diagnostics, .. }| diagnostics)
+                        .filter(|FileDiagnostics { path, .. }| path == target_file)
+                        .flat_map(|FileDiagnostics { diagnostics, .. }| diagnostics)
                         .collect();
                     let uri = Url::from_file_path(target_file.replace("file://", "")).unwrap();
                     diagnostics.push((uri.to_string(), diagnostics_for_file));

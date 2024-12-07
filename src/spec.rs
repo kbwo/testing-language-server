@@ -1,6 +1,7 @@
 use clap::Parser;
 use lsp_types::Diagnostic;
 use lsp_types::Range;
+use lsp_types::ShowMessageParams;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -80,14 +81,19 @@ pub struct AdapterConfiguration {
 /// Result of `<adapter command> detect-workspace`
 pub type DetectWorkspaceResult = HashMap<WorkspaceFilePath, Vec<FilePath>>;
 
-/// Result of `<adapter command> run-file-test`
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-pub struct RunFileTestResultItem {
+pub struct FileDiagnostics {
     pub path: String,
     pub diagnostics: Vec<Diagnostic>,
 }
 
-pub type RunFileTestResult = Vec<RunFileTestResultItem>;
+/// Result of `<adapter command> run-file-test`
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct RunFileTestResult {
+    pub data: Vec<FileDiagnostics>,
+    #[serde(default)]
+    pub messages: Vec<ShowMessageParams>,
+}
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct TestItem {
