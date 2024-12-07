@@ -203,15 +203,18 @@ impl TestingLS {
                     .unwrap()
                     .to_string();
                 let target_paths = workspace
+                    .data
                     .into_iter()
                     .flat_map(|kv| kv.1)
                     .collect::<Vec<_>>();
                 HashMap::from([(workspace_dir, target_paths)])
             } else {
-                workspace
+                workspace.data
             };
-            self.workspaces_cache
-                .push(WorkspaceAnalysis::new(adapter, workspace))
+            self.workspaces_cache.push(WorkspaceAnalysis::new(
+                adapter,
+                DetectWorkspaceResult { data: workspace },
+            ))
         }
         tracing::info!("workspaces_cache={:#?}", self.workspaces_cache);
         send_stdout(&json!({
@@ -238,7 +241,7 @@ impl TestingLS {
                  adapter_config: adapter,
                  workspaces,
              }| {
-                workspaces.iter().for_each(|(workspace, paths)| {
+                workspaces.data.iter().for_each(|(workspace, paths)| {
                     let _ = self.diagnose(adapter, workspace, paths);
                 })
             },
@@ -254,6 +257,7 @@ impl TestingLS {
                 let exclude = &cache.adapter_config.exclude;
                 if cache
                     .workspaces
+                    .data
                     .iter()
                     .any(|(_, workspace)| workspace.contains(&path.to_string()))
                 {
@@ -281,7 +285,7 @@ impl TestingLS {
                  adapter_config: adapter,
                  workspaces,
              }| {
-                for (workspace, paths) in workspaces.iter() {
+                for (workspace, paths) in workspaces.data.iter() {
                     if !paths.contains(&path.to_string()) {
                         continue;
                     }
@@ -420,7 +424,7 @@ impl TestingLS {
             workspaces,
         } in &self.workspaces_cache
         {
-            for (_, paths) in workspaces.iter() {
+            for (_, paths) in workspaces.data.iter() {
                 if !paths.contains(&path.to_string()) {
                     continue;
                 }
@@ -537,6 +541,7 @@ mod tests {
                 assert!(adapter_command_path.contains("target/debug/testing-ls-adapter"));
                 workspace_analysis
                     .workspaces
+                    .data
                     .iter()
                     .for_each(|(workspace, paths)| {
                         assert_eq!(workspace, abs_path_of_demo.to_str().unwrap());
