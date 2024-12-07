@@ -79,7 +79,10 @@ pub struct AdapterConfiguration {
 }
 
 /// Result of `<adapter command> detect-workspace`
-pub type DetectWorkspaceResult = HashMap<WorkspaceFilePath, Vec<FilePath>>;
+#[derive(Debug, Serialize, Clone, Deserialize)]
+pub struct DetectWorkspaceResult {
+    pub data: HashMap<WorkspaceFilePath, Vec<FilePath>>,
+}
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct FileDiagnostics {
@@ -104,7 +107,7 @@ pub struct TestItem {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
-pub struct DiscoverResultItem {
+pub struct FoundFileTests {
     pub path: String,
     pub tests: Vec<TestItem>,
 }
@@ -112,5 +115,5 @@ pub struct DiscoverResultItem {
 /// Result of `<adapter command> discover`
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct DiscoverResult {
-    pub data: Vec<DiscoverResultItem>,
+    pub data: Vec<FoundFileTests>,
 }
