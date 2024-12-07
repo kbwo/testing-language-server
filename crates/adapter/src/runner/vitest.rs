@@ -7,7 +7,7 @@ use lsp_types::{Diagnostic, DiagnosticSeverity};
 use serde_json::Value;
 use testing_language_server::{
     error::LSError,
-    spec::{DiscoverResult, DiscoverResultItem, FileDiagnostics, RunFileTestResult, TestItem},
+    spec::{DiscoverResult, FileDiagnostics, FoundFileTests, RunFileTestResult, TestItem},
 };
 
 use crate::model::Runner;
@@ -139,7 +139,7 @@ impl Runner for VitestRunner {
 
         for file_path in file_paths {
             let tests = discover(&file_path)?;
-            discover_results.data.push(DiscoverResultItem {
+            discover_results.data.push(FoundFileTests {
                 tests,
                 path: file_path,
             });

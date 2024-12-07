@@ -4,8 +4,8 @@ use regex::Regex;
 use testing_language_server::{
     error::LSError,
     spec::{
-        DetectWorkspaceResult, DiscoverResult, DiscoverResultItem, FileDiagnostics,
-        RunFileTestResult, TestItem,
+        DetectWorkspaceResult, DiscoverResult, FileDiagnostics, FoundFileTests, RunFileTestResult,
+        TestItem,
     },
 };
 use xml::{reader::XmlEvent, ParserConfig};
@@ -164,7 +164,7 @@ impl Runner for NodeTestRunner {
         let file_paths = args.file_paths;
         let mut discover_results: DiscoverResult = DiscoverResult { data: vec![] };
         for file_path in file_paths {
-            discover_results.data.push(DiscoverResultItem {
+            discover_results.data.push(FoundFileTests {
                 tests: discover(&file_path)?,
                 path: file_path,
             })
@@ -215,8 +215,9 @@ impl Runner for NodeTestRunner {
         args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let detect_result: DetectWorkspaceResult =
-            detect_workspaces_from_file_list(&file_paths, &["package.json".to_string()]);
+        let detect_result: DetectWorkspaceResult = DetectWorkspaceResult {
+            data: detect_workspaces_from_file_list(&file_paths, &["package.json".to_string()]),
+        };
         send_stdout(&detect_result)?;
         Ok(())
     }
