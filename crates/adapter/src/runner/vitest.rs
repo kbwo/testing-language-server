@@ -135,11 +135,11 @@ impl Runner for VitestRunner {
     #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let mut discover_results: DiscoverResult = vec![];
+        let mut discover_results: DiscoverResult = DiscoverResult { data: vec![] };
 
         for file_path in file_paths {
             let tests = discover(&file_path)?;
-            discover_results.push(DiscoverResultItem {
+            discover_results.data.push(DiscoverResultItem {
                 tests,
                 path: file_path,
             });

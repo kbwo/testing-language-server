@@ -164,9 +164,9 @@ impl Runner for DenoRunner {
     #[tracing::instrument(skip(self))]
     fn discover(&self, args: testing_language_server::spec::DiscoverArgs) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let mut discover_results: DiscoverResult = vec![];
+        let mut discover_results: DiscoverResult = DiscoverResult { data: vec![] };
         for file_path in file_paths {
-            discover_results.push(DiscoverResultItem {
+            discover_results.data.push(DiscoverResultItem {
                 tests: discover(&file_path)?,
                 path: file_path,
             })
