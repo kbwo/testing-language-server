@@ -128,6 +128,9 @@ impl TestingLS {
                 workspace_diagnostics: true,
                 work_done_progress_options: WorkDoneProgressOptions::default(),
             })),
+            text_document_sync: Some(TextDocumentSyncCapability::Kind(
+                TextDocumentSyncKind::INCREMENTAL,
+            )),
             ..ServerCapabilities::default()
         }
     }

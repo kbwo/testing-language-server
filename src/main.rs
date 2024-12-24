@@ -40,6 +40,7 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
             let stdin = io::stdin();
             let mut handle = stdin.lock();
             handle.read_line(&mut buffer)?;
+            tracing::info!("DEBUGPRINT[3]: main.rs:42: buffer={:#?}", buffer);
 
             if buffer.is_empty() {
                 tracing::warn!("buffer is empty")
@@ -74,11 +75,10 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
         handle.read_exact(&mut buf).unwrap();
         let message = String::from_utf8(buf).unwrap();
 
-        let value: Value = serde_json::from_str(&message)?;
-        let method = &value["method"].as_str();
-        tracing::info!("method={:#?}", method);
-        let params = &value["params"];
-        tracing::info!("params={:#?}", params);
+        let received_json: Value = serde_json::from_str(&message)?;
+        tracing::info!("received json={:#?}", received_json);
+        let method = &received_json["method"].as_str();
+        let params = &received_json["params"];
 
         if let Some(method) = method {
             match *method {
@@ -89,11 +89,11 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                 }
                 "initialize" => {
                     let initialize_params = InitializeParams::deserialize(params)?;
-                    let id = value["id"].as_i64().unwrap();
+                    let id = received_json["id"].as_i64().unwrap();
                     server.initialize(id, initialize_params)?;
                 }
                 "shutdown" => {
-                    let id = value["id"].as_i64().unwrap();
+                    let id = received_json["id"].as_i64().unwrap();
                     server.shutdown(id)?;
                 }
                 "exit" => {
@@ -125,7 +125,7 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                     server.diagnose_workspace()?;
                 }
                 "$/discoverFileTest" => {
-                    let id = value["id"].as_i64().unwrap();
+                    let id = received_json["id"].as_i64().unwrap();
                     let uri = extract_uri(params)?;
                     let result = server.discover_file(&uri)?;
                     send_stdout(&json!({
@@ -136,7 +136,7 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
                 }
                 _ => {
                     // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
-                    let id = value["id"].as_i64();
+                    let id = received_json["id"].as_i64();
                     if id.is_some() {
                         send_error(
                             id,
