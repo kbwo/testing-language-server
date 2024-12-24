@@ -8,8 +8,8 @@ pub struct Log;
 impl Log {
     fn log_dir() -> PathBuf {
         let home_dir = dirs::home_dir().unwrap();
-        let log_path = home_dir.join(".config/testing_language_server/adapter/logs");
-        log_path
+
+        home_dir.join(".config/testing_language_server/adapter/logs")
     }
 
     pub fn init() -> Result<WorkerGuard, anyhow::Error> {

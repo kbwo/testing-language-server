@@ -16,9 +16,7 @@ use super::util::{
 };
 
 fn detect_workspaces(file_paths: Vec<String>) -> DetectWorkspaceResult {
-    DetectWorkspaceResult {
-        data: detect_workspaces_from_file_list(&file_paths, &["composer.json".to_string()]),
-    }
+    detect_workspaces_from_file_list(&file_paths, &["composer.json".to_string()])
 }
 
 fn get_result_from_characters(characters: &str) -> Result<ResultFromXml, anyhow::Error> {
