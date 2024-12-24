@@ -18,9 +18,7 @@ use super::util::parse_cargo_diagnostics;
 use super::util::write_result_log;
 
 fn detect_workspaces(file_paths: &[String]) -> DetectWorkspaceResult {
-    DetectWorkspaceResult {
-        data: detect_workspaces_from_file_list(file_paths, &["Cargo.toml".to_string()]),
-    }
+    detect_workspaces_from_file_list(file_paths, &["Cargo.toml".to_string()])
 }
 
 #[derive(Eq, PartialEq, Hash, Debug)]

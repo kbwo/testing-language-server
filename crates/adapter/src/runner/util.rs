@@ -8,7 +8,7 @@ use std::sync::LazyLock;
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 use regex::Regex;
 use serde::Serialize;
-use testing_language_server::spec::{FileDiagnostics, TestItem};
+use testing_language_server::spec::{DetectWorkspaceResult, FileDiagnostics, TestItem};
 use testing_language_server::{error::LSError, spec::RunFileTestResult};
 use tree_sitter::{Language, Point, Query, QueryCursor};
 
@@ -74,7 +74,7 @@ fn detect_workspace_from_file(file_path: PathBuf, file_names: &[String]) -> Opti
 pub fn detect_workspaces_from_file_list(
     target_file_paths: &[String],
     file_names: &[String],
-) -> HashMap<String, Vec<String>> {
+) -> DetectWorkspaceResult {
     let mut result_map: HashMap<String, Vec<String>> = HashMap::new();
     let mut file_paths = target_file_paths.to_vec();
     file_paths.sort_by_key(|b| b.len());
@@ -106,7 +106,7 @@ pub fn detect_workspaces_from_file_list(
             }
         }
     }
-    result_map
+    DetectWorkspaceResult { data: result_map }
 }
 
 pub fn send_stdout<T>(value: &T) -> Result<(), LSError>

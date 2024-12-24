@@ -215,9 +215,8 @@ impl Runner for NodeTestRunner {
         args: testing_language_server::spec::DetectWorkspaceArgs,
     ) -> Result<(), LSError> {
         let file_paths = args.file_paths;
-        let detect_result: DetectWorkspaceResult = DetectWorkspaceResult {
-            data: detect_workspaces_from_file_list(&file_paths, &["package.json".to_string()]),
-        };
+        let detect_result: DetectWorkspaceResult =
+            detect_workspaces_from_file_list(&file_paths, &["package.json".to_string()]);
         send_stdout(&detect_result)?;
         Ok(())
     }
