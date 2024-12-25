@@ -100,7 +100,8 @@ fn get_result_from_characters(
                 continue;
             }
             return Ok(ResultFromXml {
-                message: error_text.to_string(),
+                // remove prefix because it's like "\n"
+                message: error_text.strip_prefix("\n").unwrap().to_string(),
                 path: file_path.to_string(),
                 line: caps[2].parse::<u32>().unwrap(),
                 col: caps[3].parse::<u32>().unwrap(),
