@@ -102,6 +102,11 @@ pub struct RunFileTestResult {
 pub struct TestItem {
     pub id: String,
     pub name: String,
+    /// Although FoundFileTests also has a `path` field, we keep the `path` field in TestItem
+    /// because sometimes we need to determine where a TestItem is located on its own
+    /// Example: In Rust tests, determining which file contains a test from IDs like relative::path::tests::id
+    /// TODO: Remove FoundFileTests.path once we confirm it's no longer needed
+    pub path: String,
     pub start_position: Range,
     pub end_position: Range,
 }
