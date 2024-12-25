@@ -263,6 +263,7 @@ mod tests {
                 TestItem {
                     id: String::from("addTest"),
                     name: String::from("addTest"),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 7,
@@ -287,6 +288,7 @@ mod tests {
                 TestItem {
                     id: String::from("fail1"),
                     name: String::from("fail1"),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 11,
@@ -311,6 +313,7 @@ mod tests {
                 TestItem {
                     id: String::from("fail2"),
                     name: String::from("fail2"),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 15,

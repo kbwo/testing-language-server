@@ -261,6 +261,7 @@ mod tests {
             vec![TestItem {
                 id: String::from("index::fail"),
                 name: String::from("index::fail"),
+                path: file_path.to_string(),
                 start_position: Range {
                     start: Position {
                         line: 1,

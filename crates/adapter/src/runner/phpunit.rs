@@ -240,6 +240,7 @@ mod tests {
                 TestItem {
                     id: "CalculatorTest::testAdd".to_string(),
                     name: "CalculatorTest::testAdd".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 9,
@@ -264,6 +265,7 @@ mod tests {
                 TestItem {
                     id: "CalculatorTest::testSubtract".to_string(),
                     name: "CalculatorTest::testSubtract".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 16,
@@ -288,6 +290,7 @@ mod tests {
                 TestItem {
                     id: "CalculatorTest::testFail1".to_string(),
                     name: "CalculatorTest::testFail1".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 23,

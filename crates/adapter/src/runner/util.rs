@@ -240,6 +240,7 @@ pub fn discover_with_treesitter(
                     let test_item = TestItem {
                         id: test_id.clone(),
                         name: test_id,
+                        path: file_path.to_string(),
                         start_position: Range {
                             start: Position {
                                 line: test_start_position.row as u32,
@@ -293,18 +294,21 @@ pub fn parse_cargo_diagnostics(
 
             // relaive path
             let relative_file_path = m.get(2).unwrap().as_str().to_string();
-            // name of the file without extension
-            let file_stem = Path::new(&relative_file_path)
-                .file_stem()
-                .unwrap()
-                .to_str()
-                .unwrap();
-            let executed_test_id = id_with_file.replace(&(file_stem.to_string() + "::"), "");
 
             if let Some(file_path) = file_paths.iter().find(|path| {
                 path.contains(workspace_root.join(&relative_file_path).to_str().unwrap())
             }) {
-                let matched_test_item = test_items.iter().find(|item| item.id == executed_test_id);
+                let matched_test_item = test_items.iter().find(|item| {
+                    let item_path = item.path.strip_prefix(workspace_root.to_str().unwrap()).unwrap_or(&item.path);
+                    let item_path = item_path.strip_suffix(".rs").unwrap_or(item_path);
+                    let item_path = item_path.replace('/', "::")
+                        .replace("::src::lib", "")
+                        .replace("::src::main", "")
+                        .replace("::src::", "");
+                    let exact_id = format!("{}::{}", item_path, item.id);
+                    tracing::info!("DEBUGPRINT[7]: util.rs:301: item_path={:#?}, exact_id={:#?}, id_with_file={:#?}", item_path, exact_id, id_with_file);
+                    exact_id == id_with_file
+                });
 
                 let lnum = m.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
                 let col = m.get(4).unwrap().as_str().parse::<u32>().unwrap() - 1;
@@ -358,7 +362,7 @@ pub fn parse_cargo_diagnostics(
                         ..Diagnostic::default()
                     };
                     result_map
-                        .entry(file_path.to_string())
+                        .entry(test_item.path.to_string())
                         .or_default()
                         .push(diagnostic);
                 }

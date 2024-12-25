@@ -136,6 +136,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
         let test_items: Vec<TestItem> = vec![TestItem {
             id: "rocks::dependency::tests::parse_dependency".to_string(),
             name: "rocks::dependency::tests::parse_dependency".to_string(),
+            path: "/home/example/projects/rocks-lib/src/rocks/dependency.rs".to_string(),
             start_position: Range {
                 start: Position {
                     line: 85,

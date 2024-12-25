@@ -213,6 +213,7 @@ mod tests {
                 TestItem {
                     id: "describe text::pass".to_string(),
                     name: "describe text::pass".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 4,
@@ -237,6 +238,7 @@ mod tests {
                 TestItem {
                     id: "describe text::fail".to_string(),
                     name: "describe text::fail".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 8,

@@ -270,6 +270,7 @@ mod tests {
                 TestItem {
                     id: "synchronous passing test".to_string(),
                     name: "synchronous passing test".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 5,
@@ -294,6 +295,7 @@ mod tests {
                 TestItem {
                     id: "synchronous failing test".to_string(),
                     name: "synchronous failing test".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 10,
@@ -318,6 +320,7 @@ mod tests {
                 TestItem {
                     id: "asynchronous passing test".to_string(),
                     name: "asynchronous passing test".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 15,
@@ -342,6 +345,7 @@ mod tests {
                 TestItem {
                     id: "asynchronous failing test".to_string(),
                     name: "asynchronous failing test".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 21,
@@ -366,6 +370,7 @@ mod tests {
                 TestItem {
                     id: "failing test using Promises".to_string(),
                     name: "failing test using Promises".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 27,
@@ -390,6 +395,7 @@ mod tests {
                 TestItem {
                     id: "callback passing test".to_string(),
                     name: "callback passing test".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 36,
@@ -414,6 +420,7 @@ mod tests {
                 TestItem {
                     id: "callback failing test".to_string(),
                     name: "callback failing test".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 42,
@@ -438,6 +445,7 @@ mod tests {
                 TestItem {
                     id: "top level test".to_string(),
                     name: "top level test".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 51,
@@ -462,6 +470,7 @@ mod tests {
                 TestItem {
                     id: "skip option".to_string(),
                     name: "skip option".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 63,
@@ -486,6 +495,7 @@ mod tests {
                 TestItem {
                     id: "skip option with message".to_string(),
                     name: "skip option with message".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 68,
@@ -510,6 +520,7 @@ mod tests {
                 TestItem {
                     id: "skip() method".to_string(),
                     name: "skip() method".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 72,
@@ -534,6 +545,7 @@ mod tests {
                 TestItem {
                     id: "skip() method with message".to_string(),
                     name: "skip() method with message".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 77,
@@ -558,6 +570,7 @@ mod tests {
                 TestItem {
                     id: "todo option".to_string(),
                     name: "todo option".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 84,
@@ -582,6 +595,7 @@ mod tests {
                 TestItem {
                     id: "todo option with message".to_string(),
                     name: "todo option with message".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 90,
@@ -606,6 +620,7 @@ mod tests {
                 TestItem {
                     id: "todo() method".to_string(),
                     name: "todo() method".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 94,
@@ -630,6 +645,7 @@ mod tests {
                 TestItem {
                     id: "todo() method with message".to_string(),
                     name: "todo() method with message".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 98,
@@ -654,6 +670,7 @@ mod tests {
                 TestItem {
                     id: "A thing::should work".to_string(),
                     name: "A thing::should work".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 105,
@@ -678,6 +695,7 @@ mod tests {
                 TestItem {
                     id: "A thing::should be ok".to_string(),
                     name: "A thing::should be ok".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 109,
@@ -702,6 +720,7 @@ mod tests {
                 TestItem {
                     id: "A thing::a nested thing::should work".to_string(),
                     name: "A thing::a nested thing::should work".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 114,
@@ -726,6 +745,7 @@ mod tests {
                 TestItem {
                     id: "only: this test is run".to_string(),
                     name: "only: this test is run".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 123,
@@ -750,6 +770,7 @@ mod tests {
                 TestItem {
                     id: "only: this test is not run".to_string(),
                     name: "only: this test is not run".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 142,
@@ -774,6 +795,7 @@ mod tests {
                 TestItem {
                     id: "A suite::this test is run A ".to_string(),
                     name: "A suite::this test is run A ".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 149,
@@ -798,6 +820,7 @@ mod tests {
                 TestItem {
                     id: "A suite::this test is not run B".to_string(),
                     name: "A suite::this test is not run B".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 153,
@@ -822,6 +845,7 @@ mod tests {
                 TestItem {
                     id: "this test is run C".to_string(),
                     name: "this test is run C".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 161,
@@ -846,6 +870,7 @@ mod tests {
                 TestItem {
                     id: "this test is run D".to_string(),
                     name: "this test is run D".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 165,
@@ -870,6 +895,7 @@ mod tests {
                 TestItem {
                     id: "import from external file. this must be fail".to_string(),
                     name: "import from external file. this must be fail".to_string(),
+                    path: file_path.to_string(),
                     start_position: Range {
                         start: Position {
                             line: 170,
