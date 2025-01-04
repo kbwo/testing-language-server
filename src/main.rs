@@ -40,7 +40,6 @@ fn main_loop(server: &mut TestingLS) -> Result<(), LSError> {
             let stdin = io::stdin();
             let mut handle = stdin.lock();
             handle.read_line(&mut buffer)?;
-            tracing::info!("DEBUGPRINT[3]: main.rs:42: buffer={:#?}", buffer);
 
             if buffer.is_empty() {
                 tracing::warn!("buffer is empty")
