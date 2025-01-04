@@ -30,7 +30,7 @@ cargo install testing-ls-adapter
 - [x] Realtime testing diagnostics
 - [x] [VSCode extension](https://github.com/kbwo/vscode-testing-ls)
 - [x] [coc.nvim extension](https://github.com/kbwo/coc-testing-ls)
-- [x] For Neovim builtin LSP, see [demo/README.md](./demo/README.md)
+- [x] For Neovim builtin LSP, see [testing-ls.nvim](https://github.com/kbwo/testing-ls.nvim)
 - [ ] More efficient checking of diagnostics
 - [ ] Useful commands in each extension
 
