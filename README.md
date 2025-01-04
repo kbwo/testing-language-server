@@ -102,28 +102,7 @@ You can see the example in [See more example](./.vim/coc-settings.json)
 
 ### Neovim (nvim-lspconfig)
 
-```lua
-local lspconfig = require('lspconfig')
-local configs = require('lspconfig.configs')
-local util = require "lspconfig/util"
-
-configs.testing_ls = {
-  default_config = {
-    cmd = { "testing-language-server" },
-    filetypes = {},
-    root_dir = util.root_pattern(".testingls.toml", ".git" ),
-  },
-  docs = {
-    description = [[
-      https://github.com/kbwo/testing-language-server
-
-      Language Server for real-time testing.
-    ]],
-  },
-}
-
-lspconfig.testing_ls.setup{}
-```
+See [testing-ls.nvim](https://github.com/kbwo/testing-ls.nvim)
 
 ### Helix
 See [language.toml](./demo/.helix/language.toml).
