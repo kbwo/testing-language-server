@@ -115,7 +115,7 @@ fn discover(file_path: &str) -> Result<Vec<TestItem>, LSError> {
       ) @test.definition
     ))
         "#;
-    discover_with_treesitter(file_path, &tree_sitter_php::language_php(), query)
+    discover_with_treesitter(file_path, &tree_sitter_php::language(), query) // Changed language_php() to language()
 }
 
 #[derive(Eq, PartialEq, Debug)]

@@ -3,7 +3,8 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::process::Output;
 use std::str::FromStr;
-use std::sync::LazyLock;
+// use std::sync::LazyLock; // Replaced by once_cell
+use once_cell::sync::Lazy; // Changed from LazyLock to once_cell::sync::Lazy
 
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 use regex::Regex;
@@ -14,7 +15,7 @@ use tree_sitter::{Language, Point, Query, QueryCursor};
 
 pub struct DiscoverWithTSOption {}
 
-pub static LOG_LOCATION: LazyLock<PathBuf> = LazyLock::new(|| {
+pub static LOG_LOCATION: Lazy<PathBuf> = Lazy::new(|| { // Changed from LazyLock to Lazy
     let home_dir = dirs::home_dir().unwrap();
     home_dir.join(".config/testing_language_server/adapter/")
 });
@@ -171,11 +172,11 @@ pub fn discover_with_treesitter(
     let mut parser = tree_sitter::Parser::new();
     let mut test_items: Vec<TestItem> = vec![];
     parser
-        .set_language(language)
+        .set_language(*language) // Dereferenced language
         .expect("Error loading Rust grammar");
     let source_code = std::fs::read_to_string(file_path)?;
     let tree = parser.parse(&source_code, None).unwrap();
-    let query = Query::new(language, query).expect("Error creating query");
+    let query = Query::new(*language, query).expect("Error creating query"); // Dereferenced language
 
     let mut cursor = QueryCursor::new();
     cursor.set_byte_range(tree.root_node().byte_range());
@@ -189,12 +190,12 @@ pub fn discover_with_treesitter(
         let mut test_start_position = Point::default();
         let mut test_end_position = Point::default();
         for capture in m.captures {
-            let capture_name = query.capture_names()[capture.index as usize];
+            let capture_name_str = query.capture_names()[capture.index as usize].as_str(); // Get as &str
             let value = capture.node.utf8_text(source)?;
             let start_position = capture.node.start_position();
             let end_position = capture.node.end_position();
 
-            match capture_name {
+            match capture_name_str { // Match on &str
                 "namespace.definition" => {
                     namespace_position_stack.push((start_position, end_position));
                 }

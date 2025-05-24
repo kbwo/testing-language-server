@@ -81,6 +81,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f538837af36e6f6a9be0faa67f9a314f8119e4e4b5867c6ab40ed60360142519"
 
 [[package]]
+name = "async-trait"
+version = "0.1.88"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e539d3fca749fcee5236ab05e93a52867dd549cc157c8cb7f99595f3cedffdb5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -744,7 +755,7 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
- "tree-sitter-php",
+ "tree-sitter-php 0.22.8",
 ]
 
 [[package]]
@@ -768,7 +779,7 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
- "tree-sitter-php",
+ "tree-sitter-php 0.22.8",
 ]
 
 [[package]]
@@ -776,9 +787,11 @@ name = "testing-ls-adapter"
 version = "0.1.2"
 dependencies = [
  "anyhow",
+ "async-trait",
  "clap",
  "dirs",
  "lsp-types",
+ "once_cell",
  "regex",
  "serde",
  "serde_json",
@@ -787,10 +800,11 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
- "tree-sitter",
+ "tree-sitter 0.20.10",
  "tree-sitter-go",
  "tree-sitter-javascript",
- "tree-sitter-php",
+ "tree-sitter-php 0.20.0",
+ "tree-sitter-ruby",
  "tree-sitter-rust",
  "xml-rs",
 ]
@@ -961,6 +975,16 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter"
+version = "0.20.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e747b1f9b7b931ed39a548c1fae149101497de3c1fc8d9e18c62c1a66c683d3d"
+dependencies = [
+ "cc",
+ "regex",
+]
+
+[[package]]
+name = "tree-sitter"
 version = "0.22.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "688200d842c76dd88f9a7719ecb0483f79f5a766fb1c100756d5d8a059abc71b"
@@ -971,22 +995,32 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-go"
-version = "0.21.0"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55cb318be5ccf75f44e054acf6898a5c95d59b53443eed578e16be0cd7ec037f"
+checksum = "1ad6d11f19441b961af2fda7f12f5d0dac325f6d6de83836a1d3750018cc5114"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.20.10",
 ]
 
 [[package]]
 name = "tree-sitter-javascript"
-version = "0.21.0"
+version = "0.20.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26eca1925fd9518f9439ea122e3f3395abb3fcfc4b0841ef94eeef934871ec59"
+checksum = "d015c02ea98b62c806f7329ff71c383286dfc3a7a7da0cc484f6e42922f73c2c"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.20.10",
+]
+
+[[package]]
+name = "tree-sitter-php"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "18b689aaa57bd1f0707e5c0728004e7f737b16768644a7e745d23021330797de"
+dependencies = [
+ "cc",
+ "tree-sitter 0.20.10",
 ]
 
 [[package]]
@@ -996,17 +1030,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1be890bd043986cc26b69968698e508dbd40060805e482f226dc873a63a88d60"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.22.5",
+]
+
+[[package]]
+name = "tree-sitter-ruby"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "44d50ef383469df8485f024c5fb01faced8cb90368192a7ba02605b43b2427fe"
+dependencies = [
+ "cc",
+ "tree-sitter 0.20.10",
 ]
 
 [[package]]
 name = "tree-sitter-rust"
-version = "0.21.2"
+version = "0.20.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "277690f420bf90741dea984f3da038ace46c4fe6047cba57a66822226cde1c93"
+checksum = "b0832309b0b2b6d33760ce5c0e818cb47e1d72b468516bfe4134408926fa7594"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.20.10",
 ]
 
 [[package]]

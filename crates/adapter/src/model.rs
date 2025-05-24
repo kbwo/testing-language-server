@@ -4,6 +4,7 @@ use crate::runner::deno::DenoRunner;
 use crate::runner::go::GoTestRunner;
 use crate::runner::node_test::NodeTestRunner;
 use crate::runner::phpunit::PhpunitRunner;
+use crate::runner::rspec::RspecRunner;
 use crate::runner::vitest::VitestRunner;
 use std::str::FromStr;
 use testing_language_server::error::LSError;
@@ -21,8 +22,9 @@ pub enum AvailableTestKind {
     Vitest(VitestRunner),
     Deno(DenoRunner),
     GoTest(GoTestRunner),
-    Phpunit(PhpunitRunner),
     NodeTest(NodeTestRunner),
+    Phpunit(PhpunitRunner),
+    Rspec(RspecRunner),
 }
 impl Runner for AvailableTestKind {
     fn discover(&self, args: DiscoverArgs) -> Result<(), LSError> {
@@ -35,6 +37,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::Vitest(runner) => runner.discover(args),
             AvailableTestKind::Phpunit(runner) => runner.discover(args),
             AvailableTestKind::NodeTest(runner) => runner.discover(args),
+            AvailableTestKind::Rspec(runner) => runner.discover(args),
         }
     }
 
@@ -48,6 +51,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::Vitest(runner) => runner.run_file_test(args),
             AvailableTestKind::Phpunit(runner) => runner.run_file_test(args),
             AvailableTestKind::NodeTest(runner) => runner.run_file_test(args),
+            AvailableTestKind::Rspec(runner) => runner.run_file_test(args),
         }
     }
 
@@ -61,6 +65,7 @@ impl Runner for AvailableTestKind {
             AvailableTestKind::Vitest(runner) => runner.detect_workspaces(args),
             AvailableTestKind::Phpunit(runner) => runner.detect_workspaces(args),
             AvailableTestKind::NodeTest(runner) => runner.detect_workspaces(args),
+            AvailableTestKind::Rspec(runner) => runner.detect_workspaces(args),
         }
     }
 }
@@ -78,6 +83,7 @@ impl FromStr for AvailableTestKind {
             "deno" => Ok(AvailableTestKind::Deno(DenoRunner)),
             "phpunit" => Ok(AvailableTestKind::Phpunit(PhpunitRunner)),
             "node-test" => Ok(AvailableTestKind::NodeTest(NodeTestRunner)),
+            "rspec" => Ok(AvailableTestKind::Rspec(RspecRunner)),
             _ => Err(anyhow::anyhow!("Unknown test kind: {}", s)),
         }
     }
