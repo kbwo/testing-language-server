@@ -5,5 +5,6 @@ pub mod deno;
 pub mod go;
 pub mod jest;
 pub mod phpunit;
+pub mod rspec;
 pub mod util;
 pub mod vitest;
